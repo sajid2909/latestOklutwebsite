@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Oklut AI Assistant">
+  <defs>
+    <linearGradient id="oklutAiBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b1d5e"/>
+      <stop offset="0.55" stop-color="#1b1a4a"/>
+      <stop offset="1" stop-color="#0d1230"/>
+    </linearGradient>
+    <linearGradient id="oklutAiBot" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#eaf6ff"/>
+      <stop offset="1" stop-color="#9ed8f7"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" fill="url(#oklutAiBg)"/>
+
+  <path d="M14 32a18 18 0 0 1 36 0" fill="none" stroke="url(#oklutAiBot)" stroke-width="3.2" stroke-linecap="round"/>
+
+  <rect x="9.5" y="26" width="9" height="15" rx="4.5" fill="url(#oklutAiBot)"/>
+  <rect x="45.5" y="26" width="9" height="15" rx="4.5" fill="url(#oklutAiBot)"/>
+
+  <rect x="17.5" y="21" width="29" height="24" rx="9.5" fill="url(#oklutAiBot)"/>
+
+  <circle cx="26.5" cy="31.5" r="2.9" fill="#161a3d"/>
+  <circle cx="37.5" cy="31.5" r="2.9" fill="#161a3d"/>
+
+  <path d="M28.5 37.2a4.6 4.6 0 0 0 7 0" fill="none" stroke="#161a3d" stroke-width="2" stroke-linecap="round"/>
+
+  <path d="M49.5 39.5c0 5.8-4.4 8.5-9.6 8.5" fill="none" stroke="url(#oklutAiBot)" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="38.6" cy="48" r="3" fill="url(#oklutAiBot)"/>
+</svg>

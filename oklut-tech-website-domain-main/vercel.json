@@ -1,0 +1,15 @@
+{
+  "framework": "vite",
+  "buildCommand": "cd oklut-web && npm install && npm run build",
+  "outputDirectory": "oklut-web/dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/oklut-web/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
