@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { resolveDateTimeQuery } from './dateTimeIntent'
+import { resolveContactQuery } from './contactIntent'
 
 const CONTACT = {
   phone: '18004103299',
@@ -1010,6 +1011,12 @@ export async function getChatResponse(text, history = []) {
   // "Do you offer X?" where X is genuinely unknown -> polite fallback.
   const unknownOffer = unknownOfferReply(text)
   if (unknownOffer) return unknownOffer
+
+  // Company contact/location questions ("where are you located?", "give me
+  // your phone number", "how do I reach your office?", "send address", ...)
+  // are answered from the known company details, for ANY phrasing.
+  const contactReply = resolveContactQuery(text)
+  if (contactReply) return contactReply
 
   const normalized = normalize(text)
   const words = normalized.split(' ').filter(Boolean)

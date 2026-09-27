@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
 import { resolveDateTimeQuery } from '../src/lib/dateTimeIntent.js'
+import { resolveContactQuery } from '../src/lib/contactIntent.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -22,6 +23,14 @@ app.post('/api/chat', async (req, res) => {
   const dateTimeReply = resolveDateTimeQuery(message)
   if (dateTimeReply) {
     return res.json({ response: dateTimeReply })
+  }
+
+  // Company contact/location questions ("where are you located?", "give me
+  // your phone number", "how do I reach your office?", "send address", ...)
+  // are answered from the known company details, for ANY phrasing.
+  const contactReply = resolveContactQuery(message)
+  if (contactReply) {
+    return res.json({ response: contactReply })
   }
 
   // History window is matched to the client's full-chat window (40 turns).
@@ -118,6 +127,7 @@ Do not invent features beyond these descriptions; if asked about a product not l
 CAREERS: All job openings, vacancies and applications are handled on the Oklut careers portal at https://hrm.oklut.com/careers (opens in a new tab). For any careers, hiring, job-opening or application question, direct candidates to that URL. Do not invent or list specific vacancies — the portal is the live source for current openings.
 
 CONTACT: Phone (toll-free) 18004103299; Email info@oklut.com; Hyderabad Office (India Headquarters): SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081; Vijayawada Office: D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003; South Africa Office: OKLUT TECHNOLOGIES (PTY) LTD, Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa. Hours: Monday–Saturday, 10:00–19:00 IST. Free consultation booking available on the website.
+For ANY contact or location question — address, office location, directions, phone number, email, how to reach or visit the company, contact details or company details, in ANY wording — always share the relevant details above. Never reply that you do not have this information. If a specific detail (phone, email, address) is asked for, lead with that detail. Never include or generate Google Maps, directions, or any raw/encoded location URLs — share only the plain address and contact details.
 
 WEBSITE: Homepage sections include About, Services, Perspectives (news), Projects & Insights (gallery) and Contact. Dedicated pages: /careers, /book-consultation, /privacy.
 
