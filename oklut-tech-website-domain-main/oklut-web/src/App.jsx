@@ -436,6 +436,23 @@ function Navbar({ onSignIn, onSignUp }) {
                 </div>
               )
             }
+            if (item.id === 'about' || item.id === 'contact') {
+              const path = `/${item.id}`
+              const isActive =
+                location.pathname === path ||
+                (location.pathname === '/' && activeSection === item.id)
+              return (
+                <Link
+                  key={item.id}
+                  to={path}
+                  className={isActive ? 'active' : ''}
+                  aria-current={isActive ? 'true' : undefined}
+                  onClick={closeMobile}
+                >
+                  {item.label}
+                </Link>
+              )
+            }
             if (item.id === 'products') {
               return (
                 <Link
@@ -1969,6 +1986,29 @@ function HomePage() {
   )
 }
 
+// Renders the existing home page at a section URL (/about, /contact) and lands
+// on the requested section. The markup is unchanged — this only positions the
+// viewport so the section's content is what the visitor sees.
+function SectionPage({ sectionId }) {
+  const location = useLocation()
+  const firstRun = useRef(true)
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (firstRun.current) {
+        firstRun.current = false
+        const el = document.getElementById(sectionId)
+        if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' })
+        return
+      }
+      scrollToSection(sectionId)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [sectionId, location.key])
+
+  return <HomePage />
+}
+
 function App() {
   const { isRecovery } = useAuth()
   const location = useLocation()
@@ -2029,6 +2069,8 @@ function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<SectionPage sectionId="about" />} />
+            <Route path="/contact" element={<SectionPage sectionId="contact" />} />
             <Route path="/perspectives" element={<Insights />} />
             <Route path="/careers" element={<CareersPage />} />
             <Route
