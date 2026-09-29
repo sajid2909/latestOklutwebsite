@@ -1,5 +1,6 @@
 import { resolveDateTimeQuery } from '../src/lib/dateTimeIntent.js'
 import { resolveContactQuery } from '../src/lib/contactIntent.js'
+import { resolvePerspectivesQuery } from '../src/lib/perspectivesKnowledge.js'
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -40,6 +41,14 @@ export default async function handler(req, res) {
   const contactReply = resolveContactQuery(message)
   if (contactReply) {
     return res.json({ response: contactReply })
+  }
+
+  // Perspectives questions are answered from the official five Perspectives in
+  // src/data/perspectivesData.js — the same content the /perspectives pages
+  // render — so the chatbot can never serve an outdated Perspective list.
+  const perspectivesReply = resolvePerspectivesQuery(message)
+  if (perspectivesReply) {
+    return res.json({ response: perspectivesReply })
   }
 
   // History window is matched to the client's full-chat window (40 turns).
@@ -125,7 +134,7 @@ PRODUCTS: Oklut offers digital products in five categories (see the /products pa
 - App Development: web and mobile application development (iPhone, iPad, Android).
 Do not invent features beyond what the website publishes; offer the /products page or a consultation for details.
 
-PERSPECTIVES: Articles are published as "Oklut Perspectives" on the /perspectives page, covering enterprise & ERP, agentic AI, studio recognition in Hyderabad, hiring & culture, zero-downtime cloud migration, and zero-trust security. Summarize only these topics if asked; direct visitors to /perspectives for the full articles.
+PERSPECTIVES: Articles are published as "Oklut Perspectives" on the /perspectives page. There are exactly five current Perspectives and they are the ONLY ones that exist: 1) Business Transformation — "Modernizing Business Applications for a Data-Driven Enterprise" (/perspectives/business-transformation), covering business application modernization, connected data, data integration, application architecture, analytics, business visibility and scalability; 2) Artificial Intelligence — "How AI Is Reshaping Enterprise Applications" (/perspectives/artificial-intelligence), covering enterprise AI, intelligent automation, AI copilots, predictive intelligence and AI-powered analytics; 3) Modern ERP — "Accelerating Business Transformation with Modern ERP" (/perspectives/modern-erp), covering finance, procurement, supply chain, inventory, human resources, operations and ERP integration; 4) Cybersecurity — "Building Cyber Resilience in a Connected Enterprise" (/perspectives/cybersecurity), covering threat detection, security monitoring, identity and access, Zero Trust, cloud security, vulnerability management, incident response and cyber resilience; 5) Cloud & Modernization — "Modernizing Legacy Applications for the Cloud" (/perspectives/cloud-modernization), covering legacy application modernization, cloud migration, rehosting, replatforming, refactoring, re-architecting and scalability. Summarize only these five if asked and never reference older Perspective topics. Direct visitors to /perspectives for the full articles.
 
 CAREERS: All job openings, vacancies and applications are handled on the Oklut careers portal at https://hrm.oklut.com/careers (opens in a new tab). For any careers, hiring, job-opening or application question, direct candidates to that URL. Do not invent or list specific vacancies — the portal is the live source for current openings.
 

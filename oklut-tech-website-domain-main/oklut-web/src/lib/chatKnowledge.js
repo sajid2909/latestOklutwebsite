@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { resolveDateTimeQuery } from './dateTimeIntent'
 import { resolveContactQuery } from './contactIntent'
+import { PERSPECTIVE_INTENTS } from './perspectivesKnowledge'
 
 const CONTACT = {
   phone: '18004103299',
@@ -715,28 +716,11 @@ Details on the Products page (/products#hrms).`,
     keywords: ['app development', 'appdev', 'mobile app development'],
     reply: `Oklut builds web and mobile applications — including iPhone, iPad and Android apps — as part of its custom development work. The App Development section of our Products page (/products#appdev) has details, and our Inception To Deployment service covers delivery from requirements through deployment and support.`,
   },
-  {
-    id: 'perspectives',
-    keywords: [
-      'perspectives',
-      'insights',
-      'articles',
-      'blog',
-      'news',
-      'what are oklut perspectives',
-      'projects insights',
-    ],
-    reply: `Oklut Perspectives is our Insights hub (/perspectives) — articles on enterprise technology written by our engineering studio:
-
-1. A modular ERP approach for growing enterprises (Product & ERP, Jul 2026) — structuring ERP engagements so finance, inventory, HR and procurement integrate without multi-year disruption.
-2. Agentic AI systems: moving from chatbots to autonomous execution (AI, Jun 2026) — coordinated multi-agent LLM systems with human-in-the-loop oversight.
-3. Recognized among leading IT innovation studios in Hyderabad (May 2026) — our studio's recognition for delivery excellence and client satisfaction.
-4. Hiring & culture: growing our senior cloud & AI engineering practice (People & Culture, Apr 2026) — high-autonomy squads, remote flexibility, deep technical ownership.
-5. Zero-downtime cloud migration: lessons from legacy monolith refactoring (Cloud & DevOps, Mar 2026) — strangler-fig pattern, dual-write replication and canary releases.
-6. Enterprise zero-trust architecture: defense in depth for distributed teams (Cyber Security, Feb 2026) — continuous authentication, micro-segmentation, least privilege.
-
-Ask me about any article by name and I'll summarize it.`,
-  },
+  // Official Perspectives (overview + one intent per Perspective). Replies and
+  // keywords come from src/lib/perspectivesKnowledge.js, which is built from
+  // PERSPECTIVES_DATA — the same source the /perspectives pages use. Never
+  // hard-code a second Perspective list here.
+  ...PERSPECTIVE_INTENTS,
   {
     id: 'security',
     keywords: ['security', 'privacy', 'data protection', 'gdpr', 'confidential'],

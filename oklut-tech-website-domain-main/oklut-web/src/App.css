@@ -42,6 +42,8 @@
   outline: none;
   content-visibility: auto;
   contain-intrinsic-size: auto 205px;
+  text-decoration: none;
+  color: inherit;
 }
 .insight-row:first-child {
   border-top: 1px solid var(--border);

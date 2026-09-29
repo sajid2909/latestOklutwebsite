@@ -3,6 +3,7 @@ import cors from 'cors'
 import 'dotenv/config'
 import { resolveDateTimeQuery } from '../src/lib/dateTimeIntent.js'
 import { resolveContactQuery } from '../src/lib/contactIntent.js'
+import { resolvePerspectivesQuery } from '../src/lib/perspectivesKnowledge.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -31,6 +32,16 @@ app.post('/api/chat', async (req, res) => {
   const contactReply = resolveContactQuery(message)
   if (contactReply) {
     return res.json({ response: contactReply })
+  }
+
+  // Perspectives questions ("What are your Perspectives?", "Tell me about
+  // Business Transformation", "What is your Modern ERP Perspective?") are
+  // answered from the official five Perspectives in src/data/perspectivesData.js
+  // — the same content the /perspectives pages render — so the chatbot can
+  // never serve an outdated Perspective list.
+  const perspectivesReply = resolvePerspectivesQuery(message)
+  if (perspectivesReply) {
+    return res.json({ response: perspectivesReply })
   }
 
   // History window is matched to the client's full-chat window (40 turns).
@@ -106,14 +117,13 @@ TECHNOLOGIES & ARCHITECTURE:
 
 AI SOLUTIONS: AI is a core part of Oklut's products — machine learning, data pipelines and AI-powered applications embedded into custom software and cloud solutions (AWS, Azure, Google Cloud). Oklut also grows its cloud & AI engineering practice through new hires. There is no separate public AI product line; direct users to the engineering team for specifics.
 
-PROJECTS & INSIGHTS: Oklut publishes articles as "Oklut Perspectives" on the /perspectives page. The six current articles are:
-1. "A modular ERP approach for growing enterprises" (Jul 2026) — structuring ERP engagements so finance, inventory, HR and procurement integrate seamlessly without multi-year disruption; phased rollouts, a unified data exchange bus, automated AP/AR reconciliation.
-2. "Agentic AI systems: moving from chatbots to autonomous execution" (Jun 2026) — coordinated multi-agent LLM systems (Planner, Tool Caller, Validator, Auditor) with deterministic guardrails and human-in-the-loop oversight.
-3. "Recognized among leading IT innovation studios in Hyderabad" (May 2026) — studio recognition for delivery excellence (98.4% on-time milestones) and the HITEC City Center of Excellence.
-4. "Hiring & culture: growing our senior cloud & AI engineering practice" (Apr 2026) — senior-led autonomous squads, remote-first flexibility, continuous R&D budget.
-5. "Zero-downtime cloud migration: lessons from legacy monolith refactoring" (Mar 2026) — strangler-fig pattern, CDC-based dual-write replication, canary releases; a banking-portal case with 100% uptime.
-6. "Enterprise zero-trust architecture: defense in depth for distributed teams" (Feb 2026) — identity-aware proxies, service-mesh mTLS, least privilege, compliance readiness (SOC 2, ISO 27001, GDPR).
-If the visitor asks about a specific article, summarize it from these facts; users can read the full articles on the /perspectives page.
+PERSPECTIVES: Oklut publishes thought-leadership articles as "Oklut Perspectives" on the /perspectives page. There are exactly five current Perspectives, and they are the ONLY ones that exist:
+1. "Modernizing Business Applications for a Data-Driven Enterprise" — Business Transformation (/perspectives/business-transformation): how modern application architecture and connected data improve operational efficiency, scalability and business visibility. Key topics: business application modernization, connected data, data integration, application architecture, enterprise applications, analytics, business visibility, scalability.
+2. "How AI Is Reshaping Enterprise Applications" — Artificial Intelligence (/perspectives/artificial-intelligence): how intelligent automation, AI copilots and predictive intelligence are becoming part of the enterprise applications businesses rely on every day. Key topics: enterprise AI, AI applications, intelligent automation, AI copilots, predictive intelligence, AI-powered analytics, business process automation.
+3. "Accelerating Business Transformation with Modern ERP" — Modern ERP (/perspectives/modern-erp): how modern ERP platforms connect finance, procurement, supply chain and business operations through a unified digital foundation. Key topics: modern ERP, finance, procurement, supply chain, inventory, human resources, operations, ERP integration, business analytics.
+4. "Building Cyber Resilience in a Connected Enterprise" — Cybersecurity (/perspectives/cybersecurity): strengthening security, protecting critical systems and preparing for threats across increasingly connected environments. Key topics: enterprise cybersecurity, threat detection, security monitoring, identity and access, Zero Trust, cloud security, vulnerability management, incident response, cyber resilience.
+5. "Modernizing Legacy Applications for the Cloud" — Cloud & Modernization (/perspectives/cloud-modernization): a practical approach to assessing, modernizing and moving legacy applications toward scalable, secure cloud architectures. Key topics: legacy application modernization, cloud migration, rehosting, replatforming, refactoring, re-architecting, cloud infrastructure, application modernization, scalability.
+When asked about a specific Perspective, summarize it from the facts above and mention its page path. Never mention, invent or reference any other Perspective or older article topics (for example retail analytics, digital transformation or digital information).
 
 PRODUCTS: Oklut offers digital products in five categories (see the /products page):
 - Featured Products: Oklut AI Suite (autonomous agents automating complex workflows and customer operations), CloudNexus (multi-cloud management for performance, security, compliance and costs), WorkSync (hybrid collaboration hub with task, chat and document management), DataStream (real-time analytics engine turning business event streams into insights).

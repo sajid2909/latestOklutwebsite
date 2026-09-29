@@ -25,6 +25,13 @@ const TechnologyDetailPage = lazy(() => import('./pages/technologies/TechnologyD
 import { TECHNOLOGIES_DATA } from './data/technologiesData.js'
 import { PERSPECTIVES_DATA } from './data/perspectivesData.js'
 
+const BusinessTransformationPerspective = lazy(() => import('./pages/perspectives/BusinessTransformationPerspective.jsx'))
+const ArtificialIntelligencePerspective = lazy(() => import('./pages/perspectives/ArtificialIntelligencePerspective.jsx'))
+const ModernERPPerspective = lazy(() => import('./pages/perspectives/ModernERPPerspective.jsx'))
+const CybersecurityPerspective = lazy(() => import('./pages/perspectives/CybersecurityPerspective.jsx'))
+const CloudModernizationPerspective = lazy(() => import('./pages/perspectives/CloudModernizationPerspective.jsx'))
+
+
 
 
 
@@ -466,11 +473,15 @@ function Navbar({ onSignIn, onSignUp }) {
               )
             }
             if (item.id === 'news') {
+              const isPerspectiveActive =
+                location.pathname === '/perspectives' ||
+                location.pathname.startsWith('/perspectives/')
               return (
                 <Link
                   key={item.id}
                   to="/perspectives"
-                  className={location.pathname === '/perspectives' ? 'active' : ''}
+                  className={isPerspectiveActive ? 'active' : ''}
+                  aria-current={isPerspectiveActive ? 'true' : undefined}
                   onClick={closeMobile}
                 >
                   {item.label}
@@ -953,9 +964,9 @@ function Insights() {
 
         <div className="insights-list">
           {PERSPECTIVES_DATA.map((p, i) => {
-            const title = t(p.titleKey, p.title)
-            const excerpt = t(p.excerptKey, p.excerpt)
-            const tag = p.tag
+            const title = p.title
+            const excerpt = p.excerpt
+            const tag = p.category || p.tag
             // Perf: the first two rows are on screen when the page opens, so
             // load them eagerly with high priority; everything below the fold
             // lazy-loads. Intrinsic width/height let the browser reserve the
@@ -991,22 +1002,15 @@ function Insights() {
               </div>
             )
             return (
-              <article
+              <Link
+                to={p.path}
                 className="insight-row reveal"
                 key={p.id}
-                onClick={() => setSelectedPerspective(p)}
-                tabIndex={0}
-                role="button"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setSelectedPerspective(p)
-                  }
-                }}
+                aria-label={`${title} — Read More`}
               >
                 {image}
                 {body}
-              </article>
+              </Link>
             )
           })}
         </div>
@@ -2072,6 +2076,17 @@ function App() {
             <Route path="/about" element={<SectionPage sectionId="about" />} />
             <Route path="/contact" element={<SectionPage sectionId="contact" />} />
             <Route path="/perspectives" element={<Insights />} />
+            <Route path="/perspectives/business-transformation" element={<BusinessTransformationPerspective />} />
+            <Route path="/perspectives/artificial-intelligence" element={<ArtificialIntelligencePerspective />} />
+            <Route path="/perspectives/modern-erp" element={<ModernERPPerspective />} />
+            <Route path="/perspectives/cybersecurity" element={<CybersecurityPerspective />} />
+            <Route path="/perspectives/cloud-modernization" element={<CloudModernizationPerspective />} />
+            {/* Perspective Fallback Aliases */}
+            <Route path="/perspectives/retail-business-data-analytics" element={<BusinessTransformationPerspective />} />
+            <Route path="/perspectives/ai-reshaping-enterprise-applications" element={<ArtificialIntelligencePerspective />} />
+            <Route path="/perspectives/accelerating-business-transformation-modern-erp" element={<ModernERPPerspective />} />
+            <Route path="/perspectives/cyber-resilience-connected-enterprise" element={<CybersecurityPerspective />} />
+            <Route path="/perspectives/legacy-application-cloud-modernization" element={<CloudModernizationPerspective />} />
             <Route path="/careers" element={<CareersPage />} />
             <Route
               path="/book-consultation"
