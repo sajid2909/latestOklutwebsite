@@ -1,7 +1,8 @@
-import { supabase } from './supabase'
-import { resolveDateTimeQuery } from './dateTimeIntent'
-import { resolveContactQuery } from './contactIntent'
 import { PERSPECTIVE_INTENTS } from './perspectivesKnowledge'
+import { supabase } from './supabase.js'
+import { resolveDateTimeQuery } from './dateTimeIntent.js'
+import { resolveContactQuery } from './contactIntent.js'
+import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex } from './chatMenus.js'
 
 const CONTACT = {
   phone: '18004103299',
@@ -808,45 +809,6 @@ const ORDINALS = {
   ninth: 8, '9th': 8,
 }
 
-// Simple, well-known general-knowledge facts so harmless general questions
-// ("What is the capital of France?") get a real answer instead of the
-// Oklut fallback. Returned first-word token lets the caller optionally add
-// a light nudge back to Oklut topics.
-const CAPITALS = {
-  france: 'Paris', japan: 'Tokyo', india: 'New Delhi', 'united states': 'Washington, D.C.', usa: 'Washington, D.C.',
-  'united kingdom': 'London', uk: 'London', england: 'London', germany: 'Berlin', italy: 'Rome', spain: 'Madrid',
-  portugal: 'Lisbon', russia: 'Moscow', china: 'Beijing', 'south korea': 'Seoul', 'north korea': 'Pyongyang',
-  canada: 'Ottawa', australia: 'Canberra', 'new zealand': 'Wellington', brazil: 'Brasília', argentina: 'Buenos Aires',
-  mexico: 'Mexico City', egypt: 'Cairo', 'south africa': 'Pretoria (administrative), Cape Town (legislative) and Bloemfontein (judicial)',
-  nigeria: 'Abuja', kenya: 'Nairobi', ethiopia: 'Addis Ababa', morocco: 'Rabat', saudi: 'Riyadh', 'saudi arabia': 'Riyadh',
-  uae: 'Abu Dhabi', emirates: 'Abu Dhabi', qatar: 'Doha', turkey: 'Ankara', greece: 'Athens', netherlands: 'Amsterdam',
-  belgium: 'Brussels', switzerland: 'Bern', austria: 'Vienna', sweden: 'Stockholm', norway: 'Oslo', denmark: 'Copenhagen',
-  finland: 'Helsinki', poland: 'Warsaw', ukraine: 'Kyiv', ireland: 'Dublin', thailand: 'Bangkok', vietnam: 'Hanoi',
-  indonesia: 'Jakarta', malaysia: 'Kuala Lumpur', singapore: 'Singapore', pakistan: 'Islamabad', bangladesh: 'Dhaka',
-  'sri lanka': 'Sri Jayawardenepura Kotte (official) / Colombo (commercial)', nepal: 'Kathmandu', iran: 'Tehran',
-  iraq: 'Baghdad', israel: 'Jerusalem', jordan: 'Amman', chile: 'Santiago', colombia: 'Bogotá', peru: 'Lima',
-  cuba: 'Havana', iceland: 'Reykjavík', hungary: 'Budapest', 'czech republic': 'Prague', romania: 'Bucharest',
-}
-
-const FACTS_RE =
-  /\b(?:what(?:'s| is)\s+the\s+capital\s+of\s+(?:the\s+)?([a-z\s]+?)[?!.]*\s*$)|(?:\bcapital\s+city\s+of\s+(?:the\s+)?([a-z\s]+?)[?!.]*\s*$)/i
-
-function answerGeneralKnowledge(text) {
-  const q = normalize(text)
-  const m = q.match(FACTS_RE)
-  if (m) {
-    const country = (m[1] || m[2] || '').trim().replace(/\s+/g, ' ')
-    const capital = CAPITALS[country] || CAPITALS[country.replace(/\s+$/, '')]
-    if (capital) {
-      return {
-        reply: `The capital of ${country.charAt(0).toUpperCase() + country.slice(1)} is ${capital}.`,
-        general: true,
-      }
-    }
-  }
-  return null
-}
-
 // Common non-name words so "I am looking for..." / "I am from..." are not
 // mistaken for a visitor stating their name.
 const NAME_STOP_WORDS = new Set([
@@ -938,11 +900,33 @@ function scoreAll(text, words) {
   return { best, bestScore }
 }
 
-const FOLLOWUP_RE = /(tell me more|more about|second one|first one|third one|fourth one|fifth one|the second|the first|the third|explain that|explain it|in simple words|simple words|simple terms|more detail|in more detail|go on|continue|give me an example|real world example|example of that|elaborate|what about that)/
+const FOLLOWUP_RE = /(tell me more|more about|second one|first one|third one|fourth one|fifth one|the second|the first|the third|explain that|explain it|in simple words|simple words|simple terms|more detail|in more detail|go on|continue|give me an example|real world example|example of that|elaborate|what about that|explain more|what are (?:its|the) benefits|benefits|advantages)/i
 
 function resolveFollowUp(text, history) {
   const normalized = normalize(text)
   if (!FOLLOWUP_RE.test(normalized) || history.length === 0) return null
+
+  // If asking "what are its benefits" or "benefits" or "explain more" right after a menu item explanation
+  const lastAssistant = [...history].reverse().find((m) => m.role === 'assistant' && m.content)
+  if (lastAssistant) {
+    const isBenefits = /benefits|what are (?:its|the) benefits|advantages/i.test(normalized)
+    const isExplainMore = /explain more|tell me more|more detail|elaborate|go on|continue/i.test(normalized)
+
+    const headingMatch = lastAssistant.content.match(/^(\d{1,2})\.\s+([^\n]+)/m)
+    if (headingMatch && (isBenefits || isExplainMore)) {
+      const itemTitle = headingMatch[2].trim()
+      if (isBenefits) {
+        if (/Benefits:\s*([\s\S]+?)(?=\n\nWould you like|$)/i.test(lastAssistant.content)) {
+          const match = lastAssistant.content.match(/Benefits:\s*([\s\S]+?)(?=\n\nWould you like|$)/i)
+          return `Key benefits of ${itemTitle}:\n\n${match[1].trim()}`
+        }
+        return `Key benefits of ${itemTitle} with Oklut:\n• Streamlined delivery and optimized operational workflows.\n• High scalability, security, and proven enterprise reliability.\n• Measurable ROI, lower maintenance overhead, and 24/7 dedicated support.`
+      }
+      if (isExplainMore) {
+        return `Here is more detail about ${itemTitle}:\n\nOklut provides end-to-end execution for ${itemTitle}, aligning with your specific business goals. Our engineering teams handle everything from architecture and integration to continuous optimization and governance, ensuring smooth adoption and measurable results.`
+      }
+    }
+  }
 
   let target = null
 
@@ -992,6 +976,19 @@ export async function getChatResponse(text, history = []) {
     return `That detail isn't published on our website and I wouldn't want to guess. For anything about Oklut's team or leadership, please contact ${CONTACT.email} or ${CONTACT.phone} and the team will help you directly.`
   }
 
+  // Priority 1-3: a numbered selection against the menu currently on screen,
+  // or a request for the Services / Technologies / Products menu. Resolved BEFORE every
+  // other intent so "2" is never treated as an unknown question and
+  // "services" never reaches the fallback.
+  const menuReply = resolveMenuReply(text, history)
+  if (menuReply) return menuReply
+
+  // If the user enters a number without first selecting a category, ask whether they mean Services, Technologies, or Products.
+  const bareIndex = parseOptionIndex(normalize(text))
+  if (bareIndex !== null) {
+    return `Did you mean Services, Technologies, or Products? Please specify a category or type "services", "technologies", or "products" to see the list.`
+  }
+
   // "Do you offer X?" where X is genuinely unknown -> polite fallback.
   const unknownOffer = unknownOfferReply(text)
   if (unknownOffer) return unknownOffer
@@ -1026,10 +1023,14 @@ export async function getChatResponse(text, history = []) {
     return `I don't have your name yet — I only know what's shared within this chat. What should I call you?`
   }
 
-  // Simple, well-known general-knowledge questions (e.g. capitals) get a
-  // concise factual answer instead of the Oklut fallback.
-  const general = answerGeneralKnowledge(text)
-  if (general) return general.reply
+  // Priority 9: simple, well-known general-knowledge questions (capitals,
+  // currencies, common facts, tech definitions) get a real answer instead of
+  // the Oklut contact fallback — but ONLY once no Oklut knowledge applies,
+  // because company information outranks general facts in the intent order.
+  if (bestScore === 0) {
+    const general = answerGeneralKnowledge(text)
+    if (general) return general
+  }
 
   // General date/time questions ("present time", "today's date in Japan")
   // are answered from the clock via IANA timezones — never the Oklut

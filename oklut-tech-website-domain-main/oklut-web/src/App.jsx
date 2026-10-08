@@ -209,7 +209,7 @@ function scrollToSection(id) {
     window.scrollTo({ top: 0, behavior })
     return
   }
-  const el = document.getElementById(id)
+  const el = document.getElementById(id) || (id === 'our-services' ? document.getElementById('services') : null)
   if (el) el.scrollIntoView({ behavior, block: 'start' })
 }
 
@@ -244,6 +244,7 @@ function Navbar({ onSignIn, onSignUp }) {
   const { user, signOut } = useAuth()
   const { t } = useTranslation()
   const location = useLocation()
+  const navigate = useNavigate()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
   const [techOpen, setTechOpen] = useState(false)
@@ -280,7 +281,7 @@ function Navbar({ onSignIn, onSignUp }) {
   }, [])
 
   useEffect(() => {
-    if (location.pathname !== '/') {
+    if (location.pathname !== '/' && location.pathname !== '/services' && location.pathname !== '/technologies') {
       setActiveSection('')
       return
     }
@@ -348,6 +349,10 @@ function Navbar({ onSignIn, onSignUp }) {
                     onClick={() => {
                       setServicesOpen((o) => !o)
                       setTechOpen(false)
+                      if (location.pathname !== '/services') {
+                        navigate('/services')
+                      }
+                      scrollToSection('services')
                     }}
                   >
                     <span>{t('nav.services')}</span>
@@ -403,6 +408,9 @@ function Navbar({ onSignIn, onSignUp }) {
                     onClick={() => {
                       setTechOpen((o) => !o)
                       setServicesOpen(false)
+                      if (location.pathname !== '/technologies') {
+                        navigate('/technologies')
+                      }
                     }}
                   >
                     <span>{t('nav.technologies')}</span>
@@ -1872,7 +1880,7 @@ const OUR_SERVICES = [
 function OurServices() {
   const { t } = useTranslation()
   return (
-    <section id="our-services" className="section our-services-section">
+    <section id="services" className="section our-services-section">
       <div className="container">
         <SectionHead
           eyebrow={t('ourServices.eyebrow')}
@@ -1990,24 +1998,22 @@ function HomePage() {
   )
 }
 
-// Renders the existing home page at a section URL (/about, /contact) and lands
+// Renders the existing home page at a section URL (/about, /services, /contact) and lands
 // on the requested section. The markup is unchanged — this only positions the
 // viewport so the section's content is what the visitor sees.
 function SectionPage({ sectionId }) {
   const location = useLocation()
-  const firstRun = useRef(true)
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      if (firstRun.current) {
-        firstRun.current = false
-        const el = document.getElementById(sectionId)
-        if (el) el.scrollIntoView({ behavior: 'auto', block: 'start' })
-        return
-      }
+    const runScroll = () => {
       scrollToSection(sectionId)
-    })
-    return () => cancelAnimationFrame(frame)
+    }
+    const frame = requestAnimationFrame(runScroll)
+    const timer = setTimeout(runScroll, 80)
+    return () => {
+      cancelAnimationFrame(frame)
+      clearTimeout(timer)
+    }
   }, [sectionId, location.key])
 
   return <HomePage />
@@ -2074,6 +2080,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<SectionPage sectionId="about" />} />
+            <Route path="/services" element={<SectionPage sectionId="services" />} />
+            <Route path="/technologies" element={<HomePage />} />
             <Route path="/contact" element={<SectionPage sectionId="contact" />} />
             <Route path="/perspectives" element={<Insights />} />
             <Route path="/perspectives/business-transformation" element={<BusinessTransformationPerspective />} />

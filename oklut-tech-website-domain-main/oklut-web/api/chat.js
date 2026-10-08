@@ -1,6 +1,7 @@
 import { resolveDateTimeQuery } from '../src/lib/dateTimeIntent.js'
 import { resolveContactQuery } from '../src/lib/contactIntent.js'
 import { resolvePerspectivesQuery } from '../src/lib/perspectivesKnowledge.js'
+import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex, normalize } from '../src/lib/chatMenus.js'
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -90,6 +91,30 @@ export default async function handler(req, res) {
         ? `[Earlier in this conversation]\n${m.content}`
         : m.content,
   }))
+
+  // Numbered menu selections and Services/Technologies/Products menu requests are
+  // answered deterministically so the menu text, its numbering and every
+  // option always line up — the model is never asked to reproduce a list.
+  const menuReply = resolveMenuReply(message, safeHistory)
+  if (menuReply) {
+    return res.json({ response: menuReply })
+  }
+
+  // If the user enters a number without first selecting a category, ask whether they mean Services, Technologies, or Products.
+  const bareIndex = parseOptionIndex(normalize(message))
+  if (bareIndex !== null) {
+    return res.json({
+      response: `Did you mean Services, Technologies, or Products? Please specify a category or type "services", "technologies", or "products" to see the list.`,
+    })
+  }
+
+  // Well-known general-knowledge questions (capitals, currencies, common
+  // facts, tech definitions) are answered factually instead of being handed
+  // to the model or answered with a canned reply.
+  const generalKnowledge = answerGeneralKnowledge(message)
+  if (generalKnowledge) {
+    return res.json({ response: generalKnowledge })
+  }
 
   const systemPrompt = `You are Oklut AI Assistant, a professional and friendly representative of Oklut Technologies, an IT services and digital products company based in Hyderabad, India.
 

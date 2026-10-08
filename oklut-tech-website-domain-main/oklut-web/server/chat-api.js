@@ -4,6 +4,7 @@ import 'dotenv/config'
 import { resolveDateTimeQuery } from '../src/lib/dateTimeIntent.js'
 import { resolveContactQuery } from '../src/lib/contactIntent.js'
 import { resolvePerspectivesQuery } from '../src/lib/perspectivesKnowledge.js'
+import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex, normalize } from '../src/lib/chatMenus.js'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -85,6 +86,30 @@ app.post('/api/chat', async (req, res) => {
         ? `[Earlier in this conversation]\n${m.content}`
         : m.content,
   }))
+
+  // Numbered menu selections and Services/Technologies/Products menu requests are
+  // answered deterministically so the menu text, its numbering and every
+  // option always line up — the model is never asked to reproduce a list.
+  const menuReply = resolveMenuReply(message, safeHistory)
+  if (menuReply) {
+    return res.json({ response: menuReply })
+  }
+
+  // If the user enters a number without first selecting a category, ask whether they mean Services, Technologies, or Products.
+  const bareIndex = parseOptionIndex(normalize(message))
+  if (bareIndex !== null) {
+    return res.json({
+      response: `Did you mean Services, Technologies, or Products? Please specify a category or type "services", "technologies", or "products" to see the list.`,
+    })
+  }
+
+  // Well-known general-knowledge questions (capitals, currencies, common
+  // facts, tech definitions) are answered factually instead of being handed
+  // to the model or answered with the contact fallback.
+  const generalKnowledge = answerGeneralKnowledge(message)
+  if (generalKnowledge) {
+    return res.json({ response: generalKnowledge })
+  }
 
   // System prompt for Oklut AI Assistant
   const systemPrompt = `You are Oklut AI Assistant, a professional and friendly representative of Oklut Technologies, an IT services and digital products company based in Hyderabad, India.
@@ -175,7 +200,7 @@ Current conversation context will be provided. Keep responses relevant and helpf
 
   const token = process.env.HF_TOKEN || process.env.AI_API_KEY
   const provider = process.env.AI_PROVIDER || 'huggingface'
-  
+
   if (!token) {
     console.error('HF_TOKEN / AI_API_KEY not configured')
     return res.status(500).json({ error: 'AI service not configured. Please contact the Oklut team.' })
@@ -218,7 +243,7 @@ Current conversation context will be provided. Keep responses relevant and helpf
 
       if (aiResponse) {
         console.log(`[Chat API] Success with model: ${model}`)
-        return res.json({ 
+        return res.json({
           response: aiResponse,
           model: model,
           provider: provider
@@ -294,8 +319,8 @@ app.post('/api/translate', async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     message: 'Oklut AI Chat API is running with Hugging Face open-source model support',
     provider: process.env.AI_PROVIDER || 'huggingface',
     model: process.env.AI_MODEL || 'Qwen/Qwen2.5-72B-Instruct'
@@ -306,10 +331,10 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' })
 })
 
-;(async () => {
-  app.listen(PORT, () => {
-    console.log(`Oklut AI Chat API server running at http://localhost:${PORT}`)
-  })
-})()
+  ; (async () => {
+    app.listen(PORT, () => {
+      console.log(`Oklut AI Chat API server running at http://localhost:${PORT}`)
+    })
+  })()
 
 export default app

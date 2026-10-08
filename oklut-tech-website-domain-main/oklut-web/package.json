@@ -8,6 +8,9 @@
     "server": "node server/chat-api.js",
     "build": "vite build",
     "lint": "oxlint",
+    "test:chatbot": "node scripts/verify-chatbot-cases.mjs",
+    "test:chatbot:api": "node scripts/verify-chatbot-api.mjs",
+    "test:chatbot:ui": "node scripts/verify-chatbot-ui.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import { useFocusTrap } from '../../lib/useFocusTrap'
 import {
   getWelcomeMessage,
@@ -6,6 +6,7 @@ import {
   getChatResponse,
   getUserNameFromHistory,
 } from '../../lib/chatKnowledge'
+import { parseMenuOptions } from '../../lib/chatMenus'
 import { useTranslation } from '../../i18n/TranslationContext'
 
 type Message = {
@@ -18,6 +19,18 @@ type View = 'closed' | 'open' | 'minimized'
 
 let idCounter = 0
 const nextId = (prefix: string) => `${prefix}-${++idCounter}`
+
+// The latest numbered menu the assistant displayed, recovered from the
+// message list. It stays available after an option is chosen so a visitor can
+// explore another item; a newer menu replaces it, and "New chat" clears it.
+function findActiveMenu(messages: Message[]) {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role !== 'assistant') continue
+    const parsed = parseMenuOptions(messages[i].content)
+    if (parsed) return { index: i, options: parsed.options }
+  }
+  return null
+}
 
 export const Chatbot = () => {
   const { t } = useTranslation()
@@ -171,6 +184,10 @@ export const Chatbot = () => {
 
   const canSend = input.trim().length > 0 && !loading
 
+  // Clicking an option sends the very same number a visitor would have typed,
+  // so both routes resolve through identical intent logic.
+  const activeMenu = findActiveMenu(messages)
+
   return (
     <div className="chatbot-root">
       {view === 'closed' && (
@@ -272,18 +289,39 @@ export const Chatbot = () => {
             {view === 'open' && (
               <>
                 <div className="chatbot-messages" ref={messagesRef} aria-live="polite">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`chatbot-message ${msg.role === 'user' ? 'chatbot-message-user' : 'chatbot-message-assistant'}`}
-                    >
-                      {msg.role === 'assistant' && (
-                        <span className="chatbot-avatar" aria-hidden="true">
-                          <img src={`${import.meta.env.BASE_URL}img/oklut-ai-assistant-icon.svg`} alt="" />
-                        </span>
+                  {messages.map((msg, idx) => (
+                    <Fragment key={msg.id}>
+                      <div
+                        className={`chatbot-message ${msg.role === 'user' ? 'chatbot-message-user' : 'chatbot-message-assistant'}`}
+                      >
+                        {msg.role === 'assistant' && (
+                          <span className="chatbot-avatar" aria-hidden="true">
+                            <img src={`${import.meta.env.BASE_URL}img/oklut-ai-assistant-icon.svg`} alt="" />
+                          </span>
+                        )}
+                        <p className="chatbot-message-content">{msg.content}</p>
+                      </div>
+
+                      {activeMenu && activeMenu.index === idx && !loading && (
+                        <div className="chatbot-message chatbot-message-assistant">
+                          <span className="chatbot-avatar" aria-hidden="true">
+                            <img src={`${import.meta.env.BASE_URL}img/oklut-ai-assistant-icon.svg`} alt="" />
+                          </span>
+                          <div className="chatbot-quick-list" role="group" aria-label="Menu options">
+                            {activeMenu.options.map((option) => (
+                              <button
+                                key={option.index}
+                                type="button"
+                                className="chatbot-quick-btn"
+                                onClick={() => sendMessage(String(option.index))}
+                              >
+                                {option.index}. {option.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                      <p className="chatbot-message-content">{msg.content}</p>
-                    </div>
+                    </Fragment>
                   ))}
 
                   {loading && (
