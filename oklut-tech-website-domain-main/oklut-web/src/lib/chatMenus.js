@@ -6,10 +6,11 @@
 //   - the local Express server (server/chat-api.js)
 //   - the Vercel function (api/chat.js)
 //
-// It answers three things deterministically (never delegated to the model):
-//   1. numbered/ordinal selections against the currently displayed menu
-//   2. Services / Technologies menu requests
-//   3. well-known general-knowledge questions (capitals, currencies, facts)
+// It answers these things deterministically (never delegated to the model):
+//   1. mathematics (arithmetic, averages, percentages)
+//   2. numbered/ordinal selections against the currently displayed menu
+//   3. Services / Technologies menu requests
+//   4. well-known general-knowledge questions (capitals, currencies, facts)
 
 // ─── Website data ────────────────────────────────────────────────────────────
 // The 9 services and 8 technologies are the ones published on the website and
@@ -574,4 +575,176 @@ export function answerGeneralKnowledge(text) {
   }
 
   return null
+}
+
+
+// ─── Mathematics ─────────────────────────────────────────────────────────────
+
+// Format a number for display: integers as-is, decimals rounded and trimmed.
+function formatNumber(n) {
+  if (!isFinite(n)) return null
+  if (Number.isInteger(n)) return String(n)
+  return String(parseFloat(n.toFixed(6)))
+}
+
+// Safe arithmetic expression evaluator (recursive descent parser — no eval()).
+// Supports +, -, *, /, parentheses, decimals and unary minus/plus.
+function evaluateExpression(expr) {
+  const tokens = []
+  let i = 0
+  while (i < expr.length) {
+    const ch = expr[i]
+    if (ch === ' ') { i++; continue }
+    if (/[0-9.]/.test(ch)) {
+      let num = ''
+      while (i < expr.length && /[0-9.]/.test(expr[i])) num += expr[i++]
+      const value = parseFloat(num)
+      if (isNaN(value)) throw new Error('Invalid number')
+      tokens.push({ type: 'num', value })
+    } else if (ch === '(') {
+      tokens.push({ type: 'lparen' }); i++
+    } else if (ch === ')') {
+      tokens.push({ type: 'rparen' }); i++
+    } else if (ch === '+' || ch === '-' || ch === '*' || ch === '/') {
+      tokens.push({ type: 'op', value: ch }); i++
+    } else {
+      throw new Error('Unexpected character')
+    }
+  }
+
+  let pos = 0
+  const peek = () => tokens[pos]
+  const consume = () => tokens[pos++]
+
+  function parseExpr() {
+    let left = parseTerm()
+    while (peek() && peek().type === 'op' && (peek().value === '+' || peek().value === '-')) {
+      const op = consume().value
+      const right = parseTerm()
+      left = op === '+' ? left + right : left - right
+    }
+    return left
+  }
+
+  function parseTerm() {
+    let left = parseFactor()
+    while (peek() && peek().type === 'op' && (peek().value === '*' || peek().value === '/')) {
+      const op = consume().value
+      const right = parseFactor()
+      if (op === '*') {
+        left = left * right
+      } else {
+        if (right === 0) throw new Error('Division by zero')
+        left = left / right
+      }
+    }
+    return left
+  }
+
+  function parseFactor() {
+    const tok = peek()
+    if (!tok) throw new Error('Unexpected end of expression')
+    if (tok.type === 'num') { consume(); return tok.value }
+    if (tok.type === 'op' && tok.value === '-') { consume(); return -parseFactor() }
+    if (tok.type === 'op' && tok.value === '+') { consume(); return parseFactor() }
+    if (tok.type === 'lparen') {
+      consume()
+      const val = parseExpr()
+      if (!peek() || peek().type !== 'rparen') throw new Error('Missing closing parenthesis')
+      consume()
+      return val
+    }
+    throw new Error('Unexpected token')
+  }
+
+  const result = parseExpr()
+  if (pos < tokens.length) throw new Error('Unexpected trailing tokens')
+  return result
+}
+
+// Normalize text for math: convert × and ÷ to * and /, keep operators.
+function normalizeForMath(text) {
+  return (text || '')
+    .toLowerCase()
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/[^\w\s+*/.-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Priority 0 of the chatbot's intent pipeline: mathematics.
+ *
+ * Handles arithmetic (+, -, *, /, ×, ÷), averages and percentages — including
+ * natural-language phrasing ("What is 5 plus 5?", "20% of 500"). Uses a safe
+ * recursive-descent parser (never eval()). Returns null for anything that is
+ * not a math question so the caller keeps its normal flow — crucially, a bare
+ * number like "2" is NOT math and falls through to the menu-selection logic.
+ */
+export function tryMathCalculation(text) {
+  const normalized = normalizeForMath(text)
+  if (!normalized) return null
+
+  // "average of 10, 20, 30" / "what is the average of 5 and 15"
+  const avgMatch = normalized.match(/^(?:what\s+is\s+)?(?:the\s+)?averag(?:e|es)\s+of\s+(.+)$/)
+  if (avgMatch) {
+    const nums = avgMatch[1].split(/[,\s]+/).map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n))
+    if (nums.length >= 2) {
+      const avg = nums.reduce((a, b) => a + b, 0) / nums.length
+      const formatted = formatNumber(avg)
+      if (formatted !== null) return `The average of ${nums.join(', ')} is ${formatted}.`
+    }
+  }
+
+  // "20% of 500"
+  const pctOfMatch = normalized.match(/^(\d+(?:\.\d+)?)\s*%\s*of\s+(\d+(?:\.\d+)?)$/)
+  if (pctOfMatch) {
+    const pct = parseFloat(pctOfMatch[1])
+    const total = parseFloat(pctOfMatch[2])
+    const result = (pct / 100) * total
+    const formatted = formatNumber(result)
+    if (formatted !== null) return `${pct}% of ${total} is ${formatted}.`
+  }
+
+  // "50 out of 200 in percentage"
+  const outOfMatch = normalized.match(/^(\d+(?:\.\d+)?)\s+out\s+of\s+(\d+(?:\.\d+)?)\s+in\s+percentage$/)
+  if (outOfMatch) {
+    const part = parseFloat(outOfMatch[1])
+    const total = parseFloat(outOfMatch[2])
+    if (total === 0) return "I can't calculate a percentage when the total is zero."
+    const pct = (part / total) * 100
+    const formatted = formatNumber(pct)
+    if (formatted !== null) return `${part} out of ${total} is ${formatted}%.`
+  }
+
+  // Natural-language and direct expressions: strip question words, convert
+  // word operators to symbols, then evaluate.
+  let expr = normalized
+  expr = expr.replace(/^(?:what\s+is|what's|whats|calculate|compute|evaluate|solve|please\s+calculate|please\s+compute|tell\s+me|find|can\s+you\s+calculate|can\s+you\s+compute)\s+/, '')
+  expr = expr.replace(/\bplus\b/g, '+')
+  expr = expr.replace(/\bminus\b/g, '-')
+  expr = expr.replace(/\btimes\b/g, '*')
+  expr = expr.replace(/\bmultiplied\s+by\b/g, '*')
+  expr = expr.replace(/\bdivided\s+by\b/g, '/')
+  expr = expr.replace(/\bover\b/g, '/')
+  expr = expr.replace(/[?.\s]+$/g, '')
+
+  // Only treat as math if there's an operator and the expression is valid.
+  if (!/[+\-*/]/.test(expr)) return null
+  if (!/^[\d\s+\-*/().]+$/.test(expr)) return null
+  const numberCount = (expr.match(/\d+(?:\.\d+)?/g) || []).length
+  if (numberCount < 2) return null
+
+  try {
+    const result = evaluateExpression(expr)
+    const formatted = formatNumber(result)
+    if (formatted === null) return null
+    return `${expr} = ${formatted}`
+  } catch (err) {
+    if (err.message === 'Division by zero') {
+      return "I can't divide by zero — that's undefined in mathematics."
+    }
+    return null
+  }
 }

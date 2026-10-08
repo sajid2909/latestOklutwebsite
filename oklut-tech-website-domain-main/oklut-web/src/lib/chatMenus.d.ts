@@ -26,4 +26,5 @@ export function parseMenuOptions(content: string): ParsedMenu | null
 export function detectActiveMenu(history: HistoryMessage[]): ParsedMenu | null
 export function resolveMenuReply(text: string, history: HistoryMessage[]): string | null
 export function answerGeneralKnowledge(text: string): string | null
+export function tryMathCalculation(text: string): string | null
 

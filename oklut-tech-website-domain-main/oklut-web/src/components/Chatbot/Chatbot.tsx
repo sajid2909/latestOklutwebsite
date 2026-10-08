@@ -27,7 +27,7 @@ function findActiveMenu(messages: Message[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role !== 'assistant') continue
     const parsed = parseMenuOptions(messages[i].content)
-    if (parsed) return { index: i, options: parsed.options }
+    if (parsed) return { index: i, type: parsed.type, options: parsed.options }
   }
   return null
 }
@@ -64,8 +64,40 @@ export const Chatbot = () => {
   }, [view, scrollToBottom])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages, loading, scrollToBottom])
+    const el = messagesRef.current
+    if (!el) return
+
+    const lastMsg = messages[messages.length - 1]
+
+    // When the user sends a message, keep it visible (scroll to bottom).
+    if (lastMsg?.role === 'user') {
+      el.scrollTo({ top: el.scrollHeight })
+      return
+    }
+
+    // For assistant responses: if the last message is long (taller than the
+    // container), scroll to its beginning so the user sees the start. Otherwise
+    // scroll to bottom (normal behavior for short responses).
+    const assistantEls = el.querySelectorAll('.chatbot-message-assistant')
+    const lastAssistantEl = assistantEls[assistantEls.length - 1]
+
+    if (lastAssistantEl && !loading) {
+      const msgHeight = lastAssistantEl.getBoundingClientRect().height
+      const containerHeight = el.getBoundingClientRect().height
+
+      if (msgHeight > containerHeight * 0.7) {
+        // Long response — show its beginning.
+        const containerRect = el.getBoundingClientRect()
+        const msgRect = lastAssistantEl.getBoundingClientRect()
+        const scrollTarget = el.scrollTop + (msgRect.top - containerRect.top)
+        el.scrollTo({ top: scrollTarget })
+      } else {
+        el.scrollTo({ top: el.scrollHeight })
+      }
+    } else {
+      el.scrollTo({ top: el.scrollHeight })
+    }
+  }, [messages, loading])
 
   useEffect(() => {
     if (view !== 'open') return
@@ -192,9 +224,6 @@ export const Chatbot = () => {
     <div className="chatbot-root">
       {view === 'closed' && (
         <>
-          <span className="chatbot-label" aria-hidden="true">
-            {t('chatbot.chatWithOklutAi')}
-          </span>
           <button
             ref={toggleRef}
             type="button"
@@ -302,7 +331,7 @@ export const Chatbot = () => {
                         <p className="chatbot-message-content">{msg.content}</p>
                       </div>
 
-                      {activeMenu && activeMenu.index === idx && !loading && (
+                      {activeMenu && activeMenu.index === idx && !loading && activeMenu.type !== 'services' && activeMenu.type !== 'technologies' && activeMenu.type !== 'products' && (
                         <div className="chatbot-message chatbot-message-assistant">
                           <span className="chatbot-avatar" aria-hidden="true">
                             <img src={`${import.meta.env.BASE_URL}img/oklut-ai-assistant-icon.svg`} alt="" />

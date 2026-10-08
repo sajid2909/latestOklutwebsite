@@ -38,54 +38,86 @@ export function AuthProvider({ children }) {
   }, [])
 
   // Email-confirmation callback: Supabase's default confirmation link
-  // (token_hash in the query string) verifies the address AND establishes a
-  // session, logging the visitor straight in. We want the visitor to confirm,
-  // then sign in manually, so: mark the URL as a confirmation callback,
-  // exchange/verify as Supabase intends, then immediately sign out of that
-  // confirmation-created session and open the existing Sign In view.
+  // verifies the address AND establishes a session, logging the visitor
+  // straight in. We want the visitor to confirm, then sign in manually, so:
+  // mark the URL as a confirmation callback, exchange/verify as Supabase
+  // intends, then immediately sign out of that confirmation-created session
+  // and open the existing Sign In view. Expired or invalid links are routed
+  // to an error view that offers a resend option.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    const isConfirmCallback =
-      (params.get('token_hash') || params.get('hashed_token')) && params.get('type') !== 'recovery'
-    const isImplicitCallback =
-      (window.location.hash.includes('type=signup') ||
-        window.location.hash.includes('type=email')) &&
-      window.location.hash.includes('access_token')
-    if (!isConfirmCallback && !isImplicitCallback) return
+    const hash = window.location.hash
+    const code = params.get('code')
+    const tokenHash = params.get('token_hash') || params.get('hashed_token')
+    const type = params.get('type')
+
+    // Password-recovery links are handled separately via the
+    // PASSWORD_RECOVERY auth event.
+    if (type === 'recovery') return
+
+    // Implicit (hash) links carry the session in the URL fragment.
+    const isImplicit =
+      (hash.includes('type=signup') || hash.includes('type=email')) && hash.includes('access_token')
+    // PKCE links carry an authorization code in the query string.
+    const isPkce = !!code
+    // Token-hash links carry a token_hash in the query string.
+    const isTokenHash = !!tokenHash && (!type || type === 'signup' || type === 'email')
+
+    if (!isImplicit && !isPkce && !isTokenHash) return
 
     let cancelled = false
+    setIsConfirmingEmail(true)
 
-    // Implicit (hash) links create the session automatically before we run;
-    // PKCE/query links create it via exchangeCodeForSession below.
-    if (isImplicitCallback) {
-      setIsConfirmingEmail(true)
-      supabase.auth
-        .signOut()
-        .catch(() => {})
-        .finally(() => {
-          if (cancelled) return
-          window.history.replaceState(null, '', window.location.pathname + window.location.search.replace(/([?&])(code|token_hash|hashed_token|type)=[^&]*/g, '').replace(/\?&/, '?') || window.location.pathname)
-          window.location.assign(window.location.origin + '/?confirmed=1#auth')
-        })
-      return () => {
-        cancelled = true
-      }
+    const stripSearch = (search) =>
+      search.replace(/([?&])(code|token_hash|hashed_token|type|next)=[^&]*/g, '').replace(/\?&/, '?')
+    const stripHash = (h) =>
+      h
+        .replace(/#(access_token|token|type|expires_in|refresh_token|provider_token|expires_at)=[^&]*/g, '')
+        .replace(/&+/g, '&')
+        .replace(/[?#&]+$/, '')
+
+    const redirectWith = (status) => {
+      if (cancelled) return
+      setIsConfirmingEmail(false)
+      const clean =
+        window.location.pathname +
+        (stripSearch(window.location.search) || '') +
+        (stripHash(window.location.hash) || '')
+      window.history.replaceState(null, '', clean || window.location.pathname)
+      window.location.assign(window.location.origin + `/?confirmed=${status}#auth`)
     }
 
-    // Query-string confirmation link (current Supabase default).
-    setIsConfirmingEmail(true)
-    supabase.auth
-      .exchangeCodeForSession(params.get('code') || window.location.href)
-      .catch(() => {})
-      .then(() => supabase.auth.signOut())
-      .catch(() => {})
-      .finally(() => {
-        if (cancelled) return
-        setIsConfirmingEmail(false)
-        const clean = window.location.pathname + (window.location.search.replace(/([?&])(code|token_hash|hashed_token|type)=[^&]*/g, '').replace(/\?&/, '?') || '')
-        window.history.replaceState(null, '', clean)
-        window.location.assign(window.location.origin + '/?confirmed=1#auth')
-      })
+    const finish = () => redirectWith('1')
+    const fail = () => redirectWith('error')
+
+    // Establish the session from the confirmation link, then sign the visitor
+    // out so they confirm their email and then sign in manually.
+    const establishSession = async () => {
+      // A session may already exist (implicit hash links are applied by
+      // supabase-js on initialisation). Retry briefly to cover the async init.
+      for (let attempt = 0; attempt < 10; attempt++) {
+        if (cancelled) throw new Error('Cancelled')
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session) return
+        if (!isImplicit) break
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      if (isPkce) {
+        await supabase.auth.exchangeCodeForSession(code)
+        return
+      }
+      if (isTokenHash) {
+        await supabase.auth.verifyOtp({ token_hash: tokenHash, type: type || 'signup' })
+        return
+      }
+      throw new Error('No confirmation parameters found')
+    }
+
+    establishSession()
+      .then(() => supabase.auth.signOut().catch(() => {}))
+      .then(finish)
+      .catch(fail)
+
     return () => {
       cancelled = true
     }
@@ -107,6 +139,20 @@ export function AuthProvider({ children }) {
     })
     if (error) throw error
     return data
+  }
+
+  // Resend the confirmation email. Supabase has no dedicated resend endpoint on
+  // the client, so we call signUp again with the same credentials: for an
+  // existing but unconfirmed user GoTrue resends the confirmation email.
+  async function resendVerificationEmail(email, password) {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${SITE_URL}/`,
+      },
+    })
+    if (error) throw error
   }
 
   async function signIn(email, password) {
@@ -143,6 +189,7 @@ export function AuthProvider({ children }) {
     signOut,
     resetPassword,
     updatePassword,
+    resendVerificationEmail,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

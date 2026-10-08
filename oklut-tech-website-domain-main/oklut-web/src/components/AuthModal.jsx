@@ -4,7 +4,7 @@ import { getAuthErrorMessage, useAuth } from '../lib/auth'
 import { useTranslation } from '../i18n/TranslationContext'
 
 function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
-  const { signUp, signIn, isRecovery, resetPassword, updatePassword } = useAuth()
+  const { signUp, signIn, isRecovery, resetPassword, updatePassword, resendVerificationEmail } = useAuth()
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [form, setForm] = useState({ fullName: '', email: '', password: '', confirmPassword: '' })
@@ -12,6 +12,9 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [serverMessage, setServerMessage] = useState(null)
+  const [showResend, setShowResend] = useState(false)
+  const [resendStatus, setResendStatus] = useState('idle')
+  const [resendError, setResendError] = useState(null)
 
   const isLogin = mode === 'login'
 
@@ -21,6 +24,9 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
     setErrors({})
     setStatus('idle')
     setAcceptedTerms(false)
+    setShowResend(false)
+    setResendStatus('idle')
+    setResendError(null)
     // Always start with blank credentials on every open/mode change so nothing
     // typed during Sign Up is carried into the Sign In form — including after
     // the visitor confirms their email and is brought back to sign in.
@@ -33,6 +39,7 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
       // `notice` is supplied by the app when returning from an email
       // confirmation; it is shown once and cleared when the modal closes.
       setServerMessage(notice ?? null)
+      setShowResend(notice?.showResend ?? false)
     }
   }, [open, mode, isRecovery, notice])
 
@@ -98,14 +105,36 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
       } else {
         await signUp(form.email.trim(), form.password, form.fullName.trim())
         setServerMessage({
-          type: 'info',
+          type: 'success',
           text: t('auth.accountCreated'),
         })
         setStatus('idle')
+        setShowResend(true)
       }
     } catch (err) {
       setStatus('idle')
       setServerMessage({ type: 'error', text: getAuthErrorMessage(err) })
+      const msg = err?.message?.toLowerCase() || ''
+      if (msg.includes('email not confirmed') || msg.includes('email not verified')) {
+        setShowResend(true)
+      }
+    }
+  }
+
+  const handleResend = async () => {
+    if (!form.email.trim() || !form.password) {
+      setResendStatus('error')
+      setResendError('Please enter your email and password above to resend the verification email.')
+      return
+    }
+    setResendStatus('sending')
+    setResendError(null)
+    try {
+      await resendVerificationEmail(form.email.trim(), form.password)
+      setResendStatus('sent')
+    } catch (err) {
+      setResendStatus('error')
+      setResendError(getAuthErrorMessage(err))
     }
   }
 
@@ -147,6 +176,26 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
         {serverMessage && (
           <div className={`alert alert-${serverMessage.type}`} role="status">
             {serverMessage.text}
+          </div>
+        )}
+
+        {showResend && (
+          <div className="resend-verification">
+            <p className="resend-hint">Didn't receive the verification email?</p>
+            <button
+              type="button"
+              className="link-btn"
+              onClick={handleResend}
+              disabled={resendStatus === 'sending'}
+            >
+              {resendStatus === 'sending' ? 'Sending…' : 'Resend verification email'}
+            </button>
+            {resendStatus === 'sent' && (
+              <p className="resend-success">Verification email resent! Please check your inbox.</p>
+            )}
+            {resendStatus === 'error' && resendError && (
+              <p className="resend-error">{resendError}</p>
+            )}
           </div>
         )}
 

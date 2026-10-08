@@ -1,7 +1,7 @@
 import { resolveDateTimeQuery } from '../src/lib/dateTimeIntent.js'
 import { resolveContactQuery } from '../src/lib/contactIntent.js'
 import { resolvePerspectivesQuery } from '../src/lib/perspectivesKnowledge.js'
-import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex, normalize } from '../src/lib/chatMenus.js'
+import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex, normalize, tryMathCalculation } from '../src/lib/chatMenus.js'
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -91,6 +91,13 @@ export default async function handler(req, res) {
         ? `[Earlier in this conversation]\n${m.content}`
         : m.content,
   }))
+
+  // Mathematics (arithmetic, averages, percentages) is answered deterministically
+  // with a safe parser — never delegated to the model or the fallback.
+  const mathReply = tryMathCalculation(message)
+  if (mathReply) {
+    return res.json({ response: mathReply })
+  }
 
   // Numbered menu selections and Services/Technologies/Products menu requests are
   // answered deterministically so the menu text, its numbering and every

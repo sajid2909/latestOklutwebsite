@@ -2,7 +2,7 @@ import { PERSPECTIVE_INTENTS } from './perspectivesKnowledge'
 import { supabase } from './supabase.js'
 import { resolveDateTimeQuery } from './dateTimeIntent.js'
 import { resolveContactQuery } from './contactIntent.js'
-import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex } from './chatMenus.js'
+import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex, tryMathCalculation } from './chatMenus.js'
 
 const CONTACT = {
   phone: '18004103299',
@@ -975,6 +975,12 @@ export async function getChatResponse(text, history = []) {
   if (isPersonnelQuestion(text)) {
     return `That detail isn't published on our website and I wouldn't want to guess. For anything about Oklut's team or leadership, please contact ${CONTACT.email} or ${CONTACT.phone} and the team will help you directly.`
   }
+
+  // Priority 0: mathematics (arithmetic, averages, percentages). Resolved before
+  // the menu logic so "2+2" is calculated, not treated as a list selection —
+  // while a bare "2" still falls through to the menu logic below.
+  const mathReply = tryMathCalculation(text)
+  if (mathReply) return mathReply
 
   // Priority 1-3: a numbered selection against the menu currently on screen,
   // or a request for the Services / Technologies / Products menu. Resolved BEFORE every

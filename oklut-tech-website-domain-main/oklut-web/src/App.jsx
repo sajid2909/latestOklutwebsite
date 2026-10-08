@@ -1672,34 +1672,31 @@ function Footer() {
                 </a>
               </div>
             </div>
+            {/* Phone and email below social icons in Company column */}
+            <div className="footer-contact-cell footer-contact-stack">
+              <div className="footer-contact-line">
+                <Icon name="phone" className="footer-contact-icon" />
+                <a href="tel:18004103299" className="footer-contact-link">
+                  18004103299
+                </a>
+              </div>
+              <div className="footer-contact-line">
+                <Icon name="mail" className="footer-contact-icon" />
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=info%40oklut.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-contact-link"
+                >
+                  info@oklut.com
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Contact Information & Office Locations Row */}
         <div className="footer-contact-row">
-          {/* Phone & Email — stacked in one contact block */}
-          <div className="footer-contact-cell footer-contact-stack">
-            <div className="footer-contact-line">
-              <Icon name="phone" className="footer-contact-icon" />
-              <a href={CONTACT.phoneHref} className="footer-contact-link">
-                {CONTACT.phoneDisplay}
-              </a>
-            </div>
-            <div className="footer-contact-line">
-              <Icon name="mail" className="footer-contact-icon" />
-              <a
-                href={GMAIL_COMPOSE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-contact-link"
-              >
-                {CONTACT.email}
-              </a>
-            </div>
-          </div>
-
-          <div className="footer-contact-divider" aria-hidden="true" />
-
           {/* Offices — three aligned address blocks in one row */}
           <div className="footer-offices-row">
           <div className="footer-office-block">
