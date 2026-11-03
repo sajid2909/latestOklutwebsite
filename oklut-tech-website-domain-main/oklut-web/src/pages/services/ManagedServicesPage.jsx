@@ -1,8 +1,10 @@
+import { useTranslation } from '../../i18n/TranslationContext';
 import { ServicePageTemplate } from './ServicePageTemplate'
 import { Icon } from '../../components/Icon'
 import './ServicePage.css'
 
 export default function ManagedServicesPage() {
+  const { t } = useTranslation();
   const heroImageUrl = 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=90'
   const sideImageUrl = 'https://www.designarena.ai/_next/image?url=https%3A%2F%2Fdvxrhkgloakisnvqoxgl.supabase.co%2Fstorage%2Fv1%2Fobject%2Fsign%2Fimages%2F1787553034673_c359kv.jpg%3Ftoken%3DeyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NWE1YWU1ZS0xNzg4LTRiMWYtYWM5OC1hMjgwNmQ2OTM4ZWMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvMTc4NzU1MzAzNDY3M19jMzU5a3YuanBnIiwic2NvcGUiOiJkb3dubG9hZCIsImlhdCI6MTc4NzU1MzA2NSwiZXhwIjoxNzg3NTU2NjY1fQ.224mxqOy5hv3lycxPMdCWIaaki3A5nP0VNmAomYNk80&w=750&q=75'
 
@@ -24,9 +26,8 @@ export default function ManagedServicesPage() {
             <div className="section-head reveal">
               <span className="eyebrow">
                 <span className="eyebrow-bar" aria-hidden="true" />
-                What We Offer
-              </span>
-              <h2>Comprehensive managed services for your business</h2>
+                {t('common.whatWeOffer', { defaultValue: 'What We Offer' })}</span>
+              <h2>{t('servicesDetails.managedServices.subtitle', { defaultValue: 'Comprehensive managed services for your business' })}</h2>
               <ul style={{ listStyle: 'none', padding: 0, marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {[
                   { title: '24/7 Monitoring & Support', description: 'Proactive monitoring and technical support to keep critical systems running smoothly.' },

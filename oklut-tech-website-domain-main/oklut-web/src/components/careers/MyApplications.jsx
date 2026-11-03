@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from '../../i18n/TranslationContext'
 import { supabase } from '../../lib/supabase'
 import { STATUS_LABELS, formatDate } from './jobData'
 import { ApplicationsSkeleton } from './Skeletons'
@@ -10,6 +11,7 @@ function StatusBadge({ status }) {
 }
 
 function MyApplications({ user }) {
+  const { t } = useTranslation()
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -49,8 +51,8 @@ function MyApplications({ user }) {
     <section className="section section-alt" id="my-applications">
       <div className="container">
         <div className="section-header">
-          <span className="badge">Track</span>
-          <h2>Your Applications</h2>
+          <span className="badge">{t('careers.track', { defaultValue: 'Track' })}</span>
+          <h2>{t('careers.yourApplications', { defaultValue: 'Your Applications' })}</h2>
           <p>
             {user
               ? 'Follow the status of every role you have applied to.'
@@ -60,9 +62,9 @@ function MyApplications({ user }) {
 
         {!user && (
           <div className="jobs-empty">
-            <h3>Sign in to see your applications</h3>
+            <h3>{t('careers.signInTitle', { defaultValue: 'Sign in to see your applications' })}</h3>
             <p>
-              Use the Sign In button in the navigation bar to view the status of roles you have applied to.
+              {t('careers.signInDesc', { defaultValue: 'Use the Sign In button in the navigation bar to view the status of roles you have applied to.' })}
             </p>
           </div>
         )}
@@ -70,7 +72,7 @@ function MyApplications({ user }) {
         {user && loading && (
           <>
             <ApplicationsSkeleton />
-            <p className="visually-hidden" role="status">Loading your applications…</p>
+            <p className="visually-hidden" role="status">{t('careers.loadingApplications', { defaultValue: 'Loading your applications…' })}</p>
           </>
         )}
 
@@ -85,8 +87,8 @@ function MyApplications({ user }) {
 
         {user && !loading && !error && applications.length === 0 && (
           <div className="jobs-empty">
-            <h3>No applications yet</h3>
-            <p>Find a role above and submit your first application — we would love to hear from you.</p>
+            <h3>{t('careers.noApplicationsYet', { defaultValue: 'No applications yet' })}</h3>
+            <p>{t('careers.noApplicationsSub', { defaultValue: 'Find a role above and submit your first application — we would love to hear from you.' })}</p>
           </div>
         )}
 

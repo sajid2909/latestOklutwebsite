@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from '../i18n/TranslationContext'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import './DigitalTransformationPage.css'
 
 export default function ProcessAutomationPage() {
+  const { t } = useTranslation()
   useDocumentMeta({
     title: 'Business Process Automation — Oklut Technologies',
     description:
@@ -70,7 +72,7 @@ export default function ProcessAutomationPage() {
     navigate('/book-consultation', { state: { service: 'Business Process Automation' } })
   }
 
-  const coreCapabilities = [
+  const coreCapabilitiesDefault = [
     'Workflow Automation',
     'RPA',
     'Intelligent Automation',
@@ -79,6 +81,8 @@ export default function ProcessAutomationPage() {
     'API Integration',
     'Process Orchestration',
   ]
+  const rawCaps = t('servicesDetails.processAutomation.coreCapabilities', { returnObjects: true })
+  const coreCapabilities = Array.isArray(rawCaps) && rawCaps.length ? rawCaps : coreCapabilitiesDefault
 
   return (
     <div className="dt-page">
@@ -89,23 +93,24 @@ export default function ProcessAutomationPage() {
           className="dt-hero-bg"
         />
         <div className="dt-hero-copy reveal">
-          <div className="dt-eyebrow">Intelligent Process Operations</div>
+          <div className="dt-eyebrow">{t('services.pages.processAutomation.eyebrow', { defaultValue: 'Intelligent Process Operations' })}</div>
           <h1>
-            Business Process <em>Automation</em>
+            {t('services.pages.processAutomation.titlePart1', { defaultValue: 'Business Process' })}{' '}
+            <em>{t('services.pages.processAutomation.titlePart2', { defaultValue: 'Automation' })}</em>
           </h1>
           <p>
-            Design and implementation of intelligent automation solutions that streamline business processes, eliminate repetitive manual activities, improve operational efficiency, and accelerate business outcomes.
+            {t('services.items.businessProcessAutomation.description', { defaultValue: 'Design and implementation of intelligent automation solutions that streamline business processes, eliminate repetitive manual activities, improve operational efficiency, and accelerate business outcomes.' })}
           </p>
           <div className="dt-hero-actions">
             <button type="button" className="dt-btn-primary" onClick={handleBook}>
-              Book Automation Discovery
+              {t('services.pages.processAutomation.bookDiscovery', { defaultValue: 'Book Automation Discovery' })}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </button>
             <Link to="/services/center-of-excellence" className="dt-btn-outline">
-              Explore Center of Excellence
+              {t('services.pages.processAutomation.exploreCoE', { defaultValue: 'Explore Center of Excellence' })}
             </Link>
           </div>
         </div>
@@ -115,7 +120,7 @@ export default function ProcessAutomationPage() {
       <div style={{ background: '#0a1527', borderBottom: '1px solid rgba(45, 212, 191, 0.2)', padding: '20px 24px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <span style={{ color: '#2dd4bf', fontSize: '12px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-            Core Capabilities
+            {t('services.coreCapabilities', { defaultValue: 'Core Capabilities' })}
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {coreCapabilities.map((cap) => (
@@ -148,13 +153,13 @@ export default function ProcessAutomationPage() {
           {/* Row 1: RPA & Workflow Orchestration */}
           <div className="dt-row reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Robotic Process Automation</div>
-              <h2>Intelligent Bots for High-Volume Operations</h2>
+              <div className="dt-eyebrow">{t('servicesDetails.processAutomation.row1Eyebrow', { defaultValue: 'Robotic Process Automation' })}</div>
+              <h2>{t('servicesDetails.processAutomation.row1Title', { defaultValue: 'Intelligent Bots for High-Volume Operations' })}</h2>
               <p>
-                Eliminate repetitive manual data entry, cross-system reconciliations, and document routing. We deploy enterprise RPA bots that execute structured tasks 24/7 with zero error rate.
+                {t('servicesDetails.processAutomation.row1P1', { defaultValue: 'Eliminate repetitive manual data entry, cross-system reconciliations, and document routing. We deploy enterprise RPA bots that execute structured tasks 24/7 with zero error rate.' })}
               </p>
               <p>
-                By connecting legacy desktop interfaces, SAP/ERP backends, and cloud databases, software bots free your team to focus on strategic business initiatives.
+                {t('servicesDetails.processAutomation.row1P2', { defaultValue: 'By connecting legacy desktop interfaces, SAP/ERP backends, and cloud databases, software bots free your team to focus on strategic business initiatives.' })}
               </p>
             </div>
             <div className="dt-img-col">
@@ -170,13 +175,13 @@ export default function ProcessAutomationPage() {
           {/* Row 2: Document & Invoice Automation (Reverse) */}
           <div className="dt-row reverse reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Intelligent Document Processing</div>
-              <h2>OCR, Machine Learning &amp; Document AI</h2>
+              <div className="dt-eyebrow">{t('servicesDetails.processAutomation.row2Eyebrow', { defaultValue: 'Intelligent Document Processing' })}</div>
+              <h2>{t('servicesDetails.processAutomation.row2Title', { defaultValue: 'OCR, Machine Learning & Document AI' })}</h2>
               <p>
-                Automatically ingest, classify, and extract data from invoices, contracts, identity documents, and claims. Our AI-driven pipelines validate fields against internal databases and trigger automated approval workflows.
+                {t('servicesDetails.processAutomation.row2P1', { defaultValue: 'Automatically ingest, classify, and extract data from invoices, contracts, identity documents, and claims. Our AI-driven pipelines validate fields against internal databases and trigger automated approval workflows.' })}
               </p>
               <p>
-                Achieve straight-through processing rates exceeding 95% while drastically reducing turnaround times from days to seconds.
+                {t('servicesDetails.processAutomation.row2P2', { defaultValue: 'Achieve straight-through processing rates exceeding 95% while drastically reducing turnaround times from days to seconds.' })}
               </p>
             </div>
             <div className="dt-img-col">
@@ -192,13 +197,13 @@ export default function ProcessAutomationPage() {
           {/* Row 3: API Integration & Orchestration */}
           <div className="dt-row reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Process Orchestration</div>
-              <h2>End-to-End Cross-Platform Synchronization</h2>
+              <div className="dt-eyebrow">{t('servicesDetails.processAutomation.row3Eyebrow', { defaultValue: 'Process Orchestration' })}</div>
+              <h2>{t('servicesDetails.processAutomation.row3Title', { defaultValue: 'End-to-End Cross-Platform Synchronization' })}</h2>
               <p>
-                Connect CRM, ERP, HRMS, and banking APIs into unified real-time data flows. We implement event-driven triggers, message queues, and automated fallback handlers.
+                {t('servicesDetails.processAutomation.row3P1', { defaultValue: 'Connect CRM, ERP, HRMS, and banking APIs into unified real-time data flows. We implement event-driven triggers, message queues, and automated fallback handlers.' })}
               </p>
               <p>
-                Information flows seamlessly across departments without human intervention, eliminating operational silos and communication delays.
+                {t('servicesDetails.processAutomation.row3P2', { defaultValue: 'Information flows seamlessly across departments without human intervention, eliminating operational silos and communication delays.' })}
               </p>
             </div>
             <div className="dt-img-col">
@@ -214,13 +219,13 @@ export default function ProcessAutomationPage() {
           {/* Row 4: Process Telemetry & Continuous Optimization (Reverse) */}
           <div className="dt-row reverse reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Continuous Telemetry</div>
-              <h2>Real-Time Process Analytics &amp; Kaizen Insights</h2>
+              <div className="dt-eyebrow">{t('servicesDetails.processAutomation.row4Eyebrow', { defaultValue: 'Continuous Telemetry' })}</div>
+              <h2>{t('servicesDetails.processAutomation.row4Title', { defaultValue: 'Real-Time Process Analytics & Kaizen Insights' })}</h2>
               <p>
-                Track process execution times, bottleneck heatmaps, error frequencies, and financial ROI in real-time executive dashboards.
+                {t('servicesDetails.processAutomation.row4P1', { defaultValue: 'Track process execution times, bottleneck heatmaps, error frequencies, and financial ROI in real-time executive dashboards.' })}
               </p>
               <p>
-                Continuous machine learning diagnostics discover new automation opportunities, keeping your enterprise operating at maximum efficiency.
+                {t('servicesDetails.processAutomation.row4P2', { defaultValue: 'Continuous machine learning diagnostics discover new automation opportunities, keeping your enterprise operating at maximum efficiency.' })}
               </p>
             </div>
             <div className="dt-img-col">
@@ -239,8 +244,8 @@ export default function ProcessAutomationPage() {
       <section className="dt-capabilities-section">
         <div className="dt-wrap">
           <div className="dt-section-header reveal">
-            <h2>Automation Pillars</h2>
-            <p>Proven building blocks for intelligent enterprise operations.</p>
+            <h2>{t('servicesDetails.processAutomation.pillarsTitle', { defaultValue: 'Automation Pillars' })}</h2>
+            <p>{t('servicesDetails.processAutomation.pillarsSub', { defaultValue: 'Proven building blocks for intelligent enterprise operations.' })}</p>
           </div>
           <div className="dt-grid">
             <div className="dt-card reveal">
@@ -249,8 +254,8 @@ export default function ProcessAutomationPage() {
                   <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
                 </svg>
               </div>
-              <h3>Workflow Automation</h3>
-              <p>Multi-step human-in-the-loop and digital workflows orchestrated with automated routing and escalations.</p>
+              <h3>{t('servicesDetails.processAutomation.pillar1Title', { defaultValue: 'Workflow Automation' })}</h3>
+              <p>{t('servicesDetails.processAutomation.pillar1Desc', { defaultValue: 'Multi-step human-in-the-loop and digital workflows orchestrated with automated routing and escalations.' })}</p>
             </div>
             <div className="dt-card reveal">
               <div className="dt-card-icon">
@@ -260,8 +265,8 @@ export default function ProcessAutomationPage() {
                   <line x1="12" y1="17" x2="12" y2="21"></line>
                 </svg>
               </div>
-              <h3>Robotic Process Automation</h3>
-              <p>Rule-based software bots executing routine data entry, reconciliation, and cross-application tasks.</p>
+              <h3>{t('servicesDetails.processAutomation.pillar2Title', { defaultValue: 'Robotic Process Automation' })}</h3>
+              <p>{t('servicesDetails.processAutomation.pillar2Desc', { defaultValue: 'Rule-based software bots executing routine data entry, reconciliation, and cross-application tasks.' })}</p>
             </div>
             <div className="dt-card reveal">
               <div className="dt-card-icon">
@@ -269,8 +274,8 @@ export default function ProcessAutomationPage() {
                   <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A7 7 0 1 1 13 4.07V5a1 1 0 0 1-2 0v-.93A8.93 8.93 0 0 0 3.07 12H4a1 1 0 0 1 0 2h-.93A8.93 8.93 0 0 0 11 20.93V20a1 1 0 0 1 2 0v.93A8.93 8.93 0 0 0 20.93 14H20a1 1 0 0 1 0-2h.93A8.93 8.93 0 0 0 13 3.07z"></path>
                 </svg>
               </div>
-              <h3>Intelligent AI Automation</h3>
-              <p>Cognitive AI agents that interpret context, summarize unstructured text, and make automated decisions.</p>
+              <h3>{t('servicesDetails.processAutomation.pillar3Title', { defaultValue: 'Intelligent AI Automation' })}</h3>
+              <p>{t('servicesDetails.processAutomation.pillar3Desc', { defaultValue: 'Cognitive AI agents that interpret context, summarize unstructured text, and make automated decisions.' })}</p>
             </div>
             <div className="dt-card reveal">
               <div className="dt-card-icon">
@@ -278,8 +283,8 @@ export default function ProcessAutomationPage() {
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                 </svg>
               </div>
-              <h3>Process Optimization</h3>
-              <p>Process mining, bottleneck detection, and Kaizen workflows that continuously reduce operational costs.</p>
+              <h3>{t('servicesDetails.processAutomation.pillar4Title', { defaultValue: 'Process Optimization' })}</h3>
+              <p>{t('servicesDetails.processAutomation.pillar4Desc', { defaultValue: 'Process mining, bottleneck detection, and Kaizen workflows that continuously reduce operational costs.' })}</p>
             </div>
           </div>
         </div>
@@ -289,12 +294,12 @@ export default function ProcessAutomationPage() {
       <section className="dt-cta-section" style={{ padding: '0 24px 80px', maxWidth: '1200px', margin: '0 auto' }}>
         <div className="dt-wrap">
           <div className="dt-cta-box reveal" style={{ background: 'radial-gradient(circle at center, rgba(13, 148, 136, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%)', border: '1px solid rgba(45, 212, 191, 0.4)', borderRadius: '20px', padding: '56px 32px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: 'clamp(24px, 4vw, 36px)', color: '#ffffff', margin: '0 0 16px' }}>Ready to Automate Your Business Workflows?</h2>
+            <h2 style={{ fontSize: 'clamp(24px, 4vw, 36px)', color: '#ffffff', margin: '0 0 16px' }}>{t('servicesDetails.processAutomation.ctaTitle', { defaultValue: 'Ready to Automate Your Business Workflows?' })}</h2>
             <p style={{ color: '#94a3b8', fontSize: '16px', maxWidth: '640px', margin: '0 auto 32px' }}>
-              Connect with our automation architects to identify high-ROI opportunities and deploy intelligent digital workflows.
+              {t('servicesDetails.processAutomation.ctaSub', { defaultValue: 'Connect with our automation architects to identify high-ROI opportunities and deploy intelligent digital workflows.' })}
             </p>
             <button type="button" className="dt-btn-primary" onClick={handleBook}>
-              Book an Automation Consultation
+              {t('servicesDetails.processAutomation.ctaButton', { defaultValue: 'Book an Automation Consultation' })}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>

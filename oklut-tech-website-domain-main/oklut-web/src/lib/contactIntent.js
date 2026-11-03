@@ -36,7 +36,7 @@ export const CONTACT = {
     'SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081',
   vijayawadaAddress:
     'D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003',
-  southAfricaCompany: 'OKLUT TECHNOLOGIES (PTY) LTD',
+  southAfricaCompany: 'OKLUT TECHNOLOGIES PVT LTD',
   southAfricaAddress: 'Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa',
   hours: 'Monday – Saturday, 9:30 – 18:30 IST',
 }

@@ -1,12 +1,17 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from '../i18n/TranslationContext'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import './DigitalTransformationPage.css'
 
 export default function DigitalTransformationPage() {
+  const { t } = useTranslation()
   useDocumentMeta({
-    title: 'Digital Transformation — Oklut Technologies',
-    description: 'Modernization of business operations, technology ecosystems, and customer experiences through cloud, AI, automation, data, and modern application technologies.',
+    title: `${t('services.items.digitalTransformation.label', { defaultValue: 'Digital Transformation' })} — Oklut Technologies`,
+    description: t('services.items.digitalTransformation.description', {
+      defaultValue:
+        'Modernization of business operations, technology ecosystems, and customer experiences through cloud, AI, automation, data, and modern application technologies.',
+    }),
   })
   const navigate = useNavigate()
   useEffect(() => {
@@ -25,7 +30,7 @@ export default function DigitalTransformationPage() {
   }, [])
   const handleBook = () => navigate('/book-consultation', { state: { service: 'Digital Transformation' } })
 
-  const coreCapabilities = [
+  const coreCapabilitiesDefault = [
     'Digital Strategy',
     'Cloud Transformation',
     'AI & Automation',
@@ -36,17 +41,28 @@ export default function DigitalTransformationPage() {
     'Technology Modernization',
   ]
 
+  const rawCaps = t('servicesDetails.digitalTransformation.coreCapabilities', { returnObjects: true })
+  const coreCapabilities = Array.isArray(rawCaps) && rawCaps.length ? rawCaps : coreCapabilitiesDefault
+
   return (
     <div className="dt-page">
       <section className="dt-hero">
         <img src={`${import.meta.env.BASE_URL}img/digital-transformation.jpg`} alt="Digital Transformation hero" className="dt-hero-bg" />
         <div className="dt-hero-copy reveal">
-          <div className="dt-eyebrow">Enterprise Modernization</div>
-          <h1>Digital <em>Transformation</em></h1>
-          <p>Modernization of business operations, technology ecosystems, and customer experiences through cloud, AI, automation, data, and modern application technologies.</p>
+          <div className="dt-eyebrow">{t('servicesDetails.digitalTransformation.eyebrow', { defaultValue: 'Enterprise Modernization' })}</div>
+          <h1>
+            {t('servicesDetails.digitalTransformation.titlePart1', { defaultValue: 'Digital' })}{' '}
+            <em>{t('servicesDetails.digitalTransformation.titlePart2', { defaultValue: 'Transformation' })}</em>
+          </h1>
+          <p>{t('servicesDetails.digitalTransformation.description', { defaultValue: 'Modernization of business operations, technology ecosystems, and customer experiences through cloud, AI, automation, data, and modern application technologies.' })}</p>
           <div className="dt-hero-actions">
-            <button type="button" className="dt-btn-primary" onClick={handleBook}>Book Transformation Workshop <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
-            <Link to="/services/end-to-end-solution-framework" className="dt-btn-outline">Explore Solution Framework</Link>
+            <button type="button" className="dt-btn-primary" onClick={handleBook}>
+              {t('servicesDetails.digitalTransformation.bookWorkshop', { defaultValue: 'Book Transformation Workshop' })}{' '}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+            <Link to="/services/end-to-end-solution-framework" className="dt-btn-outline">
+              {t('servicesDetails.digitalTransformation.exploreFramework', { defaultValue: 'Explore Solution Framework' })}
+            </Link>
           </div>
         </div>
       </section>
@@ -55,12 +71,12 @@ export default function DigitalTransformationPage() {
       <div style={{ background: '#0a1527', borderBottom: '1px solid rgba(45, 212, 191, 0.2)', padding: '20px 24px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <span style={{ color: '#2dd4bf', fontSize: '12px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-            Core Capabilities
+            {t('servicesDetails.digitalTransformation.coreCapabilitiesTitle', { defaultValue: 'Core Capabilities' })}
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {coreCapabilities.map((cap) => (
+            {coreCapabilities.map((cap, idx) => (
               <span
-                key={cap}
+                key={idx}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -85,35 +101,35 @@ export default function DigitalTransformationPage() {
       <section className="dt-section">
         <div className="dt-wrap">
           <div className="dt-row reveal">
-            <div className="dt-text-col"><div className="dt-eyebrow">Strategy &amp; Roadmap</div><h2>From Vision to Executable Roadmap</h2><p>We partner with enterprise leaders to define digital strategy, business cases, and phased roadmaps with quick wins and de-risked execution.</p><p>Prioritized initiatives, TCO models, and KPIs ensure every technology modernization effort ties directly to revenue, efficiency, and customer satisfaction outcomes.</p></div>
+            <div className="dt-text-col"><div className="dt-eyebrow">{t('servicesDetails.digitalTransformation.row1Eyebrow', { defaultValue: 'Strategy & Roadmap' })}</div><h2>{t('servicesDetails.digitalTransformation.row1Title', { defaultValue: 'From Vision to Executable Roadmap' })}</h2><p>{t('servicesDetails.digitalTransformation.row1P1', { defaultValue: 'We partner with enterprise leaders to define digital strategy, business cases, and phased roadmaps with quick wins and de-risked execution.' })}</p><p>{t('servicesDetails.digitalTransformation.row1P2', { defaultValue: 'Prioritized initiatives, TCO models, and KPIs ensure every technology modernization effort ties directly to revenue, efficiency, and customer satisfaction outcomes.' })}</p></div>
             <div className="dt-img-col"><div className="dt-img-frame"><img src={`${import.meta.env.BASE_URL}img/custom-dev-hero.jpg`} alt="Strategy roadmap" /></div></div>
           </div>
           <div className="dt-row reverse reveal">
-            <div className="dt-text-col"><div className="dt-eyebrow">Legacy Modernization</div><h2>Modernize Without Breaking the Business</h2><p>Re-platform monoliths to microservices, APIs, and cloud-native patterns with zero-downtime cutovers and automated regression validation.</p><p>We modernize applications, databases, and integration layers while preserving compliance and security posture.</p></div>
+            <div className="dt-text-col"><div className="dt-eyebrow">{t('servicesDetails.digitalTransformation.row2Eyebrow', { defaultValue: 'Legacy Modernization' })}</div><h2>{t('servicesDetails.digitalTransformation.row2Title', { defaultValue: 'Modernize Without Breaking the Business' })}</h2><p>{t('servicesDetails.digitalTransformation.row2P1', { defaultValue: 'Re-platform monoliths to microservices, APIs, and cloud-native patterns with zero-downtime cutovers and automated regression validation.' })}</p><p>{t('servicesDetails.digitalTransformation.row2P2', { defaultValue: 'We modernize applications, databases, and integration layers while preserving compliance and security posture.' })}</p></div>
             <div className="dt-img-col"><div className="dt-img-frame"><img src={`${import.meta.env.BASE_URL}img/custom-dev-sec2.jpg`} alt="Legacy modernization" /></div></div>
           </div>
           <div className="dt-row reveal">
-            <div className="dt-text-col"><div className="dt-eyebrow">Cloud, AI &amp; Data</div><h2>Cloud Adoption &amp; Data-Driven Intelligence</h2><p>Adopt AWS, Azure, and GCP, build modern data pipelines, and embed machine learning agents to drive autonomous decisions.</p><p>From real-time event streaming to unified dashboards, transformation becomes measurable and sustainable.</p></div>
+            <div className="dt-text-col"><div className="dt-eyebrow">{t('servicesDetails.digitalTransformation.row3Eyebrow', { defaultValue: 'Cloud, AI & Data' })}</div><h2>{t('servicesDetails.digitalTransformation.row3Title', { defaultValue: 'Cloud Adoption & Data-Driven Intelligence' })}</h2><p>{t('servicesDetails.digitalTransformation.row3P1', { defaultValue: 'Adopt AWS, Azure, and GCP, build modern data pipelines, and embed machine learning agents to drive autonomous decisions.' })}</p><p>{t('servicesDetails.digitalTransformation.row3P2', { defaultValue: 'From real-time event streaming to unified dashboards, transformation becomes measurable and sustainable.' })}</p></div>
             <div className="dt-img-col"><div className="dt-img-frame"><img src={`${import.meta.env.BASE_URL}img/cloud-integration-sec.jpg`} alt="Cloud data CX" /></div></div>
           </div>
           <div className="dt-row reverse reveal">
-            <div className="dt-text-col"><div className="dt-eyebrow">Customer Experience</div><h2>Modern Omnichannel Experiences</h2><p>Redesign customer journeys across responsive web, iOS, Android, and self-service portals with personalized interfaces.</p><p>Platform engineering, telemetry, and automated feedback loops make digital innovation continuous.</p></div>
+            <div className="dt-text-col"><div className="dt-eyebrow">{t('servicesDetails.digitalTransformation.row4Eyebrow', { defaultValue: 'Customer Experience' })}</div><h2>{t('servicesDetails.digitalTransformation.row4Title', { defaultValue: 'Modern Omnichannel Experiences' })}</h2><p>{t('servicesDetails.digitalTransformation.row4P1', { defaultValue: 'Redesign customer journeys across responsive web, iOS, Android, and self-service portals with personalized interfaces.' })}</p><p>{t('servicesDetails.digitalTransformation.row4P2', { defaultValue: 'Platform engineering, telemetry, and automated feedback loops make digital innovation continuous.' })}</p></div>
             <div className="dt-img-col"><div className="dt-img-frame"><img src={`${import.meta.env.BASE_URL}img/proto-concept-sec.jpg`} alt="Customer Experience" /></div></div>
           </div>
         </div>
       </section>
       <section className="dt-capabilities-section">
         <div className="dt-wrap">
-          <div className="dt-section-header reveal"><h2>Transformation Pillars</h2><p>Outcome-focused levers that ensure sustainable digital leadership.</p></div>
+          <div className="dt-section-header reveal"><h2>{t('servicesDetails.digitalTransformation.pillarsTitle', { defaultValue: 'Transformation Pillars' })}</h2><p>{t('servicesDetails.digitalTransformation.pillarsSub', { defaultValue: 'Outcome-focused levers that ensure sustainable digital leadership.' })}</p></div>
           <div className="dt-grid">
-            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg></div><h3>Digital Strategy &amp; Governance</h3><p>Phased transformation blueprints with business case modeling, architecture governance, and milestone risk tracking.</p></div>
-            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><h3>Cloud &amp; Data Platform</h3><p>AWS/Azure/GCP multi-cloud foundations, automated pipelines, and enterprise data analytics enablement.</p></div>
-            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg></div><h3>AI &amp; Automation</h3><p>Intelligent process automation, cognitive AI agents, and predictive telemetry to optimize daily operations.</p></div>
-            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><h3>Customer Experience</h3><p>High-converting omnichannel digital portals and personalized interfaces built for maximum user retention.</p></div>
+            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg></div><h3>{t('servicesDetails.digitalTransformation.pillar1Title', { defaultValue: 'Digital Strategy & Governance' })}</h3><p>{t('servicesDetails.digitalTransformation.pillar1Desc', { defaultValue: 'Phased transformation blueprints with business case modeling, architecture governance, and milestone risk tracking.' })}</p></div>
+            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><h3>{t('servicesDetails.digitalTransformation.pillar2Title', { defaultValue: 'Cloud & Data Platform' })}</h3><p>{t('servicesDetails.digitalTransformation.pillar2Desc', { defaultValue: 'AWS/Azure/GCP multi-cloud foundations, automated pipelines, and enterprise data analytics enablement.' })}</p></div>
+            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg></div><h3>{t('servicesDetails.digitalTransformation.pillar3Title', { defaultValue: 'AI & Automation' })}</h3><p>{t('servicesDetails.digitalTransformation.pillar3Desc', { defaultValue: 'Intelligent process automation, cognitive AI agents, and predictive telemetry to optimize daily operations.' })}</p></div>
+            <div className="dt-card reveal"><div className="dt-card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div><h3>{t('servicesDetails.digitalTransformation.pillar4Title', { defaultValue: 'Customer Experience' })}</h3><p>{t('servicesDetails.digitalTransformation.pillar4Desc', { defaultValue: 'High-converting omnichannel digital portals and personalized interfaces built for maximum user retention.' })}</p></div>
           </div>
         </div>
       </section>
-      <section className="dt-cta-section"><div className="dt-wrap"><div className="dt-cta-box reveal"><h2>Ready to Transform Your Enterprise?</h2><p>Partner with Oklut Technologies for phased, de-risked digital transformation tied to measurable business outcomes.</p><button type="button" className="dt-btn-primary" onClick={handleBook}>Book a Digital Transformation Call <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></div></div></section>
+      <section className="dt-cta-section"><div className="dt-wrap"><div className="dt-cta-box reveal"><h2>{t('servicesDetails.digitalTransformation.ctaTitle', { defaultValue: 'Ready to Transform Your Enterprise?' })}</h2><p>{t('servicesDetails.digitalTransformation.ctaSub', { defaultValue: 'Partner with Oklut Technologies for phased, de-risked digital transformation tied to measurable business outcomes.' })}</p><button type="button" className="dt-btn-primary" onClick={handleBook}>{t('servicesDetails.digitalTransformation.ctaButton', { defaultValue: 'Book a Digital Transformation Call' })} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></div></div></section>
     </div>
   )
 }

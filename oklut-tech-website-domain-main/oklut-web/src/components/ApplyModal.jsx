@@ -31,6 +31,21 @@ const FIELD_IDS = {
   resume: 'apply-resume-dropzone',
 }
 
+function renderPrivacyNotice(t) {
+  const text = t('applyModal.acceptPrivacy', { defaultValue: 'I accept the Oklut <1>Privacy & Security</1> policy.' })
+  const parts = text.split(/<\/?1>/)
+  if (parts.length === 3) {
+    return (
+      <>
+        {parts[0]}
+        <Link to="/privacy">{parts[1]}</Link>
+        {parts[2]}
+      </>
+    )
+  }
+  return text
+}
+
 function ApplyModal({ job, user, onClose, onSubmitted }) {
   const { signIn, signUp } = useAuth()
   const { t } = useTranslation()
@@ -478,7 +493,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
 
           <form className="modal-form" onSubmit={handleSignInSubmit} noValidate>
             <div className="input-group">
-              <label htmlFor="gate-email">Email</label>
+              <label htmlFor="gate-email">{t('auth.email', { defaultValue: 'Email' })}</label>
               <input
                 id="gate-email"
                 name="email"
@@ -497,7 +512,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
             </div>
 
             <div className="input-group">
-              <label htmlFor="gate-password">Password</label>
+              <label htmlFor="gate-password">{t('auth.password', { defaultValue: 'Password' })}</label>
               <input
                 id="gate-password"
                 name="password"
@@ -524,9 +539,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
                   onChange={handleSignInAcceptedChange}
                   aria-invalid={signInErrors.acceptedTerms ? 'true' : undefined}
                 />
-                <span>
-                  I accept the Oklut <Link to="/privacy">Privacy &amp; Security</Link> policy.
-                </span>
+                <span>{renderPrivacyNotice(t)}</span>
               </label>
               {signInErrors.acceptedTerms && (
                 <span className="error-message" role="alert">{signInErrors.acceptedTerms}</span>
@@ -560,7 +573,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
 
           <form className="modal-form" onSubmit={handleSignupSubmit} noValidate>
             <div className="input-group">
-              <label htmlFor="gate-name">Full Name *</label>
+              <label htmlFor="gate-name">{t('auth.fullName', { defaultValue: 'Full Name' })} *</label>
               <input
                 id="gate-name"
                 name="fullName"
@@ -578,7 +591,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
             </div>
 
             <div className="input-group">
-              <label htmlFor="gate-signup-email">Email *</label>
+              <label htmlFor="gate-signup-email">{t('auth.email', { defaultValue: 'Email' })} *</label>
               <input
                 id="gate-signup-email"
                 name="email"
@@ -598,7 +611,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
 
             <div className="grid grid-2">
               <div className="input-group">
-                <label htmlFor="gate-signup-password">Password *</label>
+                <label htmlFor="gate-signup-password">{t('auth.password', { defaultValue: 'Password' })} *</label>
                 <input
                   id="gate-signup-password"
                   name="password"
@@ -616,7 +629,7 @@ function ApplyModal({ job, user, onClose, onSubmitted }) {
                 )}
               </div>
               <div className="input-group">
-                <label htmlFor="gate-signup-confirm">Confirm Password *</label>
+                <label htmlFor="gate-signup-confirm">{t('auth.confirmPassword', { defaultValue: 'Confirm Password' })} *</label>
                 <input
                   id="gate-signup-confirm"
                   name="confirmPassword"

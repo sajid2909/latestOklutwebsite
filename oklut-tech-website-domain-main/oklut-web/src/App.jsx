@@ -10,6 +10,7 @@ import { useCookieConsent } from './components/cookie/CookieConsentProvider.tsx'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage.tsx'
 import { Chatbot } from './components/Chatbot/Chatbot.tsx'
 import { Icon } from './components/Icon.jsx'
+import LanguageSelector from './components/LanguageSelector.jsx'
 import './App.css'
 
 function RedirectToStatic({ file }) {
@@ -75,7 +76,7 @@ const CONTACT = {
     'D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003',
   vijayawadaMapsHref:
     'https://www.google.com/maps/search/D.No.+24-29-210A,+Durgapuram,+Gulabithota+Road,+Vijayawada,+NTR+District,+Andhra+Pradesh+520003',
-  southAfricaCompany: 'OKLUT TECHNOLOGIES (PTY) LTD',
+  southAfricaCompany: 'OKLUT TECHNOLOGIES PVT LTD',
   southAfricaAddress: 'Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa',
   southAfricaMapsHref:
     'https://www.google.com/maps/search/Unit+11+Sunset+View+10+Hazy+Street+Newcastle+Kwa-Zulu+Natal+2930+South+Africa',
@@ -128,10 +129,23 @@ const HRMS_SOLUTIONS = [
   { title: 'Recruitment Portal', description: 'Job postings, applicant tracking, interview scheduling, and onboarding workflows.' }
 ]
 
+const TECH_NAV_KEYS = {
+  'ai-robotics-solutions': 'aiRobotics',
+  'business-automation-solutions': 'businessAutomation',
+  'cloud-migration-solutions': 'cloudMigrations',
+  'data-center-solutions': 'dataCenters',
+  'cognitive-analytics-ai': 'cognitiveAnalytics',
+  'information-reporting-systems': 'informationReporting',
+  'managed-services': 'managedServices',
+  'one-stop-technology-solutions': 'oneStopSolutions',
+}
+
 const TECH_NAV_ITEMS = TECHNOLOGIES_DATA.map((t) => ({
   label: t.title,
+  slug: t.slug,
   to: `/technologies/${t.slug}`,
 }))
+
 
 const SERVICES = [
   {
@@ -199,7 +213,6 @@ const SERVICES = [
   },
 ]
 
-const SECTION_IDS = ['top', 'about', 'gallery', 'news', 'services', 'contact']
 
 const NAV_OFFSET = 78
 
@@ -209,18 +222,32 @@ function scrollToSection(id) {
     window.scrollTo({ top: 0, behavior })
     return
   }
-  const el = document.getElementById(id) || (id === 'our-services' ? document.getElementById('services') : null)
-  if (el) el.scrollIntoView({ behavior, block: 'start' })
+  const el = document.getElementById(id) || (id === 'our-services' ? document.getElementById('services') : null) || (id === 'technologies' ? document.getElementById('gallery') : null) || (id === 'gallery' ? document.getElementById('technologies') : null)
+  if (el) {
+    const y = el.getBoundingClientRect().top + window.scrollY - (NAV_OFFSET - 8)
+    window.scrollTo({ top: y, behavior })
+  }
 }
 
 function SectionLink({ id, children, className = '', isActive = false, onNavigate }) {
   const location = useLocation()
   const navigate = useNavigate()
 
+  const isHomeRoute =
+    location.pathname === '/' ||
+    location.pathname === '/about' ||
+    location.pathname === '/services' ||
+    location.pathname === '/contact' ||
+    location.pathname === '/technologies'
+
   const handleClick = (e) => {
     e.preventDefault()
     onNavigate?.()
-    if (location.pathname === '/') {
+    const targetPath = id === 'top' ? '/' : `/${id}`
+    if (isHomeRoute) {
+      if (typeof window !== 'undefined' && window.location.pathname !== targetPath) {
+        window.history.pushState(null, '', targetPath)
+      }
       scrollToSection(id)
     } else {
       navigate('/', { state: { scrollTo: id } })
@@ -240,9 +267,12 @@ function SectionLink({ id, children, className = '', isActive = false, onNavigat
 }
 
 
+const COMPACT_NAV_LANGUAGES = new Set(['ml', 'ta', 'km', 'my'])
+
 function Navbar({ onSignIn, onSignUp }) {
   const { user, signOut } = useAuth()
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
+  const isCompactNav = COMPACT_NAV_LANGUAGES.has(lang)
   const location = useLocation()
   const navigate = useNavigate()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -253,6 +283,13 @@ function Navbar({ onSignIn, onSignUp }) {
   const [scrolled, setScrolled] = useState(false)
   const servicesRef = useRef(null)
   const techRef = useRef(null)
+
+  const isHomeRoute =
+    location.pathname === '/' ||
+    location.pathname === '/about' ||
+    location.pathname === '/services' ||
+    location.pathname === '/contact' ||
+    location.pathname === '/technologies'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -268,20 +305,57 @@ function Navbar({ onSignIn, onSignUp }) {
   }, [])
 
   useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window === 'undefined') return
+      const p = window.location.pathname
+      if (p === '/about') {
+        scrollToSection('about')
+        setActiveSection('about')
+      } else if (p === '/services') {
+        scrollToSection('services')
+        setActiveSection('services')
+      } else if (p === '/contact') {
+        scrollToSection('contact')
+        setActiveSection('contact')
+      } else if (p === '/technologies') {
+        scrollToSection('top')
+        setActiveSection('technologies')
+        setTechOpen(true)
+      } else if (p === '/') {
+        scrollToSection('top')
+        setActiveSection('top')
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
     const onOutside = (e) => {
       if (servicesRef.current && !servicesRef.current.contains(e.target)) {
-        setServicesOpen(false)
+        setServicesOpen((prev) => {
+          if (prev && !isHomeRoute && typeof window !== 'undefined' && window.location.pathname === '/services') {
+            window.history.pushState(null, '', location.pathname)
+          }
+          return false
+        })
       }
       if (techRef.current && !techRef.current.contains(e.target)) {
-        setTechOpen(false)
+        setTechOpen((prev) => {
+          if (prev && !isHomeRoute && typeof window !== 'undefined' && window.location.pathname === '/technologies') {
+            window.history.pushState(null, '', location.pathname)
+          }
+          return false
+        })
       }
     }
     document.addEventListener('mousedown', onOutside)
     return () => document.removeEventListener('mousedown', onOutside)
-  }, [])
+  }, [isHomeRoute, location.pathname])
+
 
   useEffect(() => {
-    if (location.pathname !== '/' && location.pathname !== '/services' && location.pathname !== '/technologies') {
+    if (!isHomeRoute) {
       setActiveSection('')
       return
     }
@@ -289,15 +363,62 @@ function Navbar({ onSignIn, onSignUp }) {
     let cancelled = false
     const update = () => {
       ticking = false
-      let current = SECTION_IDS[0]
-      for (const id of SECTION_IDS) {
-        const el = document.getElementById(id)
-        if (el && el.getBoundingClientRect().top <= NAV_OFFSET) current = id
-      }
       const atBottom =
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4
-      if (atBottom) current = SECTION_IDS[SECTION_IDS.length - 1]
-      if (!cancelled) setActiveSection(current)
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60
+      if (atBottom) {
+        if (!cancelled) setActiveSection('contact')
+        return
+      }
+      if (window.scrollY < 100) {
+        if (!cancelled) setActiveSection('top')
+        return
+      }
+
+      const triggerY = NAV_OFFSET + 50
+      let current = ''
+
+      for (const id of ['contact', 'gallery', 'services', 'about', 'top']) {
+        const el = document.getElementById(id)
+        if (el) {
+          const rect = el.getBoundingClientRect()
+          if (rect.top <= triggerY && rect.bottom > triggerY) {
+            current = id
+            break
+          }
+        }
+      }
+
+      if (!current) {
+        for (const id of ['top', 'about', 'services', 'gallery', 'contact']) {
+          const el = document.getElementById(id)
+          if (el && el.getBoundingClientRect().top <= triggerY) {
+            current = id
+          }
+        }
+      }
+
+      if (!cancelled && current) {
+        const activeName = current === 'gallery' ? 'technologies' : current
+        setActiveSection(activeName)
+        if (isHomeRoute && typeof window !== 'undefined') {
+          if (window.location.pathname === '/technologies' && (activeName === 'top' || !activeName)) {
+            return
+          }
+          const targetPath =
+            activeName === 'about'
+              ? '/about'
+              : activeName === 'services'
+                ? '/services'
+                : activeName === 'technologies'
+                  ? '/technologies'
+                  : activeName === 'contact'
+                    ? '/contact'
+                    : '/'
+          if (window.location.pathname !== targetPath) {
+            window.history.replaceState(null, '', targetPath)
+          }
+        }
+      }
     }
     const onScroll = () => {
       if (!ticking) {
@@ -313,28 +434,50 @@ function Navbar({ onSignIn, onSignUp }) {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
-  }, [location.pathname])
+  }, [isHomeRoute, location.pathname])
 
   const closeMobile = () => setMobileOpen(false)
 
   return (
-    <header className={`navbar${scrolled ? ' navbar-scrolled' : ''}`}>
+    <header className={`navbar${scrolled ? ' navbar-scrolled' : ''}${isCompactNav ? ' navbar-compact-nav' : ''}`}>
       <div className="container flex flex-between">
-        <SectionLink
-          id="top"
-          className="brand"
-          isActive={location.pathname === '/' && activeSection === 'top'}
-          onNavigate={closeMobile}
+        <Link
+          to="/"
+          className={`brand${!servicesOpen && !techOpen && location.pathname === '/' && (activeSection === 'top' || !activeSection) ? ' active' : ''}`}
+          onClick={(e) => {
+            closeMobile()
+            setServicesOpen(false)
+            setTechOpen(false)
+            if (location.pathname === '/') {
+              e.preventDefault()
+              if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+                window.history.pushState(null, '', '/')
+              }
+              scrollToSection('top')
+              setActiveSection('top')
+            } else {
+              navigate('/')
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }
+          }}
+          aria-label="Oklut Technologies Home"
         >
           <img
             src={`${import.meta.env.BASE_URL}img/logo.jpg`}
             alt="Oklut Technologies logo"
             className="brand-logo"
           />
-        </SectionLink>
+        </Link>
         <nav className={`nav-links ${mobileOpen ? 'nav-links-open' : ''}`} aria-label="Main navigation">
           {NAV_ITEMS.map((item) => {
             if (item.hasDropdown && item.id === 'services') {
+              const isServicesActive = servicesOpen || (
+                !techOpen && (
+                  isHomeRoute
+                    ? activeSection === 'services'
+                    : location.pathname === '/services' || location.pathname.startsWith('/services/')
+                )
+              )
               return (
                 <div
                   key={item.id}
@@ -343,16 +486,30 @@ function Navbar({ onSignIn, onSignUp }) {
                 >
                   <button
                     type="button"
-                    className="services-toggle"
+                    className={`services-toggle${isServicesActive ? ' active' : ''}`}
                     aria-haspopup="menu"
                     aria-expanded={servicesOpen}
                     onClick={() => {
-                      setServicesOpen((o) => !o)
+                      const nextOpen = !servicesOpen
+                      setServicesOpen(nextOpen)
                       setTechOpen(false)
-                      if (location.pathname !== '/services') {
-                        navigate('/services')
+                      if (nextOpen) {
+                        if (isHomeRoute) {
+                          if (typeof window !== 'undefined' && window.location.pathname !== '/services') {
+                            window.history.pushState(null, '', '/services')
+                          }
+                          scrollToSection('services')
+                          setActiveSection('services')
+                        } else {
+                          if (typeof window !== 'undefined' && window.location.pathname !== '/services') {
+                            window.history.pushState(null, '', '/services')
+                          }
+                        }
+                      } else {
+                        if (!isHomeRoute && typeof window !== 'undefined' && window.location.pathname === '/services') {
+                          window.history.pushState(null, '', location.pathname)
+                        }
                       }
-                      scrollToSection('services')
                     }}
                   >
                     <span>{t('nav.services')}</span>
@@ -368,15 +525,18 @@ function Navbar({ onSignIn, onSignUp }) {
                     role="menu"
                     aria-label="Services"
                   >
-                    {SERVICES.map((s) => (
-                      s.externalUrl ? (
+                    {SERVICES.map((s) => {
+                      const serviceLabel = s.translationKey
+                        ? t(`services.items.${s.translationKey}.label`, { defaultValue: s.label })
+                        : s.label
+                      return s.externalUrl ? (
                         <a
                           key={s.slug}
                           href={s.externalUrl}
                           className="services-dropdown-item"
                           onClick={() => { closeMobile(); setServicesOpen(false) }}
                         >
-                          {s.label}
+                          {serviceLabel}
                         </a>
                       ) : (
                         <Link
@@ -385,15 +545,22 @@ function Navbar({ onSignIn, onSignUp }) {
                           className="services-dropdown-item"
                           onClick={() => { closeMobile(); setServicesOpen(false) }}
                         >
-                          {s.label}
+                          {serviceLabel}
                         </Link>
                       )
-                    ))}
+                    })}
                   </div>
                 </div>
               )
             }
             if (item.hasDropdown && item.id === 'gallery') {
+              const isTechActive = techOpen || (
+                !servicesOpen && (
+                  activeSection === 'technologies' ||
+                  location.pathname === '/technologies' ||
+                  location.pathname.startsWith('/technologies/')
+                )
+              )
               return (
                 <div
                   key={item.id}
@@ -402,14 +569,29 @@ function Navbar({ onSignIn, onSignUp }) {
                 >
                   <button
                     type="button"
-                    className="services-toggle"
+                    className={`services-toggle${isTechActive ? ' active' : ''}`}
                     aria-haspopup="menu"
                     aria-expanded={techOpen}
                     onClick={() => {
-                      setTechOpen((o) => !o)
+                      const nextOpen = !techOpen
+                      setTechOpen(nextOpen)
                       setServicesOpen(false)
-                      if (location.pathname !== '/technologies') {
-                        navigate('/technologies')
+                      if (nextOpen) {
+                        if (isHomeRoute) {
+                          if (typeof window !== 'undefined' && window.location.pathname !== '/technologies') {
+                            window.history.pushState(null, '', '/technologies')
+                          }
+                          scrollToSection('gallery')
+                          setActiveSection('technologies')
+                        } else {
+                          if (typeof window !== 'undefined' && window.location.pathname !== '/technologies') {
+                            window.history.pushState(null, '', '/technologies')
+                          }
+                        }
+                      } else {
+                        if (!isHomeRoute && typeof window !== 'undefined' && window.location.pathname === '/technologies') {
+                          window.history.pushState(null, '', location.pathname)
+                        }
                       }
                     }}
                   >
@@ -426,64 +608,84 @@ function Navbar({ onSignIn, onSignUp }) {
                     role="menu"
                     aria-label="Technologies"
                   >
-                    {TECH_NAV_ITEMS.map((t, i) => (
-                      t.to ? (
+                    {TECH_NAV_ITEMS.map((tItem, i) => {
+                      const techKey = TECH_NAV_KEYS[tItem.slug]
+                      const techLabel = techKey
+                        ? t(`technologies.options.${techKey}`, { defaultValue: tItem.label })
+                        : tItem.label
+                      return tItem.to ? (
                         <Link
                           key={i}
-                          to={t.to}
+                          to={tItem.to}
                           className="services-dropdown-item"
                           onClick={() => { closeMobile(); setTechOpen(false) }}
                         >
-                          {t.label}
+                          {techLabel}
                         </Link>
                       ) : (
                         <a
                           key={i}
-                          href={t.href}
+                          href={tItem.href}
                           className="services-dropdown-item"
                           onClick={() => { closeMobile(); setTechOpen(false) }}
                         >
-                          {t.label}
+                          {techLabel}
                         </a>
                       )
-                    ))}
+                    })}
                   </div>
                 </div>
               )
             }
             if (item.id === 'about' || item.id === 'contact') {
               const path = `/${item.id}`
-              const isActive =
-                location.pathname === path ||
-                (location.pathname === '/' && activeSection === item.id)
+              const isActive = !servicesOpen && !techOpen && (
+                isHomeRoute
+                  ? activeSection === item.id
+                  : location.pathname === path
+              )
               return (
                 <Link
                   key={item.id}
                   to={path}
                   className={isActive ? 'active' : ''}
                   aria-current={isActive ? 'true' : undefined}
-                  onClick={closeMobile}
+                  onClick={(e) => {
+                    closeMobile()
+                    if (isHomeRoute) {
+                      e.preventDefault()
+                      if (typeof window !== 'undefined' && window.location.pathname !== path) {
+                        window.history.pushState(null, '', path)
+                      }
+                      scrollToSection(item.id)
+                      setActiveSection(item.id)
+                    }
+                  }}
                 >
-                  {item.label}
+                  {item.id === 'about' ? t('nav.about') : t('nav.contact')}
                 </Link>
               )
             }
             if (item.id === 'products') {
+              const isProductsActive = !servicesOpen && !techOpen && (
+                location.pathname === '/products' || location.pathname.startsWith('/products')
+              )
               return (
                 <Link
                   key={item.id}
                   to="/products"
-                  className={location.pathname === '/products' ? 'active' : ''}
+                  className={isProductsActive ? 'active' : ''}
                   onClick={closeMobile}
                 >
-                  {item.label}
+                  {t('nav.products')}
                 </Link>
               )
             }
             if (item.id === 'news') {
-              const isPerspectiveActive =
+              const isPerspectiveActive = !servicesOpen && !techOpen && (
                 location.pathname === '/perspectives' ||
                 location.pathname.startsWith('/perspectives/')
+              )
               return (
                 <Link
                   key={item.id}
@@ -492,7 +694,7 @@ function Navbar({ onSignIn, onSignUp }) {
                   aria-current={isPerspectiveActive ? 'true' : undefined}
                   onClick={closeMobile}
                 >
-                  {item.label}
+                  {t('nav.perspectives')}
                 </Link>
               )
             }
@@ -505,7 +707,7 @@ function Navbar({ onSignIn, onSignUp }) {
                   rel="noopener noreferrer"
                   onClick={closeMobile}
                 >
-                  {item.label}
+                  {t('nav.careers', { defaultValue: 'Careers' })}
                 </a>
               )
             }
@@ -513,13 +715,14 @@ function Navbar({ onSignIn, onSignUp }) {
               <SectionLink
                 key={item.id}
                 id={item.id}
-                isActive={location.pathname === '/' && activeSection === item.id}
+                isActive={!servicesOpen && !techOpen && location.pathname === '/' && activeSection === item.id}
                 onNavigate={closeMobile}
               >
-                {item.label}
+                {t(`nav.${item.id}`, { defaultValue: item.label })}
               </SectionLink>
             )
           })}
+          <LanguageSelector onSelect={closeMobile} />
           <div className="auth-area">
             {user ? (
               <div className="user-menu">
@@ -713,7 +916,7 @@ function About() {
             <img src={`${import.meta.env.BASE_URL}img/about.jpg`} alt="The Oklut Technologies team at work" loading="lazy" />
             <div className="about-frame-badge">
               <strong>12+</strong>
-              <span>Years of Enterprise Excellence</span>
+              <span>{t('about.yearsExcellence', { defaultValue: 'Years of Enterprise Excellence' })}</span>
             </div>
           </figure>
         </div>
@@ -972,9 +1175,10 @@ function Insights() {
 
         <div className="insights-list">
           {PERSPECTIVES_DATA.map((p, i) => {
-            const title = p.title
-            const excerpt = p.excerpt
-            const tag = p.category || p.tag
+            const localizedP = t(`perspectivesData.${p.id}`, { returnObjects: true, defaultValue: p }) || p
+            const title = localizedP.title || p.title
+            const excerpt = localizedP.excerpt || p.excerpt
+            const tag = localizedP.category || localizedP.tag || p.category || p.tag
             // Perf: the first two rows are on screen when the page opens, so
             // load them eagerly with high priority; everything below the fold
             // lazy-loads. Intrinsic width/height let the browser reserve the
@@ -1041,35 +1245,41 @@ function Technologies() {
     <section id="gallery" className="section tech-section">
       <div className="container">
         <SectionHead
-          eyebrow="TECHNOLOGIES & ARCHITECTURE"
-          title="Enterprise Technology Solutions"
-          sub="Intelligent Technology. Automated Operations. Smarter Business."
+          eyebrow={t('technologies.title', { defaultValue: 'TECHNOLOGIES & ARCHITECTURE' })}
+          title={t('technologies.headline', { defaultValue: 'Enterprise Technology Solutions' })}
+          sub={t('technologies.sub', { defaultValue: 'Intelligent Technology. Automated Operations. Smarter Business.' })}
           center
         />
         <div className="tech-grid">
-          {TECHNOLOGIES_DATA.map((t, i) => (
-            <Link
-              to={`/technologies/${t.slug}`}
-              key={t.id}
-              className="tech-card glass-card reveal"
-              style={{ transitionDelay: `${(i % 4) * 80}ms`, textDecoration: 'none', display: 'flex', flexDirection: 'column' }}
-            >
-              <div className="tech-card-icon">
-                <Icon name={t.icon || 'cpu'} />
-              </div>
-              <h3 className="tech-card-title">{t.title}</h3>
-              <div className="tech-card-tagline">
-                {t.tagline}
-              </div>
-              <p className="tech-card-text" style={{ flexGrow: 1 }}>
-                {t.overview[0]}
-              </p>
-              <div className="tech-card-action">
-                <span>Explore Technology</span>
-                <Icon name="arrow" />
-              </div>
-            </Link>
-          ))}
+          {TECHNOLOGIES_DATA.map((tItem, i) => {
+            const techKey = TECH_NAV_KEYS[tItem.slug]
+            const techTitle = techKey
+              ? t(`technologies.options.${techKey}`, { defaultValue: tItem.title })
+              : tItem.title
+            return (
+              <Link
+                to={`/technologies/${tItem.slug}`}
+                key={tItem.id}
+                className="tech-card glass-card reveal"
+                style={{ transitionDelay: `${(i % 4) * 80}ms`, textDecoration: 'none', display: 'flex', flexDirection: 'column' }}
+              >
+                <div className="tech-card-icon">
+                  <Icon name={tItem.icon || 'cpu'} />
+                </div>
+                <h3 className="tech-card-title">{techTitle}</h3>
+                <div className="tech-card-tagline">
+                  {tItem.tagline}
+                </div>
+                <p className="tech-card-text" style={{ flexGrow: 1 }}>
+                  {tItem.overview[0]}
+                </p>
+                <div className="tech-card-action">
+                  <span>{t('technologies.explore', { defaultValue: 'Explore Technology' })}</span>
+                  <Icon name="arrow" />
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -1096,10 +1306,10 @@ function ContactForm() {
 
   const validate = () => {
     const next = {}
-    if (!form.name.trim()) next.name = t('contact.validation.nameRequired') || 'Name is required.'
-    if (!form.email.trim()) next.email = t('contact.validation.emailRequired') || 'Email is required.'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = t('contact.validation.emailInvalid') || 'Enter a valid email.'
-    if (!form.message.trim()) next.message = t('contact.validation.messageRequired') || 'Message is required.'
+    if (!form.name.trim()) next.name = t('contact.validation.fullNameRequired', { defaultValue: t('contact.validation.nameRequired', { defaultValue: 'Name is required.' }) })
+    if (!form.email.trim()) next.email = t('contact.validation.emailRequired', { defaultValue: 'Email is required.' })
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = t('contact.validation.emailInvalid', { defaultValue: 'Enter a valid email.' })
+    if (!form.message.trim()) next.message = t('contact.validation.messageRequired', { defaultValue: 'Message is required.' })
     return next
   }
 
@@ -1212,7 +1422,7 @@ function ContactForm() {
                     </a>
                   </span>
                   <span className="contact-channel">
-                    <small>Vijayawada Office</small>
+                    <small>{t('contact.offices.vijayawada', { defaultValue: 'Vijayawada Office' })}</small>
                     <a href={CONTACT.vijayawadaMapsHref} target="_blank" rel="noopener noreferrer">
                       {CONTACT.vijayawadaAddress}
                     </a>
@@ -1225,7 +1435,7 @@ function ContactForm() {
                     </a>
                   </span>
                   <span className="contact-channel">
-                    <small>South Africa Office</small>
+                    <small>{t('contact.offices.southAfrica', { defaultValue: 'South Africa Office' })}</small>
                     <a href={CONTACT.southAfricaMapsHref} target="_blank" rel="noopener noreferrer">
                       <strong>{CONTACT.southAfricaCompany}</strong><br />
                       Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa
@@ -1260,7 +1470,7 @@ function ContactForm() {
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  placeholder="Jane Doe"
+                  placeholder={t('contact.placeholders.fullName', { defaultValue: t('contact.placeholders.name', { defaultValue: 'Jane Doe' }) })}
                   autoComplete="name"
                   aria-invalid={errors.name ? 'true' : undefined}
                   aria-describedby={errors.name ? 'name-error' : undefined}
@@ -1276,7 +1486,7 @@ function ContactForm() {
                   type="email"
                   value={form.email}
                   onChange={handleChange}
-                  placeholder="jane@company.com"
+                  placeholder={t('contact.placeholders.email', { defaultValue: 'you@company.com' })}
                   autoComplete="email"
                   aria-invalid={errors.email ? 'true' : undefined}
                   aria-describedby={errors.email ? 'email-error' : undefined}
@@ -1288,11 +1498,11 @@ function ContactForm() {
             <div className="grid grid-2">
               <div className="input-group">
                 <label htmlFor="company">{t('contact.company')}</label>
-                <input id="company" name="company" value={form.company} onChange={handleChange} placeholder="Company Inc." autoComplete="organization" />
+                <input id="company" name="company" value={form.company} onChange={handleChange} placeholder={t('contact.placeholders.company', { defaultValue: 'Company Inc.' })} autoComplete="organization" />
               </div>
               <div className="input-group">
                 <label htmlFor="subject">{t('contact.subject')}</label>
-                <input id="subject" name="subject" value={form.subject} onChange={handleChange} placeholder="Project inquiry" />
+                <input id="subject" name="subject" value={form.subject} onChange={handleChange} placeholder={t('contact.placeholders.subject', { defaultValue: 'How can we help?' })} />
               </div>
             </div>
             <div className="input-group">
@@ -1302,7 +1512,7 @@ function ContactForm() {
                 name="message"
                 value={form.message}
                 onChange={handleChange}
-                placeholder="Tell us about your project…"
+                placeholder={t('contact.placeholders.message', { defaultValue: 'Tell us about your project, timeline, and goals...' })}
                 aria-invalid={errors.message ? 'true' : undefined}
                 aria-describedby={errors.message ? 'message-error' : undefined}
                 className={errors.message ? 'input-error' : ''}
@@ -1378,6 +1588,7 @@ function BackToTop() {
 }
 
 function FooterWorldMap() {
+  const { t } = useTranslation()
   return (
     <svg
       viewBox="0 0 280 110"
@@ -1458,7 +1669,7 @@ function FooterWorldMap() {
         />
         <circle cx="201" cy="49" r="4.5" fill="#2998ff" opacity="0.35" />
         <circle cx="201" cy="49" r="2.5" fill="#38bdf8" />
-        <title>Hyderabad, India</title>
+        <title>{t('footer.hyderabadPin', { defaultValue: 'Hyderabad, India' })}</title>
       </g>
 
       {/* Office Marker 2: South Africa (Newcastle, KZN approx lon 30E, lat 28S) */}
@@ -1474,7 +1685,7 @@ function FooterWorldMap() {
         />
         <circle cx="163" cy="85" r="4.5" fill="#2998ff" opacity="0.35" />
         <circle cx="163" cy="85" r="2.5" fill="#38bdf8" />
-        <title>South Africa</title>
+        <title>{t('footer.southAfricaPin', { defaultValue: 'South Africa' })}</title>
       </g>
     </svg>
   )
@@ -1482,37 +1693,38 @@ function FooterWorldMap() {
 
 function Footer() {
   const { openPreferences } = useCookieConsent()
+  const { t } = useTranslation()
 
   const SERVICES_LIST = [
-    { label: 'Inception To Deployment', to: '/services/inception-to-deployment' },
-    { label: 'Business Process Automation', to: '/services/business-process-automation' },
-    { label: 'Center of Excellence', to: '/services/center-of-excellence' },
-    { label: 'Custom Development & Customization', to: '/services/custom-development-customization' },
-    { label: 'Digital Transformation', to: '/services/digital-transformation' },
-    { label: 'End-to-End Solution Framework', to: '/services/end-to-end-solution-framework' },
-    { label: 'Migration & Modernization', to: '/services/migration-modernization' },
-    { label: 'Proof of Concept (PoC) & Pilot Implementation', to: '/services/poc-pilot-implementation' },
-    { label: 'Shared Services & Managed Operations', to: '/services/shared-services-managed-operations' },
+    { label: t('services.items.buildFromScratch.label', { defaultValue: 'Inception To Deployment' }), to: '/services/inception-to-deployment' },
+    { label: t('services.items.businessProcessAutomation.label', { defaultValue: 'Business Process Automation' }), to: '/services/business-process-automation' },
+    { label: t('services.items.centerOfExcellence.label', { defaultValue: 'Center of Excellence' }), to: '/services/center-of-excellence' },
+    { label: t('services.items.customDevelopmentCustomization.label', { defaultValue: 'Custom Development & Customization' }), to: '/services/custom-development-customization' },
+    { label: t('services.items.digitalTransformation.label', { defaultValue: 'Digital Transformation' }), to: '/services/digital-transformation' },
+    { label: t('services.items.endToEndSolutionFramework.label', { defaultValue: 'End-to-End Solution Framework' }), to: '/services/end-to-end-solution-framework' },
+    { label: t('services.items.migrationModernization.label', { defaultValue: 'Migration & Modernization' }), to: '/services/migration-modernization' },
+    { label: t('services.items.pocPilotImplementation.label', { defaultValue: 'Proof of Concept (PoC) & Pilot Implementation' }), to: '/services/poc-pilot-implementation' },
+    { label: t('services.items.sharedServicesManagedOperations.label', { defaultValue: 'Shared Services & Managed Operations' }), to: '/services/shared-services-managed-operations' },
   ]
 
   const PRODUCTS_LIST = [
-    { label: 'Featured Products', to: '/products' },
-    { label: 'ERP Solutions', to: '/products#erp' },
-    { label: 'IT Solutions', to: '/products#it' },
-    { label: 'CRM Solutions', to: '/products#crm' },
-    { label: 'HRMS Solutions', to: '/products#hrms' },
-    { label: 'App Development', to: '/products#appdev' },
+    { label: t('products.featured.title', { defaultValue: 'Featured Products' }), to: '/products' },
+    { label: t('products.erp.title', { defaultValue: 'ERP Solutions' }), to: '/products#erp' },
+    { label: t('products.it.title', { defaultValue: 'IT Solutions' }), to: '/products#it' },
+    { label: t('products.crm.title', { defaultValue: 'CRM Solutions' }), to: '/products#crm' },
+    { label: t('products.hrms.title', { defaultValue: 'HRMS Solutions' }), to: '/products#hrms' },
+    { label: t('products.appdev.title', { defaultValue: 'App Development' }), to: '/products#appdev' },
   ]
 
   const TECHNOLOGIES_LIST = [
-    { label: 'AI & Robotics Solutions', to: '/technologies/ai-robotics-solutions' },
-    { label: 'Business Automation Solutions', to: '/technologies/business-automation-solutions' },
-    { label: 'Cloud Migration Solutions', to: '/technologies/cloud-migration-solutions' },
-    { label: 'Data Center Solutions', to: '/technologies/data-center-solutions' },
-    { label: 'Cognitive Analytics & AI', to: '/technologies/cognitive-analytics-ai' },
-    { label: 'Information & Reporting Systems', to: '/technologies/information-reporting-systems' },
-    { label: 'Managed Services', to: '/technologies/managed-services' },
-    { label: 'One-Stop Technology Solutions', to: '/technologies/one-stop-technology-solutions' },
+    { label: t('technologies.options.aiRobotics', { defaultValue: 'AI & Robotics Solutions' }), to: '/technologies/ai-robotics-solutions' },
+    { label: t('technologies.options.businessAutomation', { defaultValue: 'Business Automation Solutions' }), to: '/technologies/business-automation-solutions' },
+    { label: t('technologies.options.cloudMigrations', { defaultValue: 'Cloud Migration Solutions' }), to: '/technologies/cloud-migration-solutions' },
+    { label: t('technologies.options.dataCenters', { defaultValue: 'Data Center Solutions' }), to: '/technologies/data-center-solutions' },
+    { label: t('technologies.options.cognitiveAnalytics', { defaultValue: 'Cognitive Analytics & AI' }), to: '/technologies/cognitive-analytics-ai' },
+    { label: t('technologies.options.informationReporting', { defaultValue: 'Information & Reporting Systems' }), to: '/technologies/information-reporting-systems' },
+    { label: t('technologies.options.managedServices', { defaultValue: 'Managed Services' }), to: '/technologies/managed-services' },
+    { label: t('technologies.options.oneStopSolutions', { defaultValue: 'One-Stop Technology Solutions' }), to: '/technologies/one-stop-technology-solutions' },
   ]
 
   return (
@@ -1529,17 +1741,18 @@ function Footer() {
                   className="footer-brand-logo"
                 />
               </SectionLink>
-              <span className="footer-brand-sub">Technologies</span>
+              <span className="footer-brand-sub">{t('footer.technologies', { defaultValue: 'Technologies' })}</span>
             </div>
 
             <div className="footer-divider-vert" aria-hidden="true" />
 
             <div className="footer-headline-block">
               <h3 className="footer-headline">
-                Let's build <span className="footer-headline-accent">what's next.</span>
+                {t('footer.headline', { defaultValue: "Let's build" })}{' '}
+                <span className="footer-headline-accent">{t('footer.headlineAccent', { defaultValue: "what's next." })}</span>
               </h3>
               <p className="footer-subheadline">
-                Partner with Oklut Technologies to turn ideas into real business impact.
+                {t('footer.subheadline', { defaultValue: 'Partner with Oklut Technologies to turn ideas into real business impact.' })}
               </p>
             </div>
           </div>
@@ -1549,10 +1762,10 @@ function Footer() {
               <FooterWorldMap />
             </div>
             <div className="footer-credo">
-              <span>IDEAS</span>
-              <span>SOLUTIONS</span>
-              <span>PEOPLE</span>
-              <span className="footer-credo-accent">A BRIGHTER TOMORROW</span>
+              <span>{t('footer.credoIdeas', { defaultValue: 'IDEAS' })}</span>
+              <span>{t('footer.credoSolutions', { defaultValue: 'SOLUTIONS' })}</span>
+              <span>{t('footer.credoPeople', { defaultValue: 'PEOPLE' })}</span>
+              <span className="footer-credo-accent">{t('footer.credoBrighterTomorrow', { defaultValue: 'A BRIGHTER TOMORROW' })}</span>
               <div className="footer-credo-bar" aria-hidden="true" />
             </div>
           </div>
@@ -1564,7 +1777,7 @@ function Footer() {
         <div className="footer-nav-grid">
           {/* Column 1: Services */}
           <div className="footer-nav-col">
-            <h4 className="footer-col-title">Services</h4>
+            <h4 className="footer-col-title">{t('footer.services', { defaultValue: 'Services' })}</h4>
             <ul className="footer-nav-list">
               {SERVICES_LIST.map((item) => (
                 <li key={item.to}>
@@ -1576,7 +1789,7 @@ function Footer() {
 
           {/* Column 2: Products */}
           <div className="footer-nav-col">
-            <h4 className="footer-col-title">Products</h4>
+            <h4 className="footer-col-title">{t('footer.products', { defaultValue: 'Products' })}</h4>
             <ul className="footer-nav-list">
               {PRODUCTS_LIST.map((item) => (
                 <li key={item.to}>
@@ -1588,7 +1801,7 @@ function Footer() {
 
           {/* Column 3: Technologies */}
           <div className="footer-nav-col">
-            <h4 className="footer-col-title">Technologies</h4>
+            <h4 className="footer-col-title">{t('footer.technologies', { defaultValue: 'Technologies' })}</h4>
             <ul className="footer-nav-list">
               {TECHNOLOGIES_LIST.map((item) => (
                 <li key={item.to}>
@@ -1600,13 +1813,13 @@ function Footer() {
 
           {/* Column 4: Company */}
           <div className="footer-nav-col">
-            <h4 className="footer-col-title">Company</h4>
+            <h4 className="footer-col-title">{t('footer.company', { defaultValue: 'Company' })}</h4>
             <ul className="footer-nav-list">
               <li>
-                <SectionLink id="about">About Us</SectionLink>
+                <SectionLink id="about">{t('footer.aboutUs', { defaultValue: 'About Us' })}</SectionLink>
               </li>
               <li>
-                <Link to="/perspectives">Perspectives</Link>
+                <Link to="/perspectives">{t('nav.perspectives', { defaultValue: 'Perspectives' })}</Link>
               </li>
               <li>
                 <a
@@ -1614,17 +1827,17 @@ function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Careers
+                  {t('nav.careers', { defaultValue: 'Careers' })}
                 </a>
               </li>
               <li>
-                <SectionLink id="contact">Contact Us</SectionLink>
+                <SectionLink id="contact">{t('footer.contactUs', { defaultValue: 'Contact Us' })}</SectionLink>
               </li>
             </ul>
 
             {/* Follow Us & Social Icons */}
             <div className="footer-social-section">
-              <span className="footer-social-label">Follow us</span>
+              <span className="footer-social-label">{t('footer.followUs', { defaultValue: 'Follow us' })}</span>
               <div className="footer-social-icons">
                 <a
                   href="https://www.linkedin.com/company/oklut-technologies/"
@@ -1708,7 +1921,7 @@ function Footer() {
               className="footer-office-link"
               aria-label="Open India office location on Google Maps"
             >
-              <strong>Hyderabad, India</strong>
+              <strong>{t('footer.hyderabadLocation', { defaultValue: 'Hyderabad, India' })}</strong>
               <span>
                 SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081
               </span>
@@ -1727,7 +1940,7 @@ function Footer() {
               className="footer-office-link"
               aria-label="Open Vijayawada office location on Google Maps"
             >
-              <strong>Vijayawada, Andhra Pradesh</strong>
+              <strong>{t('footer.vijayawadaLocation', { defaultValue: 'Vijayawada, Andhra Pradesh' })}</strong>
               <span>
                 D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003
               </span>
@@ -1746,7 +1959,7 @@ function Footer() {
               className="footer-office-link"
               aria-label="Open South Africa office location on Google Maps"
             >
-              <strong>South Africa – OKLUT TECHNOLOGIES (PTY) LTD</strong>
+              <strong>{t('footer.southAfricaLocation', { defaultValue: 'South Africa – OKLUT TECHNOLOGIES PVT LTD' })}</strong>
               <span>
                 Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa
               </span>
@@ -1759,19 +1972,19 @@ function Footer() {
         {/* Bottom Legal / Copyright Row */}
         <div className="footer-bottom-row">
           <p className="footer-copyright">
-            © 2025 Oklut Technologies. All rights reserved.
+            © 2025 Oklut Technologies. {t('footer.allRightsReserved', { defaultValue: 'All rights reserved.' })}
           </p>
           <div className="footer-legal-links">
             <Link to="/privacy" className="footer-legal-link">
-              Privacy Policy
+              {t('footer.privacyPolicy', { defaultValue: 'Privacy Policy' })}
             </Link>
             <span className="footer-legal-sep" aria-hidden="true">|</span>
-            <span className="footer-legal-static">Terms of Use</span>
+            <span className="footer-legal-static">{t('footer.termsOfUse', { defaultValue: 'Terms of Use' })}</span>
             <span className="footer-legal-sep" aria-hidden="true">|</span>
-            <span className="footer-legal-static">Accessibility</span>
+            <span className="footer-legal-static">{t('footer.accessibility', { defaultValue: 'Accessibility' })}</span>
             <span className="footer-legal-sep" aria-hidden="true">|</span>
             <button type="button" className="footer-legal-btn" onClick={openPreferences}>
-              Cookie Preferences
+              {t('footer.cookiePreferences', { defaultValue: 'Cookie Preferences' })}
             </button>
           </div>
         </div>
@@ -2017,6 +2230,7 @@ function SectionPage({ sectionId }) {
 }
 
 function App() {
+  const { t } = useTranslation()
   const { isRecovery } = useAuth()
   const location = useLocation()
   // Returning from an email-confirmation link (?confirmed=1): open the existing
@@ -2070,7 +2284,7 @@ function App() {
   return (
     <>
       <ScrollProgress />
-      <a href="#main" className="skip-link">Skip to content</a>
+      <a href="#main" className="skip-link">{t('common.skipToContent', { defaultValue: 'Skip to content' })}</a>
       <Navbar onSignIn={() => openAuth('login')} onSignUp={() => openAuth('signup')} />
       <main id="main">
         <Suspense fallback={null}>
@@ -2078,7 +2292,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<SectionPage sectionId="about" />} />
             <Route path="/services" element={<SectionPage sectionId="services" />} />
-            <Route path="/technologies" element={<HomePage />} />
+            <Route path="/technologies" element={<SectionPage sectionId="gallery" />} />
             <Route path="/contact" element={<SectionPage sectionId="contact" />} />
             <Route path="/perspectives" element={<Insights />} />
             <Route path="/perspectives/business-transformation" element={<BusinessTransformationPerspective />} />

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from '../i18n/TranslationContext'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import './SolutionEngineeringPage.css'
 
@@ -50,10 +51,14 @@ function FeatureIcon({ name }) {
 }
 
 export default function SolutionEngineeringPage() {
+  const { t } = useTranslation()
   useDocumentMeta({
-    title: 'Custom Development & Customization — Oklut Technologies',
+    title: `${t('services.items.customDevelopmentCustomization.label', { defaultValue: 'Custom Development & Customization' })} — Oklut Technologies`,
     description:
-      'Development and enhancement of applications, platforms, workflows, and enterprise solutions to address unique business requirements and deliver tailored functionality.',
+      t('services.items.customDevelopmentCustomization.description', {
+        defaultValue:
+          'Development and enhancement of applications, platforms, workflows, and enterprise solutions to address unique business requirements and deliver tailored functionality.',
+      }),
   })
 
   useEffect(() => {
@@ -110,7 +115,7 @@ export default function SolutionEngineeringPage() {
     }
   }, [])
 
-  const coreCapabilities = [
+  const coreCapabilitiesDefault = [
     'Custom Development',
     'Platform Configuration',
     'Extensions',
@@ -120,6 +125,8 @@ export default function SolutionEngineeringPage() {
     'UI/UX Enhancement',
     'Performance Optimization',
   ]
+  const rawCaps = t('servicesDetails.solutionEngineering.coreCapabilities', { returnObjects: true })
+  const coreCapabilities = Array.isArray(rawCaps) && rawCaps.length ? rawCaps : coreCapabilitiesDefault
 
   return (
     <div className="se-page">
@@ -127,21 +134,24 @@ export default function SolutionEngineeringPage() {
       <section className="se-hero">
         <img
           src={`${import.meta.env.BASE_URL}img/solution-engineering-hero.jpg`}
-          alt="Custom Development and Customization"
+          alt={t('services.items.customDevelopmentCustomization.label', { defaultValue: 'Custom Development & Customization' })}
           className="se-hero-bg"
         />
         <div className="se-hero-content reveal">
-          <span className="se-hero-badge">Tailored Digital Engineering</span>
-          <h1>Custom Development &amp; Customization</h1>
+          <span className="se-hero-badge">{t('services.pages.solutionEngineering.badge', { defaultValue: 'Tailored Digital Engineering' })}</span>
+          <h1>{t('services.items.customDevelopmentCustomization.label', { defaultValue: 'Custom Development & Customization' })}</h1>
           <p>
-            Development and enhancement of applications, platforms, workflows, and enterprise solutions to address unique business requirements and deliver tailored functionality.
+            {t('services.items.customDevelopmentCustomization.description', {
+              defaultValue:
+                'Development and enhancement of applications, platforms, workflows, and enterprise solutions to address unique business requirements and deliver tailored functionality.',
+            })}
           </p>
           <div className="se-hero-actions">
             <Link to="/book-consultation" className="btn btn-primary">
-              Book a Consultation
+              {t('services.pages.solutionEngineering.bookConsultation', { defaultValue: 'Book a Consultation' })}
             </Link>
             <a href="#customization" className="btn btn-secondary">
-              Explore Capabilities
+              {t('services.pages.solutionEngineering.exploreCapabilities', { defaultValue: 'Explore Capabilities' })}
             </a>
           </div>
         </div>
@@ -151,7 +161,7 @@ export default function SolutionEngineeringPage() {
       <div style={{ background: '#0a1527', borderBottom: '1px solid rgba(45, 212, 191, 0.2)', padding: '20px 24px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <span style={{ color: '#2dd4bf', fontSize: '12px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-            Core Capabilities
+            {t('services.coreCapabilities', { defaultValue: 'Core Capabilities' })}
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {coreCapabilities.map((cap) => (
@@ -181,13 +191,13 @@ export default function SolutionEngineeringPage() {
       {/* Main Section 1 */}
       <section id="customization" className="se-section reveal">
         <div className="text">
-          <span className="se-eyebrow">TAILORED FUNCTIONALITY</span>
-          <h2>Bespoke Features Built for Your Workflow</h2>
+          <span className="se-eyebrow">{t('servicesDetails.solutionEngineering.row1Eyebrow', { defaultValue: 'TAILORED FUNCTIONALITY' })}</span>
+          <h2>{t('servicesDetails.solutionEngineering.row1Title', { defaultValue: 'Bespoke Features Built for Your Workflow' })}</h2>
           <p>
-            Standard enterprise software often falls short of meeting specialized business needs. Our custom engineering team develops bespoke application modules, custom business rules, and specialized extensions tailored to your operations.
+            {t('servicesDetails.solutionEngineering.row1P1', { defaultValue: 'Standard enterprise software often falls short of meeting specialized business needs. Our custom engineering team develops bespoke application modules, custom business rules, and specialized extensions tailored to your operations.' })}
           </p>
           <p>
-            From custom CRM and ERP enhancements to specialized operational portals, we build features that seamlessly align with your team's exact workflow patterns.
+            {t('servicesDetails.solutionEngineering.row1P2', { defaultValue: "From custom CRM and ERP enhancements to specialized operational portals, we build features that seamlessly align with your team's exact workflow patterns." })}
           </p>
         </div>
         <div className="media">
@@ -204,13 +214,13 @@ export default function SolutionEngineeringPage() {
       {/* Main Section 2 */}
       <section className="se-section reverse reveal">
         <div className="text">
-          <span className="se-eyebrow">ENTERPRISE SYSTEM INTEGRATION</span>
-          <h2>Platform Configuration &amp; API Development</h2>
+          <span className="se-eyebrow">{t('servicesDetails.solutionEngineering.row2Eyebrow', { defaultValue: 'ENTERPRISE SYSTEM INTEGRATION' })}</span>
+          <h2>{t('servicesDetails.solutionEngineering.row2Title', { defaultValue: 'Platform Configuration & API Development' })}</h2>
           <p>
-            Connect disparate software systems into a unified digital ecosystem. We engineer custom REST and GraphQL APIs, webhook handlers, and enterprise message queues to ensure real-time data sync across all your platforms.
+            {t('servicesDetails.solutionEngineering.row2P1', { defaultValue: 'Connect disparate software systems into a unified digital ecosystem. We engineer custom REST and GraphQL APIs, webhook handlers, and enterprise message queues to ensure real-time data sync across all your platforms.' })}
           </p>
           <p>
-            We configure commercial and open-source platforms to your exact operational requirements while preserving upgradeability and data security.
+            {t('servicesDetails.solutionEngineering.row2P2', { defaultValue: 'Whether integrating third-party SaaS tools or extending proprietary on-premise platforms, our integration architectures prioritize data integrity, throughput, and zero downtime.' })}
           </p>
         </div>
         <div className="media">
@@ -227,13 +237,13 @@ export default function SolutionEngineeringPage() {
       {/* Main Section 3 */}
       <section className="se-section reveal">
         <div className="text">
-          <span className="se-eyebrow">UI/UX &amp; PERFORMANCE</span>
-          <h2>UI/UX Enhancements &amp; Performance Optimization</h2>
+          <span className="se-eyebrow">{t('servicesDetails.solutionEngineering.row3Eyebrow', { defaultValue: 'UI/UX & PERFORMANCE' })}</span>
+          <h2>{t('servicesDetails.solutionEngineering.row3Title', { defaultValue: 'UI/UX Enhancements & Performance Optimization' })}</h2>
           <p>
-            Upgrade sluggish legacy user interfaces to modern, reactive, accessible web and mobile experiences. We audit and optimize database queries, caching layers, and frontend rendering for blazing-fast speed.
+            {t('servicesDetails.solutionEngineering.row3P1', { defaultValue: 'Elevate legacy interfaces with modern, responsive user experiences designed for speed and clarity. We re-engineer frontends with intuitive design patterns, accessibility compliance, and streamlined interaction models.' })}
           </p>
           <p>
-            Our improvements reduce friction for internal users and end customers alike, driving immediate gains in productivity and satisfaction.
+            {t('servicesDetails.solutionEngineering.row3P2', { defaultValue: 'In parallel, our performance engineers optimize database queries, caching strategies, and frontend bundle sizes to deliver instantaneous response times across all devices.' })}
           </p>
         </div>
         <div className="media">
@@ -249,44 +259,44 @@ export default function SolutionEngineeringPage() {
       <section className="se-principles">
         <div className="se-principles-container">
           <div className="se-principles-head reveal">
-            <span className="se-eyebrow">CORE CAPABILITIES</span>
-            <h2 className="section-title">Engineered to Your Exact Specifications</h2>
+            <span className="se-eyebrow">{t('services.coreCapabilities', { defaultValue: 'CORE CAPABILITIES' })}</span>
+            <h2 className="section-title">{t('servicesDetails.solutionEngineering.pillarsTitle', { defaultValue: 'Engineered to Your Exact Specifications' })}</h2>
           </div>
           <div className="se-principles-grid">
             <div className="se-card reveal" style={{ transitionDelay: '0ms' }}>
               <div className="se-card-icon">
                 <FeatureIcon name="layers" />
               </div>
-              <h3>Custom Workflows &amp; Extensions</h3>
+              <h3>{t('servicesDetails.solutionEngineering.pillar1Title', { defaultValue: 'Custom Workflows & Extensions' })}</h3>
               <p>
-                Bespoke automation rules, custom forms, approval chains, and domain-specific logic designed around your team.
+                {t('servicesDetails.solutionEngineering.pillar1Desc', { defaultValue: 'Tailored application logic and automated state machines configured specifically around your internal operational rules.' })}
               </p>
             </div>
             <div className="se-card reveal" style={{ transitionDelay: '80ms' }}>
               <div className="se-card-icon">
                 <FeatureIcon name="cloud" />
               </div>
-              <h3>API &amp; System Integration</h3>
+              <h3>{t('servicesDetails.solutionEngineering.pillar2Title', { defaultValue: 'API & System Integration' })}</h3>
               <p>
-                High-performance API gateways and data bridges connecting your ERP, CRM, payment, and analytics platforms.
+                {t('servicesDetails.solutionEngineering.pillar2Desc', { defaultValue: 'Secure, authenticated data bridges connecting proprietary backends, ERP suites, payment gateways, and cloud services.' })}
               </p>
             </div>
             <div className="se-card reveal" style={{ transitionDelay: '160ms' }}>
               <div className="se-card-icon">
                 <FeatureIcon name="shield" />
               </div>
-              <h3>Platform Configuration</h3>
+              <h3>{t('servicesDetails.solutionEngineering.pillar3Title', { defaultValue: 'Platform Configuration' })}</h3>
               <p>
-                Expert tuning of enterprise software platforms to fit organizational hierarchy, security roles, and audit compliance.
+                {t('servicesDetails.solutionEngineering.pillar3Desc', { defaultValue: 'Deep architectural adaptations that modify enterprise software without breaking upgrade paths or vendor support agreements.' })}
               </p>
             </div>
             <div className="se-card reveal" style={{ transitionDelay: '240ms' }}>
               <div className="se-card-icon">
                 <FeatureIcon name="cpu" />
               </div>
-              <h3>Performance Optimization</h3>
+              <h3>{t('servicesDetails.solutionEngineering.pillar4Title', { defaultValue: 'Performance Optimization' })}</h3>
               <p>
-                Database indexing, query profiling, CDN edge caching, and memory tuning to handle peak user volumes effortlessly.
+                {t('servicesDetails.solutionEngineering.pillar4Desc', { defaultValue: 'Aggressive query profiling, memory leak elimination, and edge CDN distribution for sub-second page loads.' })}
               </p>
             </div>
           </div>
@@ -296,16 +306,16 @@ export default function SolutionEngineeringPage() {
       {/* Call to Action */}
       <section className="se-cta">
         <div className="se-cta-container reveal">
-          <h2>Ready to Customize Your Enterprise Platform?</h2>
+          <h2>{t('servicesDetails.solutionEngineering.ctaTitle', { defaultValue: 'Ready to Customize Your Enterprise Platform?' })}</h2>
           <p>
-            Partner with Oklut Technologies to develop tailored extensions, custom workflows, and high-performance integrations.
+            {t('servicesDetails.solutionEngineering.ctaSub', { defaultValue: 'Connect with our solutions architects to design and deploy custom modules, workflows, and integrations tailored to your business needs.' })}
           </p>
           <div className="se-hero-actions">
             <Link to="/book-consultation" className="btn btn-primary">
-              Schedule a Consultation
+              {t('servicesDetails.solutionEngineering.ctaButton', { defaultValue: 'Book a Customization Call' })}
             </Link>
             <Link to="/" className="btn btn-secondary">
-              View All Services
+              {t('servicesDetails.solutionEngineering.viewAllServices', { defaultValue: 'View All Services' })}
             </Link>
           </div>
         </div>

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from '../i18n/TranslationContext'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
-import { useTranslation } from '../i18n/TranslationContext'
 import ApplyModal from '../components/ApplyModal'
 import JobIcon from '../components/careers/JobIcon'
 import OpenRoles from '../components/careers/OpenRoles'
@@ -59,7 +59,6 @@ function buildJobPostingStructuredData(jobs) {
 
 function CareersPage() {
   const { user } = useAuth()
-  const { t } = useTranslation()
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -97,8 +96,8 @@ function CareersPage() {
   const structuredData = useMemo(() => buildJobPostingStructuredData(jobs), [jobs])
 
   useDocumentMeta({
-    title: t('careers.careersTitle'),
-    description: t('careers.careersDescription'),
+    title: 'Careers at Oklut Technologies | Build the Future With Us',
+    description: 'Explore career opportunities at Oklut Technologies. We are hiring talented engineers, architects, designers, and innovators.',
     jsonLd: jobs.length > 0 ? structuredData : undefined,
   })
 
@@ -112,31 +111,31 @@ function CareersPage() {
             <div className="careers-hero-content">
               <span className="badge">
                 <JobIcon name="sparkle" size={13} />
-                {t('careers.badge')}
+                WE'RE HIRING
               </span>
               <h1>
-                {t('careers.title')}
-                <span className="hero-accent"> {t('careers.titleAccent')}</span>
+                Build What's Next.
+                <span className="hero-accent"> {t('careers.titleAccent', { defaultValue: 'With Us.' })}</span>
               </h1>
               <p>
-                {t('careers.description')}
+                Join an engineering-first culture solving complex challenges in cloud platforms, artificial intelligence, process automation, and enterprise systems.
               </p>
               <div className="hero-actions">
-                <a href="#open-roles" className="btn btn-cta btn-lg">{t('careers.viewOpenRoles')}</a>
-                <a href="#my-applications" className="btn btn-glass btn-lg">{t('careers.trackApplications')}</a>
+                <a href="#open-roles" className="btn btn-cta btn-lg">{t('careers.viewOpenRoles', { defaultValue: 'View Open Roles' })}</a>
+                <a href="#my-applications" className="btn btn-glass btn-lg">{t('careers.trackApplications', { defaultValue: 'Track Applications' })}</a>
               </div>
             </div>
             <div className="careers-hero-visual" aria-hidden="true">
               <div className="glass-card">
                 <div className="glass-card-head">
-                  <span className="glass-card-kicker">{t('careers.whyJoinOklut')}</span>
+                  <span className="glass-card-kicker">{t('careers.whyJoinOklut', { defaultValue: 'WHY JOIN OKLUT' })}</span>
                   <span className="glass-card-pulse" />
                 </div>
                 <ul className="glass-perks">
-                  <li><span className="glass-perk-icon"><JobIcon name="globe" /></span>{t('careers.remoteFriendly')}</li>
-                  <li><span className="glass-perk-icon"><JobIcon name="rocket" /></span>{t('careers.highGrowthProjects')}</li>
-                  <li><span className="glass-perk-icon"><JobIcon name="shield" /></span>{t('careers.healthBenefits')}</li>
-                  <li><span className="glass-perk-icon"><JobIcon name="clock" /></span>{t('careers.flexibleHours')}</li>
+                  <li><span className="glass-perk-icon"><JobIcon name="globe" /></span>{t('careers.remoteFriendly', { defaultValue: 'Remote-friendly culture' })}</li>
+                  <li><span className="glass-perk-icon"><JobIcon name="rocket" /></span>{t('careers.highGrowthProjects', { defaultValue: 'High-growth engineering projects' })}</li>
+                  <li><span className="glass-perk-icon"><JobIcon name="shield" /></span>{t('careers.healthBenefits', { defaultValue: 'Comprehensive health benefits' })}</li>
+                  <li><span className="glass-perk-icon"><JobIcon name="clock" /></span>{t('careers.flexibleHours', { defaultValue: 'Flexible working hours' })}</li>
                 </ul>
               </div>
             </div>
@@ -147,9 +146,9 @@ function CareersPage() {
       <section className="section" id="open-roles">
         <div className="container">
           <div className="section-header">
-            <span className="badge">{t('careers.openPositions')}</span>
-            <h2>{t('careers.openRoles')}</h2>
-            <p>{t('careers.exploreOpportunities')}</p>
+            <span className="badge">{t('careers.joinOurTeam', { defaultValue: 'JOIN OUR TEAM' })}</span>
+            <h2>{t('careers.openRoles', { defaultValue: 'Open Roles' })}</h2>
+            <p>{t('careers.exploreOpportunities', { defaultValue: 'Explore active opportunities across engineering, product, architecture, and technology leadership.' })}</p>
           </div>
           <OpenRoles
             jobs={jobs}

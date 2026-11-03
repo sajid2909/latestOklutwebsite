@@ -1,4 +1,5 @@
 import { useDocumentMeta } from '../../lib/useDocumentMeta'
+import { useTranslation } from '../../i18n/TranslationContext'
 import {
   usePerspectiveScrollReveal,
   PerspectiveHero,
@@ -10,10 +11,15 @@ import {
 import './PerspectivesDetail.css'
 
 export default function ModernERPPerspective() {
+  const { t } = useTranslation()
+  const art = t('perspectivesArticles.modernErp', { returnObjects: true }) || {}
+
   useDocumentMeta({
-    title: 'Accelerating Business Transformation with Modern ERP | Perspectives | Oklut',
+    title: art.title ? `${art.title} | Perspectives | Oklut` : 'Accelerating Business Transformation with Modern ERP | Perspectives | Oklut',
     description:
-      'Explore how modern ERP platforms connect finance, procurement, supply chain, and business operations through a unified digital foundation.',
+      art.subtitle || 'Explore how modern ERP platforms connect finance, procurement, supply chain and business operations through a unified digital foundation.',
+    keywords:
+      'modern ERP, enterprise resource planning, business operations, supply chain, cloud ERP, financial management',
   })
 
   usePerspectiveScrollReveal()
@@ -22,57 +28,47 @@ export default function ModernERPPerspective() {
   const connectedFunctions = [
     {
       title: 'Finance & Accounting',
-      desc: 'Unified multi-currency general ledgers, automated accounts payable/receivable, streamlined tax compliance, and accelerated period-end financial close.',
-      icon: '💳',
+      desc: 'Real-time general ledger, automated reconciliation, and multi-currency consolidation across global subsidiaries.',
+      icon: '📊',
     },
     {
       title: 'Procurement & Vendor Management',
-      desc: 'Requisition-to-pay automation, automated purchase order generation, supplier scorecards, and spend analytics with built-in policy controls.',
-      icon: '📋',
+      desc: 'Automated purchase orders, vendor evaluation scorecards, and contract compliance tracking with touchless approvals.',
+      icon: '🤝',
     },
     {
-      title: 'Supply Chain Management',
-      desc: 'End-to-end logistics coordination, supplier integration, multi-location demand planning, and automated replenishment alerts.',
-      icon: '🚚',
-    },
-    {
-      title: 'Inventory & Warehouse Operations',
-      desc: 'Real-time multi-warehouse tracking, serialized asset management, batch tracking, barcode/RFID scanning, and dead-stock mitigation.',
+      title: 'Supply Chain & Inventory',
+      desc: 'End-to-end stock visibility, demand-driven replenishment, warehouse automation, and multi-node logistics optimization.',
       icon: '📦',
     },
     {
-      title: 'Human Resources & Payroll',
-      desc: 'Integrated workforce management, compliance, automated payroll runs, benefits administration, and synchronized labor cost-to-serve analytics.',
-      icon: '👥',
+      title: 'Manufacturing & Operations',
+      desc: 'Production scheduling, material requirement planning (MRP), shop-floor telemetry, and predictive asset maintenance.',
+      icon: '🏭',
     },
     {
-      title: 'Manufacturing & Field Operations',
-      desc: 'Work order routing, bill of materials (BOM) management, capacity planning, equipment maintenance schedules, and quality assurance logging.',
-      icon: '🏭',
+      title: 'Sales & Customer Order Management',
+      desc: 'Omnichannel order capture, real-time credit checks, dynamic pricing rules, and synchronized fulfillment tracking.',
+      icon: '🛍️',
+    },
+    {
+      title: 'Human Capital & Workforce',
+      desc: 'Unified employee records, automated payroll integration, time-and-expense tracking, and workforce planning analytics.',
+      icon: '👥',
     },
   ]
 
-  // Modern ERP Capabilities
+  // 4 Modern ERP Architectural Capabilities
   const modernCapabilities = [
     {
-      title: 'Cloud ERP Architecture',
-      desc: 'Secure, multi-tenant cloud infrastructure with continuous zero-downtime updates, high availability, and elastic capacity scaling.',
+      title: 'Cloud-Native Architecture',
+      desc: 'Elastic scalability, automatic security patching, continuous quarterly feature releases, and zero on-premise hardware overhead.',
       icon: '☁️',
     },
     {
-      title: 'End-to-End Automation',
-      desc: 'Eliminating manual handoffs through intelligent routing of approvals, automatic ledger reconciliations, and exception alerts.',
-      icon: '⚡',
-    },
-    {
-      title: 'API & Extensibility Layer',
-      desc: 'REST and GraphQL APIs that connect seamlessly with third-party logistics, CRMs, banking networks, and specialized legacy tools.',
+      title: 'API-First Integration',
+      desc: 'Standards-based REST and event-driven webhooks connecting seamlessly with third-party logistics, CRMs, banks, and ecommerce.',
       icon: '🔌',
-    },
-    {
-      title: 'Embedded Analytics',
-      desc: 'Out-of-the-box analytical dashboards and drill-down KPIs that provide real-time operational insights without external BI tools.',
-      icon: '📊',
     },
     {
       title: 'Dynamic Workflow Management',
@@ -106,44 +102,36 @@ export default function ModernERPPerspective() {
     <div className="perspective-page">
       <div className="perspective-wrap">
         <PerspectiveHero
-          category="MODERN ERP"
-          title="Accelerating Business Transformation with Modern ERP"
-          subtitle="Explore how modern ERP platforms connect finance, procurement, supply chain and business operations through a unified digital foundation."
+          category={art.category || "MODERN ERP"}
+          title={art.title || "Accelerating Business Transformation with Modern ERP"}
+          subtitle={art.subtitle || "Explore how modern ERP platforms connect finance, procurement, supply chain and business operations through a unified digital foundation."}
           date="August 2026"
           readTime="6 min read"
           image="/img/perspectives/accelerating-business-transformation-modern-erp.jpg"
           imageAlt="Modern ERP platform connecting enterprise business operations"
-          imageCaption="Enterprise Technology Perspective — ERP & Connected Business Operations"
+          imageCaption={art.imageCaption || "Enterprise Technology Perspective — ERP & Connected Business Operations"}
         />
 
         {/* Section: Why Modern ERP Matters */}
         <section className="perspective-section">
           <div className="p-section-header reveal">
-            <span className="p-eyebrow">THE OPERATIONAL BACKBONE</span>
-            <h2 className="p-heading">Why Modern ERP Matters</h2>
+            <span className="p-eyebrow">{art.sec1Eyebrow || "THE OPERATIONAL BACKBONE"}</span>
+            <h2 className="p-heading">{art.sec1Heading || "Why Modern ERP Matters"}</h2>
             <p className="p-subtext">
-              ERP is no longer just back-office accounting. It is the operating model of the modern enterprise
-              expressed in software.
+              {art.sec1Subtext || "ERP is no longer just back-office accounting. It is the operating model of the modern enterprise expressed in software."}
             </p>
           </div>
 
           <div className="p-editorial-grid">
             <div className="p-editorial-text reveal">
               <p>
-                In fast-moving enterprise landscapes, traditional Enterprise Resource Planning systems often struggle.
-                Built in an era of batch processing and isolated local servers, legacy ERPs were heavily customized,
-                difficult to upgrade, and painfully opaque. Crucial business operations functioned in parallel siloes,
-                relying on fragile overnight exports to synchronize ledgers with warehouses.
+                {art.sec1P1 || "In fast-moving enterprise landscapes, traditional Enterprise Resource Planning systems often struggle. Built in an era of batch processing and isolated local servers, legacy ERPs were heavily customized, difficult to upgrade, and painfully opaque. Crucial business operations functioned in parallel siloes, relying on fragile overnight exports to synchronize ledgers with warehouses."}
               </p>
               <p>
-                Modern, cloud-native ERP fundamentally redefines this dynamic. It operates as the unified digital backbone
-                of the enterprise—a living foundation where finance, procurement, supply chain, inventory, and human resources
-                transact on a shared data model.
+                {art.sec1P2 || "Modern, cloud-native ERP fundamentally redefines this dynamic. It operates as the unified digital backbone of the enterprise—a living foundation where finance, procurement, supply chain, inventory, and human resources transact on a shared data model."}
               </p>
               <p>
-                By bringing core operations into a single harmonized environment, modern ERP eliminates the operational
-                blind spots that slow down growth, enabling leaders to steer the business using real-time signals
-                rather than stale historical summaries.
+                {art.sec1P3 || "By bringing core operations into a single harmonized environment, modern ERP eliminates the operational blind spots that slow down growth, enabling leaders to steer the business using real-time signals rather than stale historical summaries."}
               </p>
             </div>
 
@@ -161,15 +149,15 @@ export default function ModernERPPerspective() {
         {/* Section: Connected Business Functions */}
         <section className="perspective-section">
           <div className="p-section-header reveal">
-            <span className="p-eyebrow">INTEGRATED ECOSYSTEM</span>
-            <h2 className="p-heading">Connected Business Functions</h2>
+            <span className="p-eyebrow">{art.sec2Eyebrow || "INTEGRATED ECOSYSTEM"}</span>
+            <h2 className="p-heading">{art.sec2Heading || "Connected Business Functions"}</h2>
             <p className="p-subtext">
-              Real organizational value emerges when core business functions transact together on a shared digital foundation.
+              {art.sec2Subtext || "Real organizational value emerges when core business functions transact together on a shared digital foundation."}
             </p>
           </div>
 
           <div className="p-card-grid-3">
-            {connectedFunctions.map((fn, idx) => (
+            {(art.connectedFunctions || connectedFunctions).map((fn, idx) => (
               <div className="p-feature-card reveal" key={idx}>
                 <div className="p-card-icon-box">{fn.icon}</div>
                 <h3 className="p-card-title">{fn.title}</h3>
@@ -182,36 +170,32 @@ export default function ModernERPPerspective() {
         {/* Section: Unified Operations */}
         <section className="perspective-section">
           <div className="p-section-header reveal">
-            <span className="p-eyebrow">CROSS-FUNCTIONAL HARMONY</span>
-            <h2 className="p-heading">Unified Operations &amp; Information Flow</h2>
+            <span className="p-eyebrow">{art.sec3Eyebrow || "CROSS-FUNCTIONAL HARMONY"}</span>
+            <h2 className="p-heading">{art.sec3Heading || "Unified Operations & Information Flow"}</h2>
             <p className="p-subtext">
-              Breaking down communication walls between departments to enable fluid, synchronized enterprise workflows.
+              {art.sec3Subtext || "Breaking down communication walls between departments to enable fluid, synchronized enterprise workflows."}
             </p>
           </div>
 
           <div className="p-editorial-grid p-reverse">
             <div className="p-editorial-text reveal">
               <p>
-                Operational silos are rarely people problems; they are architectural problems. When customer service,
-                procurement, and warehouse teams work in disconnected applications, every handoff requires manual emails,
-                spreadsheets, and phone calls. Errors multiply, invoices get held up, and customer commitments slip.
+                {art.sec3P1 || "Operational silos are rarely people problems; they are architectural problems. When customer service, procurement, and warehouse teams work in disconnected applications, every handoff requires manual emails, spreadsheets, and phone calls. Errors multiply, invoices get held up, and customer commitments slip."}
               </p>
               <p>
-                Modern ERP addresses this through unified data lineage and event-driven process orchestration:
+                {art.sec3P2 || "Modern ERP addresses this through unified data lineage and event-driven process orchestration:"}
               </p>
               <ul className="p-feature-list">
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Synchronized order-to-cash:</strong> When a customer order is placed, inventory reserves automatically, shipping labels generate, and billing ledgers update instantaneously.</span>
-                </li>
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Procure-to-pay transparency:</strong> Purchase orders, goods receipts, and vendor invoices match automatically with 3-way reconciliation, flagging only exceptions for human review.</span>
-                </li>
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Unified labor and operational costing:</strong> Project timesheets, payroll allocations, and direct operational expenditures map directly to cost centers in real time.</span>
-                </li>
+                {(art.sec3List || [
+                  { bold: 'Synchronized order-to-cash:', text: ' When a customer order is placed, inventory reserves automatically, shipping labels generate, and billing ledgers update instantaneously.' },
+                  { bold: 'Procure-to-pay transparency:', text: ' Purchase orders, goods receipts, and vendor invoices match automatically with 3-way reconciliation, flagging only exceptions for human review.' },
+                  { bold: 'Unified labor and operational costing:', text: ' Project timesheets, payroll allocations, and direct operational expenditures map directly to cost centers in real time.' }
+                ]).map((item, idx) => (
+                  <li className="p-feature-item" key={idx}>
+                    <span className="p-feature-bullet">✓</span>
+                    <span><strong>{item.bold}</strong>{item.text}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -229,36 +213,30 @@ export default function ModernERPPerspective() {
         {/* Section: Real-Time Business Visibility */}
         <section className="perspective-section">
           <div className="p-section-header reveal">
-            <span className="p-eyebrow">ENTERPRISE TELEMETRY</span>
-            <h2 className="p-heading">Real-Time Business Visibility</h2>
+            <span className="p-eyebrow">{art.sec4Eyebrow || "ENTERPRISE TELEMETRY"}</span>
+            <h2 className="p-heading">{art.sec4Heading || "Real-Time Business Visibility"}</h2>
             <p className="p-subtext">
-              Consolidating operational metrics into transparent executive dashboards that reflect current business realities.
+              {art.sec4Subtext || "Consolidating operational metrics into transparent executive dashboards that reflect current business realities."}
             </p>
           </div>
 
           <div className="p-editorial-grid">
             <div className="p-editorial-text reveal">
               <p>
-                Operating an enterprise without unified visibility is like flying in dense fog with delayed instruments.
-                Modern ERP provides real-time telemetry across every business dimension:
+                {art.sec4P1 || "Operating an enterprise without unified visibility is like flying in dense fog with delayed instruments. Modern ERP provides real-time telemetry across every business dimension:"}
               </p>
               <ul className="p-feature-list">
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Live executive dashboards:</strong> Instantaneous views of gross margins, operating cash flows, open liabilities, and order backlogs without waiting for period-end closing.</span>
-                </li>
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Self-service operational reporting:</strong> Departmental heads can build custom queries and drill down from enterprise-level summaries to individual transaction line items.</span>
-                </li>
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Centralized master information:</strong> Eliminating contradictory numbers by establishing single governed master data for customers, vendors, and product catalogs.</span>
-                </li>
-                <li className="p-feature-item">
-                  <span className="p-feature-bullet">✓</span>
-                  <span><strong>Proactive anomaly alerts:</strong> Automated alerts notify managers immediately when margins drop below threshold, inventory runs low, or supplier deliveries slip.</span>
-                </li>
+                {(art.sec4List || [
+                  { bold: 'Live executive dashboards:', text: ' Instantaneous views of gross margins, operating cash flows, open liabilities, and order backlogs without waiting for period-end closing.' },
+                  { bold: 'Self-service operational reporting:', text: ' Departmental heads can build custom queries and drill down from enterprise-level summaries to individual transaction line items.' },
+                  { bold: 'Centralized master information:', text: ' Eliminating contradictory numbers by establishing single governed master data for customers, vendors, and product catalogs.' },
+                  { bold: 'Proactive anomaly alerts:', text: ' Automated alerts notify managers immediately when margins drop below threshold, inventory runs low, or supplier deliveries slip.' }
+                ]).map((item, idx) => (
+                  <li className="p-feature-item" key={idx}>
+                    <span className="p-feature-bullet">✓</span>
+                    <span><strong>{item.bold}</strong>{item.text}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -276,15 +254,15 @@ export default function ModernERPPerspective() {
         {/* Section: Modern ERP Capabilities */}
         <section className="perspective-section">
           <div className="p-section-header reveal">
-            <span className="p-eyebrow">CORE PLATFORM ARCHITECTURE</span>
-            <h2 className="p-heading">Modern ERP Capabilities</h2>
+            <span className="p-eyebrow">{art.sec5Eyebrow || "CORE PLATFORM ARCHITECTURE"}</span>
+            <h2 className="p-heading">{art.sec5Heading || "Modern ERP Capabilities"}</h2>
             <p className="p-subtext">
-              The architectural attributes that separate contemporary ERP platforms from rigid legacy installations.
+              {art.sec5Subtext || "The architectural attributes that separate contemporary ERP platforms from rigid legacy installations."}
             </p>
           </div>
 
           <div className="p-card-grid-3">
-            {modernCapabilities.map((cap, idx) => (
+            {(art.modernCapabilities || modernCapabilities).map((cap, idx) => (
               <div className="p-feature-card reveal" key={idx}>
                 <div className="p-card-icon-box">{cap.icon}</div>
                 <h3 className="p-card-title">{cap.title}</h3>
@@ -297,29 +275,29 @@ export default function ModernERPPerspective() {
         {/* Section: Business Benefits */}
         <section className="perspective-section">
           <div className="p-section-header reveal">
-            <span className="p-eyebrow">QUALITATIVE IMPACT</span>
-            <h2 className="p-heading">Business Benefits</h2>
+            <span className="p-eyebrow">{art.sec6Eyebrow || "QUALITATIVE IMPACT"}</span>
+            <h2 className="p-heading">{art.sec6Heading || "Business Benefits"}</h2>
             <p className="p-subtext">
-              Connecting core business operations into a unified digital foundation yields measurable organizational resilience.
+              {art.sec6Subtext || "Connecting core business operations into a unified digital foundation yields measurable organizational resilience."}
             </p>
           </div>
 
-          <BusinessImpactGrid outcomes={erpBusinessBenefits} />
+          <BusinessImpactGrid outcomes={art.erpBusinessBenefits || erpBusinessBenefits} />
         </section>
 
         {/* Key Perspective */}
         <KeyPerspectiveBox
-          eyebrow="ERP TRANSFORMATION PHILOSOPHY"
-          title="Pragmatic Modernization Over Monolithic Overhaul"
-          lead="Modern ERP transformation succeeds when organizations treat it as an evolutionary operating upgrade rather than an all-or-nothing IT disruption:"
-          points={erpStrategyPoints}
+          eyebrow={art.keyPerspectiveEyebrow || "ERP TRANSFORMATION PHILOSOPHY"}
+          title={art.keyPerspectiveTitle || "Pragmatic Modernization Over Monolithic Overhaul"}
+          lead={art.keyPerspectiveLead || "Modern ERP transformation succeeds when organizations treat it as an evolutionary operating upgrade rather than an all-or-nothing IT disruption:"}
+          points={art.erpStrategyPoints || erpStrategyPoints}
         />
 
         {/* CTA */}
         <PerspectiveCTA
-          heading="Modernize Your Enterprise Operations"
-          description="Explore how modern ERP platforms connect finance, procurement, supply chain and business operations through a unified digital foundation."
-          buttonText="Talk to Our Experts"
+          heading={art.ctaHeading || "Modernize Your Enterprise Operations"}
+          description={art.ctaDescription || "Explore how modern ERP platforms connect finance, procurement, supply chain and business operations through a unified digital foundation."}
+          buttonText={art.ctaButton || "Talk to Our Experts"}
           serviceContext="Modern ERP & Business Operations"
         />
 

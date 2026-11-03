@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from '../../i18n/TranslationContext'
 import { PERSPECTIVES_DATA } from '../../data/perspectivesData.js'
 
 export function usePerspectiveScrollReveal() {
@@ -58,11 +59,12 @@ export function usePerspectiveScrollReveal() {
 }
 
 export function PerspectiveBreadcrumb({ currentTitle }) {
+  const { t } = useTranslation()
   return (
     <nav className="perspective-breadcrumb" aria-label="Breadcrumb">
-      <Link to="/">Home</Link>
+      <Link to="/">{t('nav.about') === 'About' ? 'Home' : t('hero.since').split('—')[0].trim() || 'Home'}</Link>
       <span className="perspective-breadcrumb-sep" aria-hidden="true">/</span>
-      <Link to="/perspectives">Perspectives</Link>
+      <Link to="/perspectives">{t('nav.perspectives')}</Link>
       <span className="perspective-breadcrumb-sep" aria-hidden="true">/</span>
       <span className="perspective-breadcrumb-current" aria-current="page">
         {currentTitle}
@@ -81,6 +83,7 @@ export function PerspectiveHero({
   imageAlt,
   imageCaption = 'Enterprise Technology Insight — Architecture & Strategy',
 }) {
+  const { t } = useTranslation()
   return (
     <header className="perspective-hero">
       <PerspectiveBreadcrumb currentTitle={title} />
@@ -93,20 +96,20 @@ export function PerspectiveHero({
 
       <div className="perspective-meta-bar">
         <div className="perspective-meta-item">
-          <span className="perspective-meta-label">Topic:</span>
+          <span className="perspective-meta-label">{t('perspectives.topic', { defaultValue: 'Topic:' })}</span>
           <span className="perspective-meta-val">{category}</span>
         </div>
         <div className="perspective-meta-item">
-          <span className="perspective-meta-label">Published:</span>
+          <span className="perspective-meta-label">{t('perspectives.published', { defaultValue: 'Published:' })}</span>
           <span className="perspective-meta-val">{date}</span>
         </div>
         <div className="perspective-meta-item">
-          <span className="perspective-meta-label">Reading Time:</span>
+          <span className="perspective-meta-label">{t('perspectives.readingTime', { defaultValue: 'Reading Time:' })}</span>
           <span className="perspective-meta-val">{readTime}</span>
         </div>
         <div className="perspective-meta-item">
-          <span className="perspective-meta-label">Author:</span>
-          <span className="perspective-meta-val">Oklut Enterprise Architecture Studio</span>
+          <span className="perspective-meta-label">{t('perspectives.author', { defaultValue: 'Author:' })}</span>
+          <span className="perspective-meta-val">{t('perspectives.authorName', { defaultValue: 'Oklut Enterprise Architecture Studio' })}</span>
         </div>
       </div>
 
@@ -169,13 +172,14 @@ export function ArchitectureFlowDiagram({
 }
 
 export function TechnologyGrid({ rows = [] }) {
+  const { t } = useTranslation()
   return (
     <div className="reveal">
       <table className="p-tech-table">
         <thead>
           <tr>
-            <th>Technology Area</th>
-            <th>Purpose</th>
+            <th>{t('perspectives.techArea', { defaultValue: 'Technology Area' })}</th>
+            <th>{t('perspectives.purpose', { defaultValue: 'Purpose' })}</th>
           </tr>
         </thead>
         <tbody>
@@ -236,10 +240,12 @@ export function KeyPerspectiveBox({
 export function PerspectiveCTA({
   heading,
   description,
-  buttonText = 'Talk to Our Experts',
+  buttonText,
   serviceContext,
 }) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const btnLabel = buttonText || t('perspectives.talkToExperts', { defaultValue: 'Talk to Our Experts' })
 
   const handleBooking = () => {
     navigate('/book-consultation', {
@@ -254,14 +260,14 @@ export function PerspectiveCTA({
         <p className="p-cta-text">{description}</p>
         <div className="p-cta-actions">
           <button type="button" className="p-btn-primary" onClick={handleBooking}>
-            {buttonText}
+            {btnLabel}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
             </svg>
           </button>
           <Link to="/perspectives" className="p-btn-secondary">
-            View All Perspectives
+            {t('perspectives.viewAll', { defaultValue: 'View All Perspectives' })}
           </Link>
         </div>
       </div>
@@ -271,31 +277,37 @@ export function PerspectiveCTA({
 
 export function RelatedPerspectives({ currentId }) {
   const others = PERSPECTIVES_DATA.filter((p) => p.id !== currentId).slice(0, 2)
+  const { t } = useTranslation()
 
   return (
     <section className="p-related-section">
-      <span className="p-eyebrow">EXPLORE MORE PERSPECTIVES</span>
-      <h3 className="p-heading">Continue Exploring Enterprise Technology Insights</h3>
+      <span className="p-eyebrow">{t('perspectives.exploreMore', { defaultValue: 'EXPLORE MORE PERSPECTIVES' })}</span>
+      <h3 className="p-heading">{t('perspectives.continueExploring', { defaultValue: 'Continue Exploring Enterprise Technology Insights' })}</h3>
       <div className="p-related-grid">
-        {others.map((p) => (
-          <Link to={p.path} key={p.id} className="p-related-card reveal">
-            <div className="p-related-media">
-              <img
-                src={`${import.meta.env.BASE_URL}${(p.imageOptimized || p.image).replace(/^\//, '')}`}
-                alt={p.title}
-                className="p-related-img"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-related-body">
-              <span className="p-related-cat">{p.category || p.tag}</span>
-              <h4 className="p-related-title">{p.title}</h4>
-              <span className="p-related-action">
-                Read Perspective →
-              </span>
-            </div>
-          </Link>
-        ))}
+        {others.map((p) => {
+          const localizedP = t(`perspectivesData.${p.id}`, { returnObjects: true, defaultValue: p }) || p
+          const title = localizedP.title || p.title
+          const cat = localizedP.category || localizedP.tag || p.category || p.tag
+          return (
+            <Link to={p.path} key={p.id} className="p-related-card reveal">
+              <div className="p-related-media">
+                <img
+                  src={`${import.meta.env.BASE_URL}${(p.imageOptimized || p.image).replace(/^\//, '')}`}
+                  alt={title}
+                  className="p-related-img"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-related-body">
+                <span className="p-related-cat">{cat}</span>
+                <h4 className="p-related-title">{title}</h4>
+                <span className="p-related-action">
+                  {t('perspectives.readPerspective', { defaultValue: 'Read Perspective' })} →
+                </span>
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </section>
   )

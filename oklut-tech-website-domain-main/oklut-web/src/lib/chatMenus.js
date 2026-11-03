@@ -1,3 +1,34 @@
+export function normalizeDigits(str) {
+  if (!str) return ''
+  return String(str)
+    // Arabic-Indic digits ٠-٩
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    // Eastern Arabic-Indic digits ۰-۹
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06F0))
+    // Devanagari digits ०-९
+    .replace(/[\u0966-\u096F]/g, (d) => String(d.charCodeAt(0) - 0x0966))
+    // Bengali digits ০-৯
+    .replace(/[\u09E6-\u09EF]/g, (d) => String(d.charCodeAt(0) - 0x09E6))
+    // Gurmukhi digits ੦-੯
+    .replace(/[\u0A66-\u0A6F]/g, (d) => String(d.charCodeAt(0) - 0x0A66))
+    // Gujarati digits ૦-૯
+    .replace(/[\u0AE6-\u0AEF]/g, (d) => String(d.charCodeAt(0) - 0x0AE6))
+    // Odia digits ୦-୯
+    .replace(/[\u0B66-\u0B6F]/g, (d) => String(d.charCodeAt(0) - 0x0B66))
+    // Tamil digits ௧-௯
+    .replace(/[\u0BE6-\u0BEF]/g, (d) => String(d.charCodeAt(0) - 0x0BE6))
+    // Telugu digits ౦-౯
+    .replace(/[\u0C66-\u0C6F]/g, (d) => String(d.charCodeAt(0) - 0x0C66))
+    // Kannada digits ೦-೯
+    .replace(/[\u0CE6-\u0CEF]/g, (d) => String(d.charCodeAt(0) - 0x0CE6))
+    // Malayalam digits ൦-൯
+    .replace(/[\u0D66-\u0D6F]/g, (d) => String(d.charCodeAt(0) - 0x0D66))
+    // Myanmar digits ၀-၉
+    .replace(/[\u1040-\u1049]/g, (d) => String(d.charCodeAt(0) - 0x1040))
+    // Full-width digits ０-９
+    .replace(/[\uFF10-\uFF19]/g, (d) => String(d.charCodeAt(0) - 0xFF10))
+}
+
 // Menu + general-knowledge resolution for the Oklut AI Assistant.
 //
 // This module is deliberately PURE: no Supabase, no `import.meta`, no network.
@@ -185,10 +216,11 @@ export const PRODUCTS_MENU = [
 export function normalize(text) {
   return (text || '')
     .toLowerCase()
+    .replace(/['\u2019]/g, '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/['\u2019]/g, '')
-    .replace(/[^a-z0-9\s+./@-]/g, ' ')
+    .normalize('NFC')
+    .replace(/[^\p{L}\p{M}\p{N}\s+./@-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -222,23 +254,41 @@ export function buildProductsMenu() {
 export function parseMenuOptions(content) {
   if (typeof content !== 'string') return null
   const lines = content.split('\n')
-  const header = (lines[0] || '').trim()
-  let type = null
-  if (/^(?:here\s+are\s+our\s+|our\s+)?services:?$/i.test(header) || /^services:?$/i.test(header)) {
-    type = 'services'
-  } else if (/^(?:here\s+are\s+the\s+technologies(?:\s+we\s+work\s+with)?|our\s+technologies):?$/i.test(header) || /^technologies:?$/i.test(header)) {
-    type = 'technologies'
-  } else if (/^(?:here\s+are\s+our\s+|our\s+)?products:?$/i.test(header) || /^products:?$/i.test(header)) {
-    type = 'products'
-  }
-  if (!type) return null
-
   const options = []
   for (const line of lines) {
-    const m = line.match(/^\s*(\d{1,2})\s*[.)]\s+(.+?)\s*$/)
+    const normLine = normalizeDigits(line)
+    const m = normLine.match(/^\s*(\d{1,2})\s*[.)]\s+(.+?)\s*$/)
     if (m) options.push({ index: Number(m[1]), label: m[2] })
   }
   if (options.length === 0) return null
+
+  // Ensure options are sequential 1..N starting from 1 to avoid treating unrelated numbered text as a menu
+  const isSequential = options.every((opt, i) => opt.index === i + 1)
+  if (!isSequential) return null
+
+  const header = (lines[0] || '').trim()
+  let type = null
+  if (/services:?/i.test(header)) {
+    type = 'services'
+  } else if (/technolog/i.test(header)) {
+    type = 'technologies'
+  } else if (/products?:?/i.test(header)) {
+    type = 'products'
+  }
+
+  // Language-independent category detection across all 115 languages
+  // When translated, header won't match English keywords, so identify menu by option count/structure:
+  if (!type) {
+    if (options.length === SERVICES_MENU.length) {
+      type = 'services'
+    } else if (options.length === TECHNOLOGIES_MENU.length) {
+      type = 'technologies'
+    } else if (options.length === PRODUCTS_MENU.length) {
+      type = 'products'
+    }
+  }
+
+  if (!type) return null
   return { type, options }
 }
 
@@ -247,14 +297,71 @@ export function parseMenuOptions(content) {
  * Scans backwards for the most recent menu the assistant displayed, so a
  * visitor can pick another option after reading one item.
  */
-export function detectActiveMenu(history) {
+export function detectActiveMenu(history, explicitCategory) {
+  // If explicitly cleared (null), no menu is active. Do not resurrect from history.
+  if (explicitCategory === null) {
+    return null
+  }
+
+  // If explicitly tracked in session context, use that category directly
+  if (explicitCategory) {
+    if (explicitCategory === 'services') {
+      return { type: 'services', options: SERVICES_MENU.map((s, i) => ({ index: i + 1, label: s.name })) }
+    }
+    if (explicitCategory === 'technologies') {
+      return { type: 'technologies', options: TECHNOLOGIES_MENU.map((t, i) => ({ index: i + 1, label: t.name })) }
+    }
+    if (explicitCategory === 'products') {
+      return { type: 'products', options: PRODUCTS_MENU.map((p, i) => ({ index: i + 1, label: p.name })) }
+    }
+  }
+
   const list = Array.isArray(history) ? history : []
+  // 1. Scan backwards for a full numbered menu list
   for (let i = list.length - 1; i >= 0; i--) {
     const m = list[i]
-    if (!m || m.role !== 'assistant') continue
+    if (!m) continue
+    if (m.currentMenuCategory) {
+      return detectActiveMenu([], m.currentMenuCategory)
+    }
+    if (m.role !== 'assistant') continue
     const parsed = parseMenuOptions(m.content)
     if (parsed) return parsed
   }
+
+  // 2. Scan backwards for an assistant message that answered a single item (e.g. "9. Shared Services..." or translated)
+  for (let i = list.length - 1; i >= 0; i--) {
+    const m = list[i]
+    if (!m || m.role !== 'assistant') continue
+    const norm = normalizeDigits(m.content || '')
+    const firstLine = norm.split('\n')[0].trim()
+    const numMatch = firstLine.match(/^\s*(\d{1,2})\s*[.)]\s*(.+)$/)
+    if (numMatch) {
+      const idx = Number(numMatch[1])
+      if (idx === 9 || idx === 7 || idx === 8) {
+        // Disambiguate: 9 is exclusively a service
+        if (idx === 9) {
+          return { type: 'services', options: SERVICES_MENU.map((s, j) => ({ index: j + 1, label: s.name })) }
+        }
+      }
+      for (const s of SERVICES_MENU) {
+        if (firstLine.toLowerCase().includes(s.name.toLowerCase())) {
+          return { type: 'services', options: SERVICES_MENU.map((item, j) => ({ index: j + 1, label: item.name })) }
+        }
+      }
+      for (const t of TECHNOLOGIES_MENU) {
+        if (firstLine.toLowerCase().includes(t.name.toLowerCase())) {
+          return { type: 'technologies', options: TECHNOLOGIES_MENU.map((item, j) => ({ index: j + 1, label: item.name })) }
+        }
+      }
+      for (const p of PRODUCTS_MENU) {
+        if (firstLine.toLowerCase().includes(p.name.toLowerCase())) {
+          return { type: 'products', options: PRODUCTS_MENU.map((item, j) => ({ index: j + 1, label: item.name })) }
+        }
+      }
+    }
+  }
+
   return null
 }
 
@@ -267,19 +374,27 @@ const ORDINAL_WORDS = {
 
 // Accepts "2", "2.", "option 2", "number 2", "service 2", "the 2nd", "second",
 // and natural questions like "Tell me about number 2", "explain 2", "what is option 2".
-export function parseOptionIndex(q) {
+export function parseOptionIndex(raw) {
+  if (raw === null || raw === undefined) return null
+  const str = normalizeDigits(String(raw).trim())
+
+  // Direct standalone number check: e.g. "9", " 9 ", "9.", "#9"
+  const pureNumMatch = str.match(/^#?\s*(\d{1,2})\s*\.?$/)
+  if (pureNumMatch) return Number(pureNumMatch[1])
+
+  const q = normalize(str)
   const cleaned = (q || '')
     .replace(/^(?:can you\s+)?(?:please\s+)?(?:tell me about|tell me more about|explain|what is|describe|details on|learn more about|show me|give me details about)\s+/, '')
     .trim()
 
   let m = cleaned.match(/^(\d{1,2})\.?$/)
   if (m) return Number(m[1])
-  m = cleaned.match(/^(?:option|number|no|choice|item|service|services|tech|technology|technologies|product|products)\s*(\d{1,2})\.?$/)
+  m = cleaned.match(/^(?:option|number|no|choice|item|service|services|tech|technology|technologies|product|products)\s*(\d{1,2})\.?$/i)
   if (m) return Number(m[1])
-  m = cleaned.match(/^(\d{1,2})(?:st|nd|rd|th)$/)
+  m = cleaned.match(/^(\d{1,2})(?:st|nd|rd|th)$/i)
   if (m) return Number(m[1])
-  m = cleaned.match(/^(?:the\s+)?(\w+)$/)
-  if (m && Object.prototype.hasOwnProperty.call(ORDINAL_WORDS, m[1])) return ORDINAL_WORDS[m[1]]
+  m = cleaned.match(/^(?:the\s+)?(\w+)$/i)
+  if (m && Object.prototype.hasOwnProperty.call(ORDINAL_WORDS, m[1].toLowerCase())) return ORDINAL_WORDS[m[1].toLowerCase()]
   return null
 }
 
@@ -368,6 +483,27 @@ const MENU_FILLER = new Set([
   're', 've', 'll', 's', 'd', 't', 'youve', 'youre', 'id', 'im',
 ])
 
+const MULTILINGUAL_SERVICE_WORDS = new Set([
+  'service', 'services', 'servicios', 'servicio', 'servizi', 'servizio',
+  'amasevisi', 'sevisi', 'isevisi', 'diensten', 'dienst', 'dienstleistungen',
+  'tjenester', 'uslugi', 'usluga', 'सेवाएं', 'सेवा', 'సేవలు', 'சேவைகள்',
+  'خدمات', 'خدمة', '服务', 'サービス'
+])
+
+const MULTILINGUAL_TECH_WORDS = new Set([
+  'tech', 'techs', 'technology', 'technologies', 'tecnologia', 'tecnologias',
+  'technologie', 'technologies', 'ubuchwepheshe', 'teknologi', 'teknolojiler',
+  'teknoloji', 'taknik', 'तकनीक', 'సాంకేతికత', 'தொழில்நுட்பம்', 'تكنولوجيا',
+  '技术', '技術', 'テクノロジー'
+])
+
+const MULTILINGUAL_PRODUCT_WORDS = new Set([
+  'product', 'products', 'producto', 'productos', 'produit', 'produits',
+  'imikhiqizo', 'umkhiqizo', 'prodotto', 'prodotti', 'produkte', 'produkt',
+  'producten', 'produkter', 'utpaad', 'उत्पाद', 'ఉత్పత్తులు', 'தயாரிப்புகள்',
+  'منتجات', 'منتج', '产品', '製品', 'プロダクト'
+])
+
 const SERVICE_STEM = /^services?$/
 const TECH_STEM = /^(?:tech|techs|technolog(?:y|ies))$/
 const PRODUCT_STEM = /^(?:product|products)$/
@@ -375,9 +511,9 @@ const PRODUCT_STEM = /^(?:product|products)$/
 function matchMenuIntent(q) {
   const tokens = q.split(' ').filter(Boolean)
   if (tokens.length === 0) return null
-  const hasService = tokens.some((t) => SERVICE_STEM.test(t))
-  const hasTech = tokens.some((t) => TECH_STEM.test(t))
-  const hasProduct = tokens.some((t) => PRODUCT_STEM.test(t))
+  const hasService = tokens.some((t) => SERVICE_STEM.test(t) || MULTILINGUAL_SERVICE_WORDS.has(t.toLowerCase()))
+  const hasTech = tokens.some((t) => TECH_STEM.test(t) || MULTILINGUAL_TECH_WORDS.has(t.toLowerCase()))
+  const hasProduct = tokens.some((t) => PRODUCT_STEM.test(t) || MULTILINGUAL_PRODUCT_WORDS.has(t.toLowerCase()))
   if (!hasService && !hasTech && !hasProduct) return null
 
   const content = tokens.filter(
@@ -385,7 +521,10 @@ function matchMenuIntent(q) {
       !MENU_FILLER.has(t) &&
       !SERVICE_STEM.test(t) &&
       !TECH_STEM.test(t) &&
-      !PRODUCT_STEM.test(t),
+      !PRODUCT_STEM.test(t) &&
+      !MULTILINGUAL_SERVICE_WORDS.has(t.toLowerCase()) &&
+      !MULTILINGUAL_TECH_WORDS.has(t.toLowerCase()) &&
+      !MULTILINGUAL_PRODUCT_WORDS.has(t.toLowerCase()),
   )
   if (content.length > 0) return null
   if (hasProduct) return 'products'
@@ -393,27 +532,19 @@ function matchMenuIntent(q) {
   return 'technologies'
 }
 
-/**
- * Priority 1-3 of the chatbot's intent pipeline:
- *   1. numbered selection against the active menu
- *   2. Services menu request
- *   3. Technologies menu request
- *   4. Products menu request
- *
- * Returns `null` when the message is none of these, so the caller keeps its
- * normal flow. A bare number with NO active menu is also `null` — there is
- * nothing to map it onto, so it must not be answered with a menu item.
- */
-export function resolveMenuReply(text, history) {
-  const q = normalize(text)
-  if (!q) return null
-
-  const index = parseOptionIndex(q)
+export function resolveMenuReply(text, history, explicitCategory) {
+  // Check standalone number first with digit normalization
+  const index = parseOptionIndex(text)
   if (index !== null) {
-    const menu = detectActiveMenu(history)
-    if (menu) return selectionReply(menu, index)
+    const menu = detectActiveMenu(history, explicitCategory)
+    if (menu) {
+      return selectionReply(menu, index)
+    }
     return null
   }
+
+  const q = normalize(text)
+  if (!q) return null
 
   const type = matchMenuIntent(q)
   if (type === 'services') return buildServicesMenu()
