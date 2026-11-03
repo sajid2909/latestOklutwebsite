@@ -175,13 +175,13 @@ export default function ProductsPage() {
             <aside className="products-sidebar">
               {CATEGORIES.map((cat, idx) => (
                 <Fragment key={cat.id}>
-                  {idx === 1 && <div className="mega-menu-sidebar-heading">Solutions</div>}
+                  {idx === 1 && <div className="mega-menu-sidebar-heading">{t('products.sidebar.solutions', { defaultValue: 'Solutions' })}</div>}
                   <button
                     type="button"
                     className={`mega-menu-tab-btn ${activeTab === cat.id ? 'is-active' : ''}`}
                     onClick={() => setActiveTab(cat.id)}
                   >
-                    <span>{cat.title}</span>
+                    <span>{t(`products.catalog.${cat.id}.title`, { defaultValue: t(`products.${cat.id}.title`, { defaultValue: cat.title }) })}</span>
                     <span className="mega-menu-tab-chevron"><Icon name="chevronRight" /></span>
                   </button>
                 </Fragment>
@@ -190,18 +190,22 @@ export default function ProductsPage() {
 
             <div className="products-content" key={active.id}>
               <div className="mega-menu-main-header">
-                <h3 className="mega-menu-title">{active.heading || active.title}</h3>
-                <p className="mega-menu-subtitle">{active.sub}</p>
+                <h3 className="mega-menu-title">{t(`products.catalog.${active.id}.heading`, { defaultValue: t(`products.${active.id}.title`, { defaultValue: active.heading || active.title }) })}</h3>
+                <p className="mega-menu-subtitle">{t(`products.catalog.${active.id}.sub`, { defaultValue: t(`products.${active.id}.sub`, { defaultValue: active.sub }) })}</p>
               </div>
               <div className="mega-menu-divider" />
-              <div className="mega-menu-grid-title">{(active.heading || active.title).toUpperCase()}</div>
+              <div className="mega-menu-grid-title">{t(`products.catalog.${active.id}.heading`, { defaultValue: active.heading || active.title }).toUpperCase()}</div>
               <div className={`mega-menu-grid ${active.id === 'featured' ? 'mega-menu-grid--two-col' : ''}`}>
-                {active.items.map((prod, idx) => (
-                  <Link key={idx} to="/book-consultation" className="mega-menu-grid-item">
-                    <h4>{prod.title}</h4>
-                    <p>{prod.description}</p>
-                  </Link>
-                ))}
+                {active.items.map((prod, idx) => {
+                  const itemTitle = t(`products.catalog.${active.id}.items.${idx}.title`, { defaultValue: prod.title })
+                  const itemDesc = t(`products.catalog.${active.id}.items.${idx}.description`, { defaultValue: prod.description })
+                  return (
+                    <Link key={idx} to="/book-consultation" className="mega-menu-grid-item">
+                      <h4>{itemTitle}</h4>
+                      <p>{itemDesc}</p>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           </div>

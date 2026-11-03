@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { useTranslation } from '../../i18n/TranslationContext'
 import JobIcon from './JobIcon'
 import RoleCard from './RoleCard'
 import { RoleCardSkeleton } from './Skeletons'
@@ -17,6 +18,7 @@ function FilterSelect({ id, label, value, onChange, options }) {
 }
 
 function NoResults({ query, onClear }) {
+  const { t } = useTranslation()
   return (
     <div className="jobs-empty roles-empty">
       <div className="roles-empty-art" aria-hidden="true">
@@ -28,7 +30,7 @@ function NoResults({ query, onClear }) {
           <rect x="54" y="66" width="34" height="7" rx="3.5" fill="var(--primary)" opacity="0.22" />
         </svg>
       </div>
-      <h3>No roles match your filters</h3>
+      <h3>{t('careers.noRolesMatch', { defaultValue: 'No roles match your filters' })}</h3>
       <p>
         {query
           ? `We could not find roles matching "${query}". `
@@ -36,13 +38,14 @@ function NoResults({ query, onClear }) {
         Try adjusting your search or clearing a few filters to see more opportunities.
       </p>
       <button type="button" className="btn btn-outline" onClick={onClear}>
-        Clear all filters
+        {t('careers.clearAllFilters', { defaultValue: 'Clear all filters' })}
       </button>
     </div>
   )
 }
 
 function OpenRoles({ jobs, loading, error, onApply, onRetry }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [department, setDepartment] = useState('All Departments')
   const [location, setLocation] = useState('All Locations')
@@ -153,7 +156,7 @@ function OpenRoles({ jobs, loading, error, onApply, onRetry }) {
         {hasActiveFilters && !loading && !error && (
           <button type="button" className="clear-filters" onClick={clearFilters}>
             <JobIcon name="x" size={14} />
-            Clear Filters
+            {t('careers.clearFilters', { defaultValue: 'Clear Filters' })}
           </button>
         )}
       </div>
@@ -163,11 +166,11 @@ function OpenRoles({ jobs, loading, error, onApply, onRetry }) {
           <div className="roles-grid" aria-hidden="true">
             {Array.from({ length: skeletonCount }).map((_, i) => <RoleCardSkeleton key={i} />)}
           </div>
-          <p className="visually-hidden" role="status">Loading open roles…</p>
+          <p className="visually-hidden" role="status">{t('careers.loadingRoles', { defaultValue: 'Loading open roles…' })}</p>
         </>
       ) : error ? (
         <div className="careers-error" role="alert">
-          <p>We could not load live roles right now. Please try again in a moment.</p>
+          <p>{t('careers.errorLoadRoles', { defaultValue: 'We could not load live roles right now. Please try again in a moment.' })}</p>
           <button type="button" className="btn btn-outline btn-sm" onClick={onRetry}>
             Retry
           </button>

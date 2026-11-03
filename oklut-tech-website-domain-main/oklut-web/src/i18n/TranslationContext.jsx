@@ -1,61 +1,137 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import i18n from './i18n'
-import { loadTranslations } from './translationService'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import i18n from './i18n.js'
+import { isRtlLanguage } from './languages.js'
+import {
+  getSavedTabLanguage,
+  isLocaleLoaded,
+  loadLocale,
+  resolveCanonicalLocale,
+} from './localeLoader.js'
 
 /* ── context ─────────────────────────────────────────────────────────────── */
 
 const TranslationContext = createContext({
   lang: 'en',
   loading: false,
+  isRtl: false,
   setLanguage: () => {},
   t: (key) => key,
 })
 
 export function TranslationProvider({ children }) {
-  const [lang, setLang] = useState(i18n.language || 'en')
-  const [loading, setLoading] = useState(false)
+  const initialSaved = typeof window !== 'undefined' ? getSavedTabLanguage() : 'en'
+  const [lang, setLang] = useState(initialSaved || 'en')
+  const [loading, setLoading] = useState(Boolean(initialSaved && initialSaved !== 'en'))
+
+  // Sequential request tracking to eliminate rapid language-switching race conditions
+  const activeRequestIdRef = useRef(0)
+
+  const isRtl = useMemo(() => isRtlLanguage(lang), [lang])
 
   const setLanguage = useCallback(async (code) => {
-    if (!code || code === i18n.language) return
+    if (!code) return
+    const canonical = resolveCanonicalLocale(code)
+    const requestId = ++activeRequestIdRef.current
     setLoading(true)
+
     try {
-      // If the bundle is already loaded in i18next, just switch
-      if (i18n.hasResourceBundle(code, 'translation')) {
-        await i18n.changeLanguage(code)
-        setLang(code)
+      // If language is not English and not yet loaded into memory, fetch on-demand
+      if (canonical !== 'en' && !isLocaleLoaded(canonical)) {
+        const loaded = await loadLocale(canonical)
+
+        // Stale request detection: if a newer switch was triggered while fetching, discard
+        if (requestId !== activeRequestIdRef.current) {
+          return
+        }
+
+        if (!loaded) {
+          console.warn(`[Translation] Failed to load locale "${code}". Retaining current language.`)
+          return
+        }
+      }
+
+      // Check again if superseded before committing language change
+      if (requestId !== activeRequestIdRef.current) {
         return
       }
 
-      // Otherwise try loading via the translation service (API + cache)
-      const enBundle = i18n.getResourceBundle('en', 'translation')
-      const bundle = await loadTranslations(code, enBundle)
-      i18n.addResourceBundle(code, 'translation', bundle, true, true)
-      await i18n.changeLanguage(code)
-      setLang(code)
+      await i18n.changeLanguage(canonical)
+
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          window.sessionStorage.setItem('oklut_tab_lang', canonical)
+        }
+      } catch {
+        // Silently ignore storage errors
+      }
+
+      setLang(canonical)
+
+      if (typeof document !== 'undefined') {
+        const rtl = isRtlLanguage(canonical)
+        document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr')
+        document.documentElement.setAttribute('lang', canonical)
+      }
     } catch (err) {
-      console.error('[Translation] Failed to load language:', code, err)
+      console.error('[Translation] Error switching language to:', code, err)
     } finally {
-      setLoading(false)
+      if (requestId === activeRequestIdRef.current) {
+        setLoading(false)
+      }
     }
   }, [])
 
-  // Sync with i18next's own language changes (e.g. from detector).
+  // Restore saved language on tab refresh
   useEffect(() => {
-    const handler = (lng) => setLang(lng)
+    const saved = getSavedTabLanguage()
+    if (saved && saved !== 'en') {
+      setLanguage(saved)
+    } else {
+      setLoading(false)
+    }
+  }, [setLanguage])
+
+  // Sync with external i18next language changes
+  useEffect(() => {
+    const handler = (lng) => {
+      setLang(lng)
+      if (typeof document !== 'undefined') {
+        const rtl = isRtlLanguage(lng)
+        document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr')
+        document.documentElement.setAttribute('lang', lng)
+      }
+    }
     i18n.on('languageChanged', handler)
+
+    // Initial DOM setup for lang and dir
+    const initialLng = i18n.language || 'en'
+    if (typeof document !== 'undefined') {
+      const rtl = isRtlLanguage(initialLng)
+      document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr')
+      document.documentElement.setAttribute('lang', initialLng)
+    }
+
     return () => i18n.off('languageChanged', handler)
   }, [])
 
-  // On first load, if the detector picked a non-English language, translate.
-  useEffect(() => {
-    const detected = i18n.language || 'en'
-    if (detected !== 'en') {
-      setLanguage(detected)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const value = useMemo(() => ({ lang, loading, setLanguage, t: i18n.t.bind(i18n) }), [lang, loading, setLanguage])
+  const value = useMemo(
+    () => ({
+      lang,
+      loading,
+      isRtl,
+      setLanguage,
+      t: i18n.t.bind(i18n),
+    }),
+    [lang, loading, isRtl, setLanguage]
+  )
 
   return (
     <TranslationContext.Provider value={value}>

@@ -124,7 +124,7 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
   const handleResend = async () => {
     if (!form.email.trim() || !form.password) {
       setResendStatus('error')
-      setResendError('Please enter your email and password above to resend the verification email.')
+      setResendError(t('auth.resendPromptError', { defaultValue: 'Please enter your email and password above to resend the verification email.' }))
       return
     }
     setResendStatus('sending')
@@ -181,17 +181,17 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
 
         {showResend && (
           <div className="resend-verification">
-            <p className="resend-hint">Didn't receive the verification email?</p>
+            <p className="resend-hint">{t('auth.resendVerificationHint', { defaultValue: "Didn't receive the verification email?" })}</p>
             <button
               type="button"
               className="link-btn"
               onClick={handleResend}
               disabled={resendStatus === 'sending'}
             >
-              {resendStatus === 'sending' ? 'Sending…' : 'Resend verification email'}
+              {resendStatus === 'sending' ? t('auth.sending', { defaultValue: 'Sending…' }) : t('auth.resendVerificationBtn', { defaultValue: 'Resend verification email' })}
             </button>
             {resendStatus === 'sent' && (
-              <p className="resend-success">Verification email resent! Please check your inbox.</p>
+              <p className="resend-success">{t('auth.resendSuccess', { defaultValue: 'Verification email resent! Please check your inbox.' })}</p>
             )}
             {resendStatus === 'error' && resendError && (
               <p className="resend-error">{resendError}</p>
@@ -208,7 +208,7 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
                 name="fullName"
                 value={form.fullName}
                 onChange={handleChange}
-                placeholder="Jane Doe"
+                placeholder={t('auth.placeholders.fullName', { defaultValue: 'Jane Doe' })}
                 autoComplete="name"
                 className={errors.fullName ? 'input-error' : ''}
               />
@@ -225,7 +225,7 @@ function AuthModal({ open, mode, onClose, onSwitchMode, redirectTo, notice }) {
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="jane@company.com"
+                placeholder={t('auth.placeholders.email', { defaultValue: 'jane@company.com' })}
                 autoComplete="email"
                 className={errors.email ? 'input-error' : ''}
               />

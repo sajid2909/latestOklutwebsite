@@ -5,6 +5,7 @@ type TFunction = (key: string, options?: Record<string, unknown>) => string
 interface TranslationContextValue {
   lang: string
   loading: boolean
+  isRtl: boolean
   setLanguage: (code: string) => Promise<void>
   t: TFunction
 }

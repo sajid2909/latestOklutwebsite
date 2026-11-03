@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import { useFocusTrap } from '../../lib/useFocusTrap'
 import {
-  getWelcomeMessage,
   QUICK_ACTIONS,
   getChatResponse,
   getUserNameFromHistory,
@@ -23,23 +22,53 @@ const nextId = (prefix: string) => `${prefix}-${++idCounter}`
 // The latest numbered menu the assistant displayed, recovered from the
 // message list. It stays available after an option is chosen so a visitor can
 // explore another item; a newer menu replaces it, and "New chat" clears it.
-function findActiveMenu(messages: Message[]) {
+function findActiveMenu(messages: Message[], currentCategory?: 'services' | 'technologies' | 'products' | null) {
+  if (currentCategory === null) {
+    return null
+  }
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role !== 'assistant') continue
     const parsed = parseMenuOptions(messages[i].content)
-    if (parsed) return { index: i, type: parsed.type, options: parsed.options }
+    if (parsed) return { index: i, type: currentCategory || parsed.type, options: parsed.options }
   }
   return null
 }
 
+function getLocalizedWelcomeMessage(t: (key: string, options?: any) => string, date = new Date()) {
+  const h = date.getHours()
+  let greeting = t('chatbot.greetingMorning', { defaultValue: 'Good morning' })
+  if (h >= 12 && h < 16) {
+    greeting = t('chatbot.greetingAfternoon', { defaultValue: 'Good afternoon' })
+  } else if (h >= 16) {
+    greeting = t('chatbot.greetingEvening', { defaultValue: 'Good evening' })
+  }
+  const welcome = t('chatbot.welcomeText', {
+    defaultValue: "! 👋 Welcome to Oklut Technologies.\nI'm the Oklut AI Assistant. I can help you explore our services, technologies, careers, and contact information.",
+  })
+  if (!welcome) return greeting
+  const trimmedGreeting = greeting.trim()
+  const trimmedWelcome = welcome.trim()
+  if (/^[!！,.?;:]/.test(trimmedWelcome)) {
+    return `${trimmedGreeting}${trimmedWelcome}`
+  }
+  return `${trimmedGreeting} ${trimmedWelcome}`
+}
+
 export const Chatbot = () => {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [view, setView] = useState<View>('closed')
   const [messages, setMessages] = useState<Message[]>([
-    { id: nextId('welcome'), role: 'assistant', content: getWelcomeMessage() },
+    { id: nextId('welcome'), role: 'assistant', content: getLocalizedWelcomeMessage(t) },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [currentMenuCategory, setCurrentMenuCategory] = useState<'services' | 'technologies' | 'products' | null>(null)
+  const currentMenuCategoryRef = useRef<'services' | 'technologies' | 'products' | null>(null)
+
+  const updateMenuCategory = (cat: 'services' | 'technologies' | 'products' | null) => {
+    currentMenuCategoryRef.current = cat
+    setCurrentMenuCategory(cat)
+  }
 
   const panelRef = useRef<HTMLDivElement>(null)
   const messagesRef = useRef<HTMLDivElement>(null)
@@ -49,6 +78,12 @@ export const Chatbot = () => {
   useFocusTrap(panelRef, view === 'open', toggleRef)
 
   const hasConversation = messages.some((m) => m.role === 'user')
+
+  useEffect(() => {
+    if (!hasConversation) {
+      setMessages([{ id: nextId('welcome'), role: 'assistant', content: getLocalizedWelcomeMessage(t) }])
+    }
+  }, [lang, t, hasConversation])
 
   const scrollToBottom = useCallback(() => {
     const el = messagesRef.current
@@ -127,8 +162,9 @@ export const Chatbot = () => {
   const resetChat = () => {
     // New chat: conversation memory (including the visitor's name) resets,
     // and the welcome greeting reflects the current time.
-    setMessages([{ id: nextId('welcome'), role: 'assistant', content: getWelcomeMessage() }])
+    setMessages([{ id: nextId('welcome'), role: 'assistant', content: getLocalizedWelcomeMessage(t) }])
     setInput('')
+    updateMenuCategory(null)
   }
 
   const appendMessage = (role: 'user' | 'assistant', content: string) => {
@@ -136,11 +172,11 @@ export const Chatbot = () => {
   }
 
   const sendMessage = useCallback(
-    async (raw: string) => {
+    async (raw: string, displayLabel?: string) => {
       const text = raw.trim()
       if (!text || loading) return
 
-      appendMessage('user', text)
+      appendMessage('user', displayLabel ? displayLabel.trim() : text)
       setInput('')
       setLoading(true)
 
@@ -170,7 +206,14 @@ export const Chatbot = () => {
           res = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text, history, userName: statedName, localTime }),
+            body: JSON.stringify({
+              message: text,
+              history,
+              userName: statedName,
+              localTime,
+              lang,
+              currentMenuCategory: currentMenuCategoryRef.current,
+            }),
             signal: controller.signal,
           })
         } finally {
@@ -182,17 +225,40 @@ export const Chatbot = () => {
           throw new Error(data?.error || 'Request failed')
         }
 
+        if ('currentMenuCategory' in data) {
+          updateMenuCategory(data.currentMenuCategory || null)
+        } else {
+          const parsed = parseMenuOptions(data.response)
+          if (parsed) {
+            updateMenuCategory(parsed.type)
+          } else {
+            updateMenuCategory(null)
+          }
+        }
+
         appendMessage('assistant', data.response)
       } catch {
         // Fallback (API unreachable): pass the conversation so name memory,
         // follow-ups and context also work in the local path.
-        const local = await getChatResponse(text, history)
-        appendMessage('assistant', local)
+        const local = await getChatResponse(text, history, lang, currentMenuCategoryRef.current)
+        if (typeof local === 'object' && local !== null && 'currentMenuCategory' in local) {
+          updateMenuCategory((local as any).currentMenuCategory || null)
+          appendMessage('assistant', (local as any).response || '')
+        } else {
+          const textResponse = typeof local === 'string' ? local : (local as any)?.response || ''
+          const parsed = parseMenuOptions(textResponse)
+          if (parsed) {
+            updateMenuCategory(parsed.type)
+          } else {
+            updateMenuCategory(null)
+          }
+          appendMessage('assistant', textResponse)
+        }
       } finally {
         setLoading(false)
       }
     },
-    [loading, messages],
+    [loading, messages, lang],
   )
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -218,7 +284,7 @@ export const Chatbot = () => {
 
   // Clicking an option sends the very same number a visitor would have typed,
   // so both routes resolve through identical intent logic.
-  const activeMenu = findActiveMenu(messages)
+  const activeMenu = findActiveMenu(messages, currentMenuCategory)
 
   return (
     <div className="chatbot-root">
@@ -331,18 +397,18 @@ export const Chatbot = () => {
                         <p className="chatbot-message-content">{msg.content}</p>
                       </div>
 
-                      {activeMenu && activeMenu.index === idx && !loading && activeMenu.type !== 'services' && activeMenu.type !== 'technologies' && activeMenu.type !== 'products' && (
+                      {activeMenu && activeMenu.index === idx && !loading && (
                         <div className="chatbot-message chatbot-message-assistant">
                           <span className="chatbot-avatar" aria-hidden="true">
                             <img src={`${import.meta.env.BASE_URL}img/oklut-ai-assistant-icon.svg`} alt="" />
                           </span>
-                          <div className="chatbot-quick-list" role="group" aria-label="Menu options">
+                          <div className="chatbot-quick-list" role="group" aria-label={t('chatbot.menuOptions', { defaultValue: 'Menu options' })}>
                             {activeMenu.options.map((option) => (
                               <button
                                 key={option.index}
                                 type="button"
                                 className="chatbot-quick-btn"
-                                onClick={() => sendMessage(String(option.index))}
+                                onClick={() => sendMessage(String(option.index), `${option.index}. ${option.label}`)}
                               >
                                 {option.index}. {option.label}
                               </button>
@@ -354,7 +420,7 @@ export const Chatbot = () => {
                   ))}
 
                   {loading && (
-                    <div className="chatbot-message chatbot-message-assistant" aria-label="Oklut AI is typing">
+                    <div className="chatbot-message chatbot-message-assistant" aria-label={t('chatbot.typing', { defaultValue: 'Oklut AI is typing' })}>
                       <span className="chatbot-avatar" aria-hidden="true">
                         <img src={`${import.meta.env.BASE_URL}img/oklut-ai-assistant-icon.svg`} alt="" />
                       </span>
@@ -371,16 +437,25 @@ export const Chatbot = () => {
                   <div className="chatbot-quick-actions">
                     <p className="chatbot-quick-title">{t('chatbot.popularTopics')}</p>
                     <div className="chatbot-quick-list">
-                      {QUICK_ACTIONS.map((action) => (
-                        <button
-                          key={action.value}
-                          type="button"
-                          className="chatbot-quick-btn"
-                          onClick={() => sendMessage(action.value)}
-                        >
-                          {action.label}
-                        </button>
-                      ))}
+                      {QUICK_ACTIONS.map((action) => {
+                        const quickTopicLabels: Record<string, string> = {
+                          'What services do you offer?': t('nav.services', { defaultValue: t('services.eyebrow', { defaultValue: 'Our Services' }) }),
+                          'What technologies do you use?': t('nav.technologies', { defaultValue: t('technologies.title', { defaultValue: 'Technologies' }) }),
+                          'What career opportunities are available at Oklut?': t('nav.careers', { defaultValue: 'Careers' }),
+                          'How can I contact Oklut?': t('nav.contact', { defaultValue: t('contact.eyebrow', { defaultValue: 'Contact Oklut' }) }),
+                        }
+                        const label = quickTopicLabels[action.value] || action.label
+                        return (
+                          <button
+                            key={action.value}
+                            type="button"
+                            className="chatbot-quick-btn"
+                            onClick={() => sendMessage(action.value, label)}
+                          >
+                            {label}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}

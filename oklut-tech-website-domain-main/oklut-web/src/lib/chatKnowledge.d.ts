@@ -17,4 +17,9 @@ export function getUserNameFromHistory(
   history: Array<{ role: 'user' | 'assistant'; content: string }>,
 ): string | null
 
-export function getChatResponse(text: string, history?: Array<{ role: 'user' | 'assistant'; content: string }>): Promise<string>
+export function getChatResponse(
+  text: string,
+  history?: Array<{ role: 'user' | 'assistant'; content: string; currentMenuCategory?: string | null }>,
+  lang?: string,
+  currentMenuCategory?: string | null,
+): Promise<string | { response: string; currentMenuCategory: string | null }>

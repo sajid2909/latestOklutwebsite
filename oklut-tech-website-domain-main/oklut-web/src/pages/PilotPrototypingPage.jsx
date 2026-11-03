@@ -1,13 +1,18 @@
 import { useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from '../i18n/TranslationContext'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import './PilotPrototypingPage.css'
 
 export default function PilotPrototypingPage() {
+  const { t } = useTranslation()
   useDocumentMeta({
-    title: 'Proof of Concept (PoC) & Pilot Implementation — Oklut Technologies',
+    title: `${t('services.items.pocPilotImplementation.label', { defaultValue: 'Proof of Concept (PoC) & Pilot Implementation' })} — Oklut Technologies`,
     description:
-      'Rapid development and validation of technology solutions to assess technical feasibility, business value, integration requirements, performance, and scalability before full-scale implementation.',
+      t('services.items.pocPilotImplementation.description', {
+        defaultValue:
+          'Rapid development and validation of technology solutions to assess technical feasibility, business value, integration requirements, performance, and scalability before full-scale implementation.',
+      }),
   })
 
   const navigate = useNavigate()
@@ -70,7 +75,8 @@ export default function PilotPrototypingPage() {
     navigate('/book-consultation', { state: { service: 'Proof of Concept (PoC) & Pilot Implementation' } })
   }
 
-  const coreCapabilities = [
+  const rawCaps = t('servicesDetails.pilotPrototyping.coreCapabilities', { returnObjects: true })
+  const coreCapabilities = Array.isArray(rawCaps) && rawCaps.length ? rawCaps : [
     'PoC Development',
     'Prototyping',
     'MVP Development',
@@ -87,27 +93,31 @@ export default function PilotPrototypingPage() {
       <section className="pp-hero">
         <img
           src={`${import.meta.env.BASE_URL}img/poc-pilot-implementation.jpg`}
-          alt="Proof of Concept and Pilot Implementation"
+          alt={t('services.items.pocPilotImplementation.label', { defaultValue: 'Proof of Concept (PoC) & Pilot Implementation' })}
           className="pp-hero-bg"
         />
         <div className="pp-hero-copy reveal">
-          <div className="pp-eyebrow">Rapid Validation &amp; Feasibility</div>
+          <div className="pp-eyebrow">{t('services.pages.pilotPrototyping.eyebrow', { defaultValue: 'Rapid Validation & Feasibility' })}</div>
           <h1>
-            Proof of Concept (PoC) &amp; <em>Pilot Implementation</em>
+            {t('services.pages.pilotPrototyping.titlePart1', { defaultValue: 'Proof of Concept (PoC) &' })}{' '}
+            <em>{t('services.pages.pilotPrototyping.titlePart2', { defaultValue: 'Pilot Implementation' })}</em>
           </h1>
           <p>
-            Rapid development and validation of technology solutions to assess technical feasibility, business value, integration requirements, performance, and scalability before full-scale implementation.
+            {t('services.items.pocPilotImplementation.description', {
+              defaultValue:
+                'Rapid development and validation of technology solutions to assess technical feasibility, business value, integration requirements, performance, and scalability before full-scale implementation.',
+            })}
           </p>
           <div className="pp-hero-actions">
             <button type="button" className="pp-btn-primary" onClick={handleBookConsultation}>
-              Initiate PoC Discovery
+              {t('services.pages.pilotPrototyping.initiateDiscovery', { defaultValue: 'Initiate PoC Discovery' })}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </button>
             <Link to="/services/custom-development-customization" className="pp-btn-outline">
-              Explore Custom Development
+              {t('services.pages.pilotPrototyping.exploreDevelopment', { defaultValue: 'Explore Custom Development' })}
             </Link>
           </div>
         </div>
@@ -117,7 +127,7 @@ export default function PilotPrototypingPage() {
       <div style={{ background: '#0a1527', borderBottom: '1px solid rgba(45, 212, 191, 0.2)', padding: '20px 24px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <span style={{ color: '#2dd4bf', fontSize: '12px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-            Core Capabilities
+            {t('services.coreCapabilities', { defaultValue: 'Core Capabilities' })}
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {coreCapabilities.map((cap) => (
@@ -150,20 +160,19 @@ export default function PilotPrototypingPage() {
           {/* Row 1: Why Prototype First */}
           <div className="pp-row reveal">
             <div className="pp-col-text">
-              <div className="pp-tag">Rapid Validation</div>
-              <h2>From Concept to Validated Feasibility</h2>
+              <div className="pp-tag">{t('servicesDetails.pilotPrototyping.row1Eyebrow', { defaultValue: 'Rapid Validation' })}</div>
+              <h2>{t('servicesDetails.pilotPrototyping.row1Title', { defaultValue: 'From Concept to Validated Feasibility' })}</h2>
               <p>
-                Turning an idea into an enterprise-scale solution requires rigorous upfront validation. Our PoC &amp;
-                Pilot service evaluates technology viability, stress-tests critical integration hooks, and validates business ROI before major capital commitments.
+                {t('servicesDetails.pilotPrototyping.row1P1', { defaultValue: 'Turning an idea into an enterprise-scale solution requires rigorous upfront validation. Our PoC & Pilot service evaluates technology viability, stress-tests critical integration hooks, and validates business ROI before major capital commitments.' })}
               </p>
               <p>
-                We construct high-fidelity MVPs and focused sandbox pilots that prove technical feasibility, measure system latency, and gather direct stakeholder validation early.
+                {t('servicesDetails.pilotPrototyping.row1P2', { defaultValue: 'We construct high-fidelity MVPs and focused sandbox pilots that prove technical feasibility, measure system latency, and gather direct stakeholder validation early.' })}
               </p>
             </div>
             <div className="pp-col-image">
               <div className="pp-img-frame">
                 <img src={`${import.meta.env.BASE_URL}img/pilot-prototyping-hero.jpg`} alt="PoC Development and Feasibility Discovery" />
-                <div className="pp-cap">Rapid MVP Prototyping &amp; Technical Benchmarks</div>
+                <div className="pp-cap">{t('servicesDetails.pilotPrototyping.row1Cap', { defaultValue: 'Rapid MVP Prototyping & Technical Benchmarks' })}</div>
               </div>
             </div>
           </div>
@@ -171,19 +180,19 @@ export default function PilotPrototypingPage() {
           {/* Row 2: Agile Concept Validation (Reverse) */}
           <div className="pp-row reverse reveal">
             <div className="pp-col-text">
-              <div className="pp-tag">Agile Prototyping</div>
-              <h2>Interactive MVPs &amp; UX Validation</h2>
+              <div className="pp-tag">{t('servicesDetails.pilotPrototyping.row2Eyebrow', { defaultValue: 'Agile Prototyping' })}</div>
+              <h2>{t('servicesDetails.pilotPrototyping.row2Title', { defaultValue: 'Interactive MVPs & UX Validation' })}</h2>
               <p>
-                We build interactive wireframes, clickable user flows, and functional proof-of-concepts in days, not months. Test real user interactions, refine UI/UX patterns, and gather actionable feedback from stakeholders.
+                {t('servicesDetails.pilotPrototyping.row2P1', { defaultValue: 'We build interactive wireframes, clickable user flows, and functional proof-of-concepts in days, not months. Test real user interactions, refine UI/UX patterns, and gather actionable feedback from stakeholders.' })}
               </p>
               <p>
-                By shortening feedback loops during early development, your team minimizes rework and establishes clear technical specifications before capital-intensive build phases begin.
+                {t('servicesDetails.pilotPrototyping.row2P2', { defaultValue: 'By shortening feedback loops during early development, your team minimizes rework and establishes clear technical specifications before capital-intensive build phases begin.' })}
               </p>
             </div>
             <div className="pp-col-image">
               <div className="pp-img-frame">
                 <img src={`${import.meta.env.BASE_URL}img/proto-concept-sec.jpg`} alt="Rapid Prototyping and UX Testing" />
-                <div className="pp-cap">Rapid Iteration &amp; Clickable UX Prototypes</div>
+                <div className="pp-cap">{t('servicesDetails.pilotPrototyping.row2Cap', { defaultValue: 'Rapid Iteration & Clickable UX Prototypes' })}</div>
               </div>
             </div>
           </div>
@@ -191,19 +200,19 @@ export default function PilotPrototypingPage() {
           {/* Row 3: Technical Feasibility & Risk Reduction */}
           <div className="pp-row reveal">
             <div className="pp-col-text">
-              <div className="pp-tag">Integration &amp; Scalability Testing</div>
-              <h2>De-Risk Complex System Integrations</h2>
+              <div className="pp-tag">{t('servicesDetails.pilotPrototyping.row3Eyebrow', { defaultValue: 'Integration & Scalability Testing' })}</div>
+              <h2>{t('servicesDetails.pilotPrototyping.row3Title', { defaultValue: 'De-Risk Complex System Integrations' })}</h2>
               <p>
-                Uncover technical bottlenecks, API limitations, and performance constraints before full capital commitment. Our pilot engineering team stress-tests integrations, data pipelines, and third-party APIs in isolated sandbox environments.
+                {t('servicesDetails.pilotPrototyping.row3P1', { defaultValue: 'Uncover technical bottlenecks, API limitations, and performance constraints before full capital commitment. Our pilot engineering team stress-tests integrations, data pipelines, and third-party APIs in isolated sandbox environments.' })}
               </p>
               <p>
-                This proactive risk mitigation ensures high system availability, security compliance, and predictable development timelines when transitioning your PoC into enterprise production.
+                {t('servicesDetails.pilotPrototyping.row3P2', { defaultValue: 'This proactive risk mitigation ensures high system availability, security compliance, and predictable development timelines when transitioning your PoC into enterprise production.' })}
               </p>
             </div>
             <div className="pp-col-image">
               <div className="pp-img-frame">
                 <img src={`${import.meta.env.BASE_URL}img/proto-rapid-sec.jpg`} alt="De-Risking Cloud & System Architecture" />
-                <div className="pp-cap">Sandbox Integration &amp; Stress Testing</div>
+                <div className="pp-cap">{t('servicesDetails.pilotPrototyping.row3Cap', { defaultValue: 'Sandbox Integration & Stress Testing' })}</div>
               </div>
             </div>
           </div>
@@ -211,19 +220,19 @@ export default function PilotPrototypingPage() {
           {/* Row 4: Controlled Production Pilot (Reverse) */}
           <div className="pp-row reverse reveal">
             <div className="pp-col-text">
-              <div className="pp-tag">Controlled Production Pilot</div>
-              <h2>Targeted Pilot Launch &amp; Business Case Validation</h2>
+              <div className="pp-tag">{t('servicesDetails.pilotPrototyping.row4Eyebrow', { defaultValue: 'Controlled Production Pilot' })}</div>
+              <h2>{t('servicesDetails.pilotPrototyping.row4Title', { defaultValue: 'Targeted Pilot Launch & Business Case Validation' })}</h2>
               <p>
-                Deploy targeted pilot releases to a select user segment or test market. Track performance metrics, user adoption analytics, and operational feedback to quantify business value and establish a data-backed business case.
+                {t('servicesDetails.pilotPrototyping.row4P1', { defaultValue: 'Deploy targeted pilot releases to a select user segment or test market. Track performance metrics, user adoption analytics, and operational feedback to quantify business value and establish a data-backed business case.' })}
               </p>
               <p>
-                With real-world pilot insights, executive sponsors gain clear ROI metrics to justify broader deployment and strategic digital transformation investments.
+                {t('servicesDetails.pilotPrototyping.row4P2', { defaultValue: 'With real-world pilot insights, executive sponsors gain clear ROI metrics to justify broader deployment and strategic digital transformation investments.' })}
               </p>
             </div>
             <div className="pp-col-image">
               <div className="pp-img-frame">
                 <img src={`${import.meta.env.BASE_URL}img/proto-pilot-sec.jpg`} alt="Pilot Production Deployment and Analytics" />
-                <div className="pp-cap">Controlled Deployment &amp; Performance Telemetry</div>
+                <div className="pp-cap">{t('servicesDetails.pilotPrototyping.row4Cap', { defaultValue: 'Controlled Deployment & Performance Telemetry' })}</div>
               </div>
             </div>
           </div>
@@ -234,8 +243,8 @@ export default function PilotPrototypingPage() {
       <section className="pp-principles-section">
         <div className="pp-wrap">
           <div className="pp-section-header reveal">
-            <h2>Our Pilot Engineering Principles</h2>
-            <p>Guiding principles that turn technical uncertainty into predictable business success.</p>
+            <h2>{t('servicesDetails.pilotPrototyping.pillarsTitle', { defaultValue: 'Our Pilot Engineering Principles' })}</h2>
+            <p>{t('servicesDetails.pilotPrototyping.pillarsSub', { defaultValue: 'Guiding principles that turn technical uncertainty into predictable business success.' })}</p>
           </div>
           <div className="pp-grid">
             <div className="pp-card reveal">
@@ -244,8 +253,8 @@ export default function PilotPrototypingPage() {
                   <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                 </svg>
               </div>
-              <h3>PoC &amp; MVP Prototyping</h3>
-              <p>Deliver functional prototypes rapidly to validate value propositions early in the lifecycle.</p>
+              <h3>{t('servicesDetails.pilotPrototyping.pillar1Title', { defaultValue: 'PoC & MVP Prototyping' })}</h3>
+              <p>{t('servicesDetails.pilotPrototyping.pillar1Desc', { defaultValue: 'Deliver functional prototypes rapidly to validate value propositions early in the lifecycle.' })}</p>
             </div>
             <div className="pp-card reveal">
               <div className="pp-card-icon">
@@ -256,8 +265,8 @@ export default function PilotPrototypingPage() {
                   <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
               </div>
-              <h3>Feasibility &amp; Validation</h3>
-              <p>Verify API compatibility, throughput thresholds, and compliance constraints in sandbox environments.</p>
+              <h3>{t('servicesDetails.pilotPrototyping.pillar2Title', { defaultValue: 'Feasibility & Validation' })}</h3>
+              <p>{t('servicesDetails.pilotPrototyping.pillar2Desc', { defaultValue: 'Verify API compatibility, throughput thresholds, and compliance constraints in sandbox environments.' })}</p>
             </div>
             <div className="pp-card reveal">
               <div className="pp-card-icon">
@@ -265,8 +274,8 @@ export default function PilotPrototypingPage() {
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                 </svg>
               </div>
-              <h3>Scalability Assessment</h3>
-              <p>Simulate production load to establish capacity limits and determine cloud architecture sizing.</p>
+              <h3>{t('servicesDetails.pilotPrototyping.pillar3Title', { defaultValue: 'Scalability Assessment' })}</h3>
+              <p>{t('servicesDetails.pilotPrototyping.pillar3Desc', { defaultValue: 'Simulate production load to establish capacity limits and determine cloud architecture sizing.' })}</p>
             </div>
             <div className="pp-card reveal">
               <div className="pp-card-icon">
@@ -276,8 +285,8 @@ export default function PilotPrototypingPage() {
                   <line x1="6" y1="20" x2="6" y2="14"></line>
                 </svg>
               </div>
-              <h3>Business Case Validation</h3>
-              <p>Quantify tangible ROI and productivity metrics to support enterprise-wide rollout decisions.</p>
+              <h3>{t('servicesDetails.pilotPrototyping.pillar4Title', { defaultValue: 'Business Case Validation' })}</h3>
+              <p>{t('servicesDetails.pilotPrototyping.pillar4Desc', { defaultValue: 'Quantify tangible ROI and productivity metrics to support enterprise-wide rollout decisions.' })}</p>
             </div>
           </div>
         </div>
@@ -287,12 +296,12 @@ export default function PilotPrototypingPage() {
       <section className="pp-cta-section">
         <div className="pp-wrap">
           <div className="pp-cta-box reveal">
-            <h2>Ready to validate your next digital solution?</h2>
+            <h2>{t('servicesDetails.pilotPrototyping.ctaTitle', { defaultValue: 'Ready to validate your next digital solution?' })}</h2>
             <p>
-              Connect with our solution engineering team to explore your project requirements, build a prototype, and test feasibility with zero risk.
+              {t('servicesDetails.pilotPrototyping.ctaSub', { defaultValue: 'Connect with our solution engineering team to explore your project requirements, build a prototype, and test feasibility with zero risk.' })}
             </p>
             <button type="button" className="pp-btn-primary" onClick={handleBookConsultation}>
-              Book a PoC Consultation
+              {t('servicesDetails.pilotPrototyping.ctaButton', { defaultValue: 'Book a PoC Consultation' })}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>

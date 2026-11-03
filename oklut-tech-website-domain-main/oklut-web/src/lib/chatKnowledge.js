@@ -1,8 +1,9 @@
-import { PERSPECTIVE_INTENTS } from './perspectivesKnowledge'
+import { PERSPECTIVE_INTENTS } from './perspectivesKnowledge.js'
 import { supabase } from './supabase.js'
 import { resolveDateTimeQuery } from './dateTimeIntent.js'
 import { resolveContactQuery } from './contactIntent.js'
 import { resolveMenuReply, answerGeneralKnowledge, parseOptionIndex, tryMathCalculation } from './chatMenus.js'
+import { translateText } from './translateHelper.js'
 
 const CONTACT = {
   phone: '18004103299',
@@ -12,7 +13,7 @@ const CONTACT = {
     'SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081',
   vijayawadaAddress:
     'D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003',
-  southAfricaCompany: 'OKLUT TECHNOLOGIES (PTY) LTD',
+  southAfricaCompany: 'OKLUT TECHNOLOGIES PVT LTD',
   southAfricaAddress: 'Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa',
   hours: 'Monday – Saturday, 9:30 – 18:30 IST',
 }
@@ -966,106 +967,131 @@ function resolveFollowUp(text, history) {
   return wantsSimple ? `Sure — in simple terms: ${target.reply}` : target.reply
 }
 
-export async function getChatResponse(text, history = []) {
-  if (isSecretRequest(text)) {
-    return `I'm sorry, but I can't share API keys, passwords, credentials or internal configuration. If you'd like help with Oklut's services or contacting our team, I'm happy to assist.`
-  }
-
-  // Personnel/salary specifics aren't published — answer honestly, never invent.
-  if (isPersonnelQuestion(text)) {
-    return `That detail isn't published on our website and I wouldn't want to guess. For anything about Oklut's team or leadership, please contact ${CONTACT.email} or ${CONTACT.phone} and the team will help you directly.`
-  }
-
-  // Priority 0: mathematics (arithmetic, averages, percentages). Resolved before
-  // the menu logic so "2+2" is calculated, not treated as a list selection —
-  // while a bare "2" still falls through to the menu logic below.
-  const mathReply = tryMathCalculation(text)
-  if (mathReply) return mathReply
-
-  // Priority 1-3: a numbered selection against the menu currently on screen,
-  // or a request for the Services / Technologies / Products menu. Resolved BEFORE every
-  // other intent so "2" is never treated as an unknown question and
-  // "services" never reaches the fallback.
-  const menuReply = resolveMenuReply(text, history)
-  if (menuReply) return menuReply
-
-  // If the user enters a number without first selecting a category, ask whether they mean Services, Technologies, or Products.
-  const bareIndex = parseOptionIndex(normalize(text))
-  if (bareIndex !== null) {
-    return `Did you mean Services, Technologies, or Products? Please specify a category or type "services", "technologies", or "products" to see the list.`
-  }
-
-  // "Do you offer X?" where X is genuinely unknown -> polite fallback.
-  const unknownOffer = unknownOfferReply(text)
-  if (unknownOffer) return unknownOffer
-
-  // Company contact/location questions ("where are you located?", "give me
-  // your phone number", "how do I reach your office?", "send address", ...)
-  // are answered from the known company details, for ANY phrasing.
-  const contactReply = resolveContactQuery(text)
-  if (contactReply) return contactReply
-
-  const normalized = normalize(text)
-  const words = normalized.split(' ').filter(Boolean)
-  const { best, bestScore } = scoreAll(normalized, words)
-
-  // The visitor shared their name -> acknowledge it (works for ANY name).
-  const statedName = extractName(text)
-  if (statedName) {
-    if (best && bestScore > 0) {
-      if (best.async) {
-        const roles = await getOpenRolesSummary()
-        return `Nice to meet you, ${statedName}! 👋 ${best.reply}\n\n${roles}`
-      }
-      return `Nice to meet you, ${statedName}! 👋 ${best.reply}`
+export async function getChatResponse(text, history = [], lang = 'en', currentMenuCategory = null) {
+  async function computeReply() {
+    if (isSecretRequest(text)) {
+      return `I'm sorry, but I can't share API keys, passwords, credentials or internal configuration. If you'd like help with Oklut's services or contacting our team, I'm happy to assist.`
     }
-    return `Nice to meet you, ${statedName}! 👋 I'll remember your name for this conversation. How can I help — services, products, technologies, careers, or contact info?`
+
+    // Personnel/salary specifics aren't published — answer honestly, never invent.
+    if (isPersonnelQuestion(text)) {
+      return `That detail isn't published on our website and I wouldn't want to guess. For anything about Oklut's team or leadership, please contact ${CONTACT.email} or ${CONTACT.phone} and the team will help you directly.`
+    }
+
+    // Priority 0: mathematics (arithmetic, averages, percentages). Resolved before
+    // the menu logic so "2+2" is calculated, not treated as a list selection —
+    // while a bare "2" still falls through to the menu logic below.
+    const mathReply = tryMathCalculation(text)
+    if (mathReply) return mathReply
+
+    // Priority 1-3: a numbered selection against the menu currently on screen,
+    // or a request for the Services / Technologies / Products menu. Resolved BEFORE every
+    // other intent so "2" is never treated as an unknown question and
+    // "services" never reaches the fallback.
+    const menuReply = resolveMenuReply(text, history, currentMenuCategory)
+    if (menuReply) {
+      let nextCategory = currentMenuCategory
+      if (/^Our Services:/m.test(menuReply)) nextCategory = 'services'
+      else if (/^Our Technologies:/m.test(menuReply)) nextCategory = 'technologies'
+      else if (/^Here are our products:/m.test(menuReply)) nextCategory = 'products'
+      return { reply: menuReply, currentMenuCategory: nextCategory }
+    }
+
+    // If the user enters a number without first selecting a category, ask whether they mean Services, Technologies, or Products.
+    const bareIndex = parseOptionIndex(text)
+    if (bareIndex !== null) {
+      return {
+        reply: `Did you mean Services, Technologies, or Products? Please specify a category or type "services", "technologies", or "products" to see the list.`,
+        currentMenuCategory: null,
+      }
+    }
+
+    const unknownOffer = unknownOfferReply(text)
+    if (unknownOffer) return unknownOffer
+
+    // Company contact/location questions ("where are you located?", "give me
+    // your phone number", "how do I reach your office?", "send address", ...)
+    // are answered from the known company details, for ANY phrasing.
+    const contactReply = resolveContactQuery(text)
+    if (contactReply) return contactReply
+
+    const normalized = normalize(text)
+    const words = normalized.split(' ').filter(Boolean)
+    const { best, bestScore } = scoreAll(normalized, words)
+
+    // The visitor shared their name -> acknowledge it (works for ANY name).
+    const statedName = extractName(text)
+    if (statedName) {
+      if (best && bestScore > 0) {
+        if (best.async) {
+          const roles = await getOpenRolesSummary()
+          return `Nice to meet you, ${statedName}! 👋 ${best.reply}\n\n${roles}`
+        }
+        return `Nice to meet you, ${statedName}! 👋 ${best.reply}`
+      }
+      return `Nice to meet you, ${statedName}! 👋 I'll remember your name for this conversation. How can I help — services, products, technologies, careers, or contact info?`
+    }
+
+    // Name recall question -> answer from the current chat only.
+    if (isNameQuestion(text)) {
+      const name = findNameInHistory(history)
+      if (name) return `Your name is ${name}.`
+      return `I don't have your name yet — I only know what's shared within this chat. What should I call you?`
+    }
+
+    // Priority 9: simple, well-known general-knowledge questions (capitals,
+    // currencies, common facts, tech definitions) get a real answer instead of
+    // the Oklut contact fallback — but ONLY once no Oklut knowledge applies,
+    // because company information outranks general facts in the intent order.
+    if (bestScore === 0) {
+      const general = answerGeneralKnowledge(text)
+      if (general) return general
+    }
+
+    // General date/time questions ("present time", "today's date in Japan")
+    // are answered from the clock via IANA timezones — never the Oklut
+    // fallback. Default location is India; a name shared in this chat
+    // personalizes the default-location time reply (spec: date/time + name).
+    const dateTimeReply = resolveDateTimeQuery(text, {
+      name: findNameInHistory(history),
+      greeting: getTimeGreeting(),
+    })
+    if (dateTimeReply) return dateTimeReply
+
+    // Pure greetings -> natural, brief reply (with name/context awareness);
+    // conversation context is preserved, never the fallback.
+    const greetingReply = getGreetingReply(text, history)
+    if (greetingReply) return greetingReply
+
+    // Follow-up ("tell me more", "the second one", "in simple words") ->
+    // resolve against the recent conversation instead of falling back.
+    if (bestScore === 0 && history.length > 0) {
+      const followUp = resolveFollowUp(text, history)
+      if (followUp) return followUp
+    }
+
+    if (!best) return FALLBACK
+
+    if (best.async) {
+      const roles = await getOpenRolesSummary()
+      return `${best.reply}\n\n${roles}`
+    }
+
+    return best.reply
   }
 
-  // Name recall question -> answer from the current chat only.
-  if (isNameQuestion(text)) {
-    const name = findNameInHistory(history)
-    if (name) return `Your name is ${name}.`
-    return `I don't have your name yet — I only know what's shared within this chat. What should I call you?`
+  const result = await computeReply()
+  const rawReply = typeof result === 'object' && result !== null && 'reply' in result ? result.reply : result
+  const category = typeof result === 'object' && result !== null && 'currentMenuCategory' in result ? result.currentMenuCategory : null
+
+  const translated = lang && lang !== 'en' ? await translateText(rawReply, lang) : rawReply
+
+  const output = {
+    response: translated,
+    currentMenuCategory: category,
+    toString() {
+      return this.response
+    },
   }
-
-  // Priority 9: simple, well-known general-knowledge questions (capitals,
-  // currencies, common facts, tech definitions) get a real answer instead of
-  // the Oklut contact fallback — but ONLY once no Oklut knowledge applies,
-  // because company information outranks general facts in the intent order.
-  if (bestScore === 0) {
-    const general = answerGeneralKnowledge(text)
-    if (general) return general
-  }
-
-  // General date/time questions ("present time", "today's date in Japan")
-  // are answered from the clock via IANA timezones — never the Oklut
-  // fallback. Default location is India; a name shared in this chat
-  // personalizes the default-location time reply (spec: date/time + name).
-  const dateTimeReply = resolveDateTimeQuery(text, {
-    name: findNameInHistory(history),
-    greeting: getTimeGreeting(),
-  })
-  if (dateTimeReply) return dateTimeReply
-
-  // Pure greetings -> natural, brief reply (with name/context awareness);
-  // conversation context is preserved, never the fallback.
-  const greetingReply = getGreetingReply(text, history)
-  if (greetingReply) return greetingReply
-
-  // Follow-up ("tell me more", "the second one", "in simple words") ->
-  // resolve against the recent conversation instead of falling back.
-  if (bestScore === 0 && history.length > 0) {
-    const followUp = resolveFollowUp(text, history)
-    if (followUp) return followUp
-  }
-
-  if (!best) return FALLBACK
-
-  if (best.async) {
-    const roles = await getOpenRolesSummary()
-    return `${best.reply}\n\n${roles}`
-  }
-
-  return best.reply
+  return output
 }

@@ -1,8 +1,10 @@
 import { memo } from 'react'
+import { useTranslation } from '../../i18n/TranslationContext'
 import JobIcon from './JobIcon'
 import { DEPT_COLORS, formatSalary, timeAgo } from './jobData'
 
 function RoleCard({ job, index = 0, expanded, onToggleDetails, onApply }) {
+  const { t } = useTranslation()
   const salary = formatSalary(job)
   const meta = [
     job.location && { icon: 'pin', text: job.location },
@@ -22,7 +24,7 @@ function RoleCard({ job, index = 0, expanded, onToggleDetails, onApply }) {
     >
       <div className="role-card-head">
         <span className="dept-badge">{job.department || 'General'}</span>
-        {job.remote && <span className="badge-remote"><JobIcon name="pin" /> Remote</span>}
+        {job.remote && <span className="badge-remote"><JobIcon name="pin" /> {t('careers.remote', { defaultValue: 'Remote' })}</span>}
       </div>
 
       <h3 className="role-card-title">{job.title}</h3>
@@ -47,19 +49,19 @@ function RoleCard({ job, index = 0, expanded, onToggleDetails, onApply }) {
           <div className="role-details">
             {job.responsibilities?.length > 0 && (
               <div className="role-details-block">
-                <h4>Responsibilities</h4>
+                <h4>{t('careers.responsibilities', { defaultValue: 'Responsibilities' })}</h4>
                 <ul>{job.responsibilities.map((r) => <li key={r}>{r}</li>)}</ul>
               </div>
             )}
             {job.requirements?.length > 0 && (
               <div className="role-details-block">
-                <h4>Requirements</h4>
+                <h4>{t('careers.requirements', { defaultValue: 'Requirements' })}</h4>
                 <ul>{job.requirements.map((r) => <li key={r}>{r}</li>)}</ul>
               </div>
             )}
             {job.nice_to_have?.length > 0 && (
               <div className="role-details-block">
-                <h4>Nice to Have</h4>
+                <h4>{t('careers.niceToHave', { defaultValue: 'Nice to Have' })}</h4>
                 <ul>{job.nice_to_have.map((r) => <li key={r}>{r}</li>)}</ul>
               </div>
             )}

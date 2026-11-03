@@ -1,7 +1,9 @@
+import { useTranslation } from '../../i18n/TranslationContext';
 import { ServicePageTemplate } from './ServicePageTemplate'
 import './ServicePage.css'
 
 export default function SharedServicesPage() {
+  const { t } = useTranslation();
   const heroImageUrl = `${import.meta.env.BASE_URL}img/shared-services-managed-operations.jpg`
   const overviewImageUrl = `${import.meta.env.BASE_URL}img/case-shared-services.jpg`
 
@@ -91,9 +93,8 @@ export default function SharedServicesPage() {
           <div className="section-head reveal">
             <span className="eyebrow">
               <span className="eyebrow-bar" aria-hidden="true" />
-              How It Works
-            </span>
-            <h2>A proven path to shared services success</h2>
+              {t('common.howItWorks', { defaultValue: 'How It Works' })}</span>
+            <h2>{t('servicesDetails.sharedServices.howItWorksHeading', { defaultValue: 'A proven path to shared services success' })}</h2>
             <p className="service-overview-desc">
               Whether you need to centralize back-office operations, establish a global services hub,
               or optimize an existing shared service center, our structured approach ensures a smooth

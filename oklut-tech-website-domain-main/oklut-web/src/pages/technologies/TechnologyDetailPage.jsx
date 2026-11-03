@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from '../../i18n/TranslationContext'
 import { TECHNOLOGIES_DATA } from '../../data/technologiesData'
 import { useDocumentMeta } from '../../lib/useDocumentMeta'
 import '../DigitalTransformationPage.css'
 
 export default function TechnologyDetailPage({ fixedId }) {
+  const { t } = useTranslation()
   const { techId } = useParams()
   const currentId = fixedId || techId || 'ai-robotics-solutions'
 
@@ -137,24 +139,39 @@ export default function TechnologyDetailPage({ fixedId }) {
     `${import.meta.env.BASE_URL}img/proto-rapid-sec.jpg`,
   ]
 
+  const localizedTech = t(`technologiesDetails.${tech.id}`, { returnObjects: true, defaultValue: tech }) || tech
+  const localizedCommon = t('technologiesCommon', { returnObjects: true, defaultValue: {} }) || {}
+
+  const techKey = {
+    'ai-robotics-solutions': 'aiRobotics',
+    'business-automation-solutions': 'businessAutomation',
+    'cloud-migration-solutions': 'cloudMigrations',
+    'data-center-solutions': 'dataCenters',
+    'cognitive-analytics-ai': 'cognitiveAnalytics',
+    'information-reporting-systems': 'informationReporting',
+    'managed-services': 'managedServices',
+    'one-stop-technology-solutions': 'oneStopSolutions',
+  }[tech.slug || tech.id]
+  const localizedTitle = localizedTech.title || (techKey ? t(`technologies.options.${techKey}`, { defaultValue: tech.title }) : tech.title)
+
   return (
     <div className="dt-page">
       {/* Hero Section */}
       <section className="dt-hero">
         <img
           src={`${import.meta.env.BASE_URL}${tech.image}`}
-          alt={tech.title}
+          alt={localizedTitle}
           className="dt-hero-bg"
         />
         <div className="dt-hero-copy reveal">
-          <div className="dt-eyebrow">{tech.heroBadge || 'Enterprise Technology Solutions'}</div>
+          <div className="dt-eyebrow">{localizedTech.heroBadge || localizedCommon.heroBadge || 'Enterprise Technology Solutions'}</div>
           <h1>
-            {tech.title}
+            {localizedTitle}
           </h1>
-          <p>{tech.tagline}</p>
+          <p>{localizedTech.tagline || tech.tagline}</p>
           <div className="dt-hero-actions">
             <button type="button" className="dt-btn-primary" onClick={handleBook}>
-              Book Technology Discovery
+              {localizedCommon.bookDiscovery || t('technologies.bookDiscovery', { defaultValue: 'Book Technology Discovery' })}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -168,7 +185,7 @@ export default function TechnologyDetailPage({ fixedId }) {
                 navigate('/', { state: { scrollTo: 'gallery' } })
               }}
             >
-              Explore All Technologies
+              {localizedCommon.exploreAll || t('technologies.exploreAll', { defaultValue: 'Explore All Technologies' })}
             </a>
           </div>
         </div>
@@ -178,10 +195,10 @@ export default function TechnologyDetailPage({ fixedId }) {
       <div style={{ background: '#0a1527', borderBottom: '1px solid rgba(45, 212, 191, 0.2)', padding: '20px 24px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <span style={{ color: '#2dd4bf', fontSize: '12px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-            Core Capabilities
+            {localizedCommon.coreCapabilities || t('services.coreCapabilities', { defaultValue: 'Core Capabilities' })}
           </span>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            {tech.capabilities.map((cap) => (
+            {(localizedTech.capabilities || tech.capabilities).map((cap) => (
               <span
                 key={cap.title || cap}
                 style={{
@@ -211,15 +228,15 @@ export default function TechnologyDetailPage({ fixedId }) {
           {/* Row 1: Overview */}
           <div className="dt-row reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Enterprise Overview</div>
-              <h2>Intelligent Technology for Measurable Outcomes</h2>
-              {tech.overview.map((p, idx) => (
+              <div className="dt-eyebrow">{localizedCommon.overviewEyebrow || 'Enterprise Overview'}</div>
+              <h2>{localizedCommon.overviewTitle || 'Intelligent Technology for Measurable Outcomes'}</h2>
+              {(localizedTech.overview || tech.overview).map((p, idx) => (
                 <p key={idx}>{p}</p>
               ))}
             </div>
             <div className="dt-img-col">
               <div className="dt-img-frame">
-                <img src={rowImgs[0]} alt={`${tech.title} Overview`} />
+                <img src={rowImgs[0]} alt={`${localizedTitle} Overview`} />
               </div>
             </div>
           </div>
@@ -227,15 +244,15 @@ export default function TechnologyDetailPage({ fixedId }) {
           {/* Row 2: Transformation (Reverse) */}
           <div className="dt-row reverse reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Operational Transformation</div>
-              <h2>Transforming Business Through Intelligent Workflows</h2>
-              {tech.transformation && tech.transformation.map((p, idx) => (
+              <div className="dt-eyebrow">{localizedCommon.transformationEyebrow || 'Operational Transformation'}</div>
+              <h2>{localizedCommon.transformationTitle || 'Transforming Business Through Intelligent Workflows'}</h2>
+              {(localizedTech.transformation || tech.transformation) && (localizedTech.transformation || tech.transformation).map((p, idx) => (
                 <p key={idx}>{p}</p>
               ))}
             </div>
             <div className="dt-img-col">
               <div className="dt-img-frame">
-                <img src={rowImgs[1]} alt={`${tech.title} Transformation`} />
+                <img src={rowImgs[1]} alt={`${localizedTitle} Transformation`} />
               </div>
             </div>
           </div>
@@ -243,13 +260,13 @@ export default function TechnologyDetailPage({ fixedId }) {
           {/* Row 3: Lifecycle Framework */}
           <div className="dt-row reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Structured Delivery Approach</div>
-              <h2>End-to-End Execution &amp; Continuous Optimization</h2>
+              <div className="dt-eyebrow">{localizedCommon.deliveryEyebrow || 'Structured Delivery Approach'}</div>
+              <h2>{localizedCommon.deliveryTitle || 'End-to-End Execution & Continuous Optimization'}</h2>
               <p>
-                Our proven implementation approach follows a rigorous delivery lifecycle:
+                {localizedCommon.deliveryIntro || 'Our proven implementation approach follows a rigorous delivery lifecycle:'}
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '16px 0 20px' }}>
-                {tech.lifecycleSteps.map((step, idx) => (
+                {(localizedTech.lifecycleSteps || tech.lifecycleSteps).map((step, idx) => (
                   <span
                     key={step}
                     style={{
@@ -267,12 +284,12 @@ export default function TechnologyDetailPage({ fixedId }) {
                 ))}
               </div>
               <p>
-                This structured sequence ensures tight alignment with business goals, robust security posture, and measurable ROI benchmarks at every phase.
+                {localizedCommon.deliveryOutro || 'This structured sequence ensures tight alignment with business goals, robust security posture, and measurable ROI benchmarks at every phase.'}
               </p>
             </div>
             <div className="dt-img-col">
               <div className="dt-img-frame">
-                <img src={rowImgs[2]} alt={`${tech.title} Lifecycle`} />
+                <img src={rowImgs[2]} alt={`${localizedTitle} Lifecycle`} />
               </div>
             </div>
           </div>
@@ -280,16 +297,16 @@ export default function TechnologyDetailPage({ fixedId }) {
           {/* Row 4: Security & Governance (Reverse) */}
           <div className="dt-row reverse reveal">
             <div className="dt-text-col">
-              <div className="dt-eyebrow">Security &amp; Governance</div>
-              <h2>Enterprise-Grade Reliability &amp; Compliance Safeguards</h2>
-              <p>{tech.security}</p>
+              <div className="dt-eyebrow">{localizedCommon.securityEyebrow || 'Security & Governance'}</div>
+              <h2>{localizedCommon.securityTitle || 'Enterprise-Grade Reliability & Compliance Safeguards'}</h2>
+              <p>{localizedTech.security || tech.security}</p>
               <p>
-                We embed strict role-based access control, automated vulnerability scanning, model governance, and multi-tier encryption to ensure your production environment remains resilient and fully compliant.
+                {localizedCommon.securityOutro || 'We embed strict role-based access control, automated vulnerability scanning, model governance, and multi-tier encryption to ensure your production environment remains resilient and fully compliant.'}
               </p>
             </div>
             <div className="dt-img-col">
               <div className="dt-img-frame">
-                <img src={rowImgs[3]} alt={`${tech.title} Security & Governance`} />
+                <img src={rowImgs[3]} alt={`${localizedTitle} Security & Governance`} />
               </div>
             </div>
           </div>
@@ -300,19 +317,19 @@ export default function TechnologyDetailPage({ fixedId }) {
       <section className="dt-capabilities-section">
         <div className="dt-wrap">
           <div className="dt-section-header reveal">
-            <h2>Core Technology Capabilities</h2>
-            <p>Comprehensive technical competencies engineered to scale your digital operations.</p>
+            <h2>{localizedCommon.capabilitiesTitle || t('technologies.coreCapabilities', { defaultValue: 'Core Technology Capabilities' })}</h2>
+            <p>{localizedCommon.capabilitiesSub || 'Comprehensive technical competencies engineered to scale your digital operations.'}</p>
           </div>
           <div className="dt-grid">
-            {tech.capabilities.slice(0, 4).map((cap, idx) => (
+            {(localizedTech.capabilities || tech.capabilities).slice(0, 4).map((cap, idx) => (
               <div key={idx} className="dt-card reveal">
                 <div className="dt-card-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                   </svg>
                 </div>
-                <h3>{cap.title}</h3>
-                <p>{cap.desc}</p>
+                <h3>{cap.title || cap}</h3>
+                <p>{cap.desc || ''}</p>
               </div>
             ))}
           </div>
@@ -324,13 +341,13 @@ export default function TechnologyDetailPage({ fixedId }) {
         <div className="dt-wrap">
           <div className="dt-cta-box reveal" style={{ background: 'radial-gradient(circle at center, rgba(13, 148, 136, 0.25) 0%, rgba(15, 23, 42, 0.8) 100%)', border: '1px solid rgba(45, 212, 191, 0.4)', borderRadius: '20px', padding: '56px 32px', textAlign: 'center' }}>
             <h2 style={{ fontSize: 'clamp(24px, 4vw, 36px)', color: '#ffffff', margin: '0 0 16px' }}>
-              {tech.ctaHeadline || 'Ready to transform your technology environment?'}
+              {localizedTech.ctaHeadline || tech.ctaHeadline || 'Ready to transform your technology environment?'}
             </h2>
             <p style={{ color: '#c7d2dd', fontSize: '16px', maxWidth: '640px', margin: '0 auto 32px' }}>
-              {tech.ctaSub || 'Contact our team to discuss your requirements and build the right solution for your organization.'}
+              {localizedTech.ctaSub || tech.ctaSub || 'Contact our team to discuss your requirements and build the right solution for your organization.'}
             </p>
             <button type="button" className="dt-btn-primary" onClick={handleBook}>
-              Book a Consultation
+              {localizedCommon.bookConsultation || t('technologies.bookConsultation', { defaultValue: 'Book a Consultation' })}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
