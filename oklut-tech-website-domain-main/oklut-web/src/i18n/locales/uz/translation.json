@@ -130,7 +130,7 @@
     "emailLabel": "Elektron pochta *",
     "company": "Kompaniya",
     "subject": "Mavzu",
-    "messageLabel": "Xabar *",
+    "messageLabel": "Xabar",
     "sending": "Yuborilmoqda…",
     "sendBtn": "Xabar yuborish",
     "successMsg": "Xabar yuborildi! Nusxasi elektron pochtangizga yuborildi.",
@@ -144,13 +144,52 @@
       "email": "you@company.com",
       "company": "Sizning kompaniyangiz yoki tashkilotingiz",
       "subject": "Biz qanday yordam bera olamiz?",
-      "message": "Loyihangiz, vaqt jadvalingiz va maqsadlaringiz haqida bizga xabar bering..."
+      "message": "Loyihangiz, vaqt jadvalingiz va maqsadlaringiz haqida bizga xabar bering...",
+      "firstName": "Ismingizni kiriting",
+      "lastName": "Familiyangizni kiriting",
+      "workEmail": "Elektron pochta manzilingizni kiriting",
+      "phoneNumber": "Telefon raqamingizni kiriting",
+      "selectSubject": "Mavzuni tanlang",
+      "messageNew": "Xabaringizni shu yerga yozing..."
     },
     "validation": {
       "fullNameRequired": "Iltimos, toʻliq ismingizni kiriting.",
-      "emailRequired": "Iltimos, elektron pochta manzilingizni kiriting.",
+      "emailRequired": "Elektron pochta kerak.",
       "emailInvalid": "Yaroqli elektron pochta manzilini kiriting.",
-      "messageRequired": "Iltimos, xabar kiriting."
+      "messageRequired": "Xabar kerak.",
+      "firstNameRequired": "Ism talab qilinadi.",
+      "lastNameRequired": "Familiya kerak.",
+      "subjectRequired": "Iltimos, mavzuni tanlang."
+    },
+    "eyebrowDash": "BIZ BOG'LANING",
+    "sendUsAMessage": "Bizga xabar yuboring",
+    "subMessage": "Savolingiz bormi, loyihangiz bormi yoki hamkorlikni o'rganmoqchimisiz? Shaklni to'ldiring va bizning jamoamiz sizga tez orada javob beradi.",
+    "firstNameLabel": "Ism",
+    "lastNameLabel": "Familiya",
+    "workEmailLabel": "Ishchi elektron pochta",
+    "phoneNumberLabel": "Telefon raqami",
+    "subjectLabel": "Mavzu",
+    "sendMessageBtn": "Xabar yuborish",
+    "reachUsTitle": "Bizga yetib boring",
+    "reachUsDirectlyWord": "bevosita",
+    "callUs": "Bizga qo'ng'iroq qiling",
+    "emailUs": "Bizga elektron pochta",
+    "ourOffices": "Bizning ofislarimiz",
+    "quickResponse": "Tez javob",
+    "replyPromptly": "Biz zudlik bilan javob beramiz",
+    "businessSupport": "Biznesni qo'llab-quvvatlash",
+    "inquiryToDelivery": "So'rovdan tortib to etkazib berishgacha",
+    "consultOurExperts": "Mutaxassislarimiz bilan maslahatlashing",
+    "getRightSolution": "To'g'ri yechim toping",
+    "subjects": {
+      "generalInquiry": "Umumiy so'rov",
+      "customDev": "Shaxsiy dasturiy ta'minotni ishlab chiqish",
+      "cloudDevOps": "Bulut va DevOps",
+      "aiMl": "AI va mashinani o'rganish",
+      "mobileDev": "Mobil ilovalarni ishlab chiqish",
+      "uiUx": "UI/UX dizayni",
+      "consulting": "Konsalting / Hamkorlik",
+      "other": "Boshqa"
     }
   },
   "services": {
@@ -1180,7 +1219,7 @@
     "credoPeople": "ODAMLAR",
     "credoBrighterTomorrow": "ERTAGA YORG'UN",
     "hyderabadLocation": "Haydarobod, Hindiston",
-    "vijayawadaLocation": "Vijayavada, Andxra-Pradesh",
+    "vijayawadaLocation": "Vijayavada, Hindiston",
     "southAfricaLocation": "Janubiy Afrika – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Foydalanish shartlari",
     "accessibility": "Foydalanish imkoniyati",
@@ -1189,7 +1228,8 @@
     "vijayawadaOffice": "Vijayawada idorasi",
     "allRightsReserved": "Barcha huquqlar himoyalangan.",
     "hyderabadPin": "Haydarobod, Hindiston",
-    "southAfricaPin": "Janubiy Afrika"
+    "southAfricaPin": "Janubiy Afrika",
+    "dubaiLocation": "Yaqin Sharq markazi · Birlashgan Arab Amirliklari"
   },
   "common": {
     "loading": "Yuklanmoqda...",

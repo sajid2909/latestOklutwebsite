@@ -120,7 +120,7 @@
     "contactLede": "The fastest way to move forward is a short conversation. Reach us on any channel below, or book a slot and we will come to you prepared.",
     "phone": "Phone",
     "email": "Email",
-    "office": "Office",
+    "office": "Hyderabad Office",
     "hours": "Hours",
     "hoursValue": "Mon – Sat, 9:30 – 18:30 IST",
     "bookSlot": "Book a consultation slot",
@@ -130,27 +130,68 @@
     "emailLabel": "Email *",
     "company": "Company",
     "subject": "Subject",
-    "messageLabel": "Message *",
+    "messageLabel": "Message",
     "sending": "Sending…",
     "sendBtn": "Send message",
     "successMsg": "Message sent! A copy has been emailed to you.",
     "errorMsg": "Could not save your message. Check that the contact_messages table exists, then try again.",
     "offices": {
+      "hyderabad": "Hyderabad Office",
       "vijayawada": "Vijayawada Office",
-      "southAfrica": "South Africa Office"
+      "southAfrica": "South Africa Office",
+      "dubai": "Middle East Office"
     },
     "placeholders": {
       "fullName": "Your full name",
       "email": "you@company.com",
       "company": "Your company or organization",
       "subject": "How can we help?",
-      "message": "Tell us about your project, timeline, and goals..."
+      "message": "Tell us about your project, timeline, and goals...",
+      "firstName": "Enter your first name",
+      "lastName": "Enter your last name",
+      "workEmail": "Enter your email address",
+      "phoneNumber": "Enter your phone number",
+      "selectSubject": "Select a subject",
+      "messageNew": "Type your message here..."
     },
     "validation": {
       "fullNameRequired": "Please enter your full name.",
-      "emailRequired": "Please enter your email address.",
-      "emailInvalid": "Please enter a valid email address.",
-      "messageRequired": "Please enter a message."
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Enter a valid email.",
+      "messageRequired": "Message is required.",
+      "firstNameRequired": "First name is required.",
+      "lastNameRequired": "Last name is required.",
+      "subjectRequired": "Please select a subject."
+    },
+    "eyebrowDash": "CONTACT US",
+    "sendUsAMessage": "Send us a message",
+    "subMessage": "Have a question, a project in mind, or want to explore a partnership? Fill out the form and our team will get back to you shortly.",
+    "firstNameLabel": "First Name",
+    "lastNameLabel": "Last Name",
+    "workEmailLabel": "Work Email",
+    "phoneNumberLabel": "Phone Number",
+    "subjectLabel": "Subject",
+    "sendMessageBtn": "Send Message",
+    "reachUsTitle": "Reach us",
+    "reachUsDirectlyWord": "directly",
+    "callUs": "Call Us",
+    "emailUs": "Email Us",
+    "ourOffices": "Our Offices",
+    "quickResponse": "Quick Response",
+    "replyPromptly": "We reply promptly",
+    "businessSupport": "Business Support",
+    "inquiryToDelivery": "From inquiry to delivery",
+    "consultOurExperts": "Consult Our Experts",
+    "getRightSolution": "Get the right solution",
+    "subjects": {
+      "generalInquiry": "General Inquiry",
+      "customDev": "Custom Software Development",
+      "cloudDevOps": "Cloud & DevOps",
+      "aiMl": "AI & Machine Learning",
+      "mobileDev": "Mobile App Development",
+      "uiUx": "UI/UX Design",
+      "consulting": "Consulting / Partnership",
+      "other": "Other"
     }
   },
   "services": {
@@ -1180,7 +1221,7 @@
     "credoPeople": "PEOPLE",
     "credoBrighterTomorrow": "A BRIGHTER TOMORROW",
     "hyderabadLocation": "Hyderabad, India",
-    "vijayawadaLocation": "Vijayawada, Andhra Pradesh",
+    "vijayawadaLocation": "Vijayawada, India",
     "southAfricaLocation": "South Africa – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Terms of Use",
     "accessibility": "Accessibility",
@@ -1189,7 +1230,9 @@
     "vijayawadaOffice": "Vijayawada Office",
     "allRightsReserved": "All rights reserved.",
     "hyderabadPin": "Hyderabad, India",
-    "southAfricaPin": "South Africa"
+    "southAfricaPin": "South Africa",
+    "dubaiLocation": "Middle East hub · United Arab Emirates",
+    "dubaiPin": "Middle East (Dubai, UAE)"
   },
   "common": {
     "loading": "Loading...",

@@ -16,7 +16,8 @@ interface ContactMessage {
   to: string
   name: string
   email: string
-  company: string
+  phone?: string
+  company?: string
   subject: string
   message: string
 }
@@ -35,11 +36,17 @@ function renderEmail(data: ContactMessage): { text: string; html: string } {
     `Thank you for reaching out to Oklut Technologies. This is a copy of the message we received from you.`,
     `Our team will review your message and get back to you within 24 hours.`,
   ]
+  const phoneLine = data.phone?.trim() ? `Phone: ${data.phone.trim()}` : null
+  const companyClean =
+    data.company?.trim() && !data.company.trim().startsWith('Phone:')
+      ? `Company: ${data.company.trim()}`
+      : null
   const details = [
     `Name: ${data.name.trim()}`,
     `Email: ${data.email.trim()}`,
-    data.company.trim() ? `Company: ${data.company.trim()}` : null,
-    data.subject.trim() ? `Subject: ${data.subject.trim()}` : null,
+    phoneLine,
+    companyClean,
+    data.subject?.trim() ? `Subject: ${data.subject.trim()}` : null,
     `Message: ${data.message.trim()}`,
   ].filter(Boolean)
   const closing = 'Best Regards,\nOklut Technologies Team'

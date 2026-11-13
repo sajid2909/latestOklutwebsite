@@ -130,7 +130,7 @@
     "emailLabel": "Sähköposti *",
     "company": "Yritys",
     "subject": "Aihe",
-    "messageLabel": "Viesti *",
+    "messageLabel": "Viesti",
     "sending": "Lähetetään…",
     "sendBtn": "Lähetä viesti",
     "successMsg": "Viesti lähetetty! Kopio on lähetetty sinulle sähköpostitse.",
@@ -144,13 +144,52 @@
       "email": "sinä@yritys.com",
       "company": "Yrityksesi tai organisaatiosi",
       "subject": "Miten voimme auttaa?",
-      "message": "Kerro meille projektistasi, aikajanastasi ja tavoitteistasi..."
+      "message": "Kerro meille projektistasi, aikajanastasi ja tavoitteistasi...",
+      "firstName": "Kirjoita etunimesi",
+      "lastName": "Kirjoita sukunimesi",
+      "workEmail": "Kirjoita sähköpostiosoitteesi",
+      "phoneNumber": "Anna puhelinnumerosi",
+      "selectSubject": "Valitse aihe",
+      "messageNew": "Kirjoita viestisi tähän..."
     },
     "validation": {
       "fullNameRequired": "Kirjoita koko nimesi.",
-      "emailRequired": "Anna sähköpostiosoitteesi.",
+      "emailRequired": "Sähköposti vaaditaan.",
       "emailInvalid": "Anna kelvollinen sähköpostiosoite.",
-      "messageRequired": "Kirjoita viesti."
+      "messageRequired": "Viesti vaaditaan.",
+      "firstNameRequired": "Etunimi vaaditaan.",
+      "lastNameRequired": "Sukunimi vaaditaan.",
+      "subjectRequired": "Valitse aihe."
+    },
+    "eyebrowDash": "OTA YHTEYTTÄ",
+    "sendUsAMessage": "Lähetä meille viesti",
+    "subMessage": "Onko mielessäsi kysymys, projekti tai haluatko tutustua kumppanuuteen? Täytä lomake, niin tiimimme ottaa sinuun yhteyttä pian.",
+    "firstNameLabel": "Etunimi",
+    "lastNameLabel": "Sukunimi",
+    "workEmailLabel": "Työsähköposti",
+    "phoneNumberLabel": "Puhelinnumero",
+    "subjectLabel": "Aihe",
+    "sendMessageBtn": "Lähetä Viesti",
+    "reachUsTitle": "Tavoita meidät",
+    "reachUsDirectlyWord": "suoraan",
+    "callUs": "Soita meille",
+    "emailUs": "Lähetä meille sähköpostia",
+    "ourOffices": "Toimistomme",
+    "quickResponse": "Nopea vastaus",
+    "replyPromptly": "Vastaamme viipymättä",
+    "businessSupport": "Yritystuki",
+    "inquiryToDelivery": "Tiedustelusta toimitukseen",
+    "consultOurExperts": "Ota yhteyttä asiantuntijoihimme",
+    "getRightSolution": "Hanki oikea ratkaisu",
+    "subjects": {
+      "generalInquiry": "Yleinen tiedustelu",
+      "customDev": "Mukautettu ohjelmistokehitys",
+      "cloudDevOps": "Pilvi & DevOps",
+      "aiMl": "Tekoäly ja koneoppiminen",
+      "mobileDev": "Mobiilisovellusten kehittäminen",
+      "uiUx": "UI/UX-suunnittelu",
+      "consulting": "Konsultointi / Kumppanuus",
+      "other": "muu"
     }
   },
   "services": {
@@ -1180,7 +1219,7 @@
     "credoPeople": "IHMISET",
     "credoBrighterTomorrow": "KIRKKAAMPI HUOMINEN",
     "hyderabadLocation": "Hyderabad, Intia",
-    "vijayawadaLocation": "Vijayawada, Andhra Pradesh",
+    "vijayawadaLocation": "Vijayawada, Intia",
     "southAfricaLocation": "Etelä-Afrikka – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Käyttöehdot",
     "accessibility": "Esteettömyys",
@@ -1189,7 +1228,8 @@
     "vijayawadaOffice": "Vijayawadan toimisto",
     "allRightsReserved": "Kaikki oikeudet pidätetään.",
     "hyderabadPin": "Hyderabad, Intia",
-    "southAfricaPin": "Etelä-Afrikka"
+    "southAfricaPin": "Etelä-Afrikka",
+    "dubaiLocation": "Lähi-idän keskus · Yhdistyneet arabiemiirikunnat"
   },
   "common": {
     "loading": "Ladataan...",

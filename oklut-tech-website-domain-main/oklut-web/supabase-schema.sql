@@ -101,6 +101,7 @@ create table public.contact_messages (
   id uuid primary key default uuid_generate_v4(),
   name text not null,
   email text not null,
+  phone text,
   company text,
   subject text,
   message text not null,

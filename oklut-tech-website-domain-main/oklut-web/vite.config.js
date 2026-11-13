@@ -9,6 +9,8 @@ export default defineConfig({
   },
   base: process.env.VITE_BASE_URL || '/',
   server: {
+    host: true,
+    port: 5173,
     allowedHosts: ['fool-buzz-dainty.ngrok-free.dev'],
     proxy: {
       '/api': {
