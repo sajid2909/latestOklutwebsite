@@ -130,7 +130,7 @@
     "emailLabel": "E-post *",
     "company": "Ettevõte",
     "subject": "Teema",
-    "messageLabel": "Sõnum *",
+    "messageLabel": "Sõnum",
     "sending": "Saadan…",
     "sendBtn": "Saada sõnum",
     "successMsg": "Sõnum saadetud! Koopia on teile e-kirjaga saadetud.",
@@ -144,13 +144,52 @@
       "email": "sina@ettevõte.com",
       "company": "Teie ettevõte või organisatsioon",
       "subject": "Kuidas saame aidata?",
-      "message": "Rääkige meile oma projektist, ajakavast ja eesmärkidest..."
+      "message": "Rääkige meile oma projektist, ajakavast ja eesmärkidest...",
+      "firstName": "Sisestage oma eesnimi",
+      "lastName": "Sisestage oma perekonnanimi",
+      "workEmail": "Sisestage oma e-posti aadress",
+      "phoneNumber": "Sisestage oma telefoninumber",
+      "selectSubject": "Valige teema",
+      "messageNew": "Sisestage oma sõnum siia..."
     },
     "validation": {
       "fullNameRequired": "Palun sisestage oma täisnimi.",
-      "emailRequired": "Palun sisestage oma e-posti aadress.",
+      "emailRequired": "E-post on kohustuslik.",
       "emailInvalid": "Sisestage kehtiv e-posti aadress.",
-      "messageRequired": "Palun sisestage sõnum."
+      "messageRequired": "Sõnum on kohustuslik.",
+      "firstNameRequired": "Eesnimi on kohustuslik.",
+      "lastNameRequired": "Perekonnanimi on kohustuslik.",
+      "subjectRequired": "Valige teema."
+    },
+    "eyebrowDash": "VÕTKE MEIEGA ÜHENDUST",
+    "sendUsAMessage": "Saada meile sõnum",
+    "subMessage": "Kas teil on küsimus, projekt või soovite uurida partnerlust? Täitke vorm ja meie meeskond võtab teiega peagi ühendust.",
+    "firstNameLabel": "Eesnimi",
+    "lastNameLabel": "Perekonnanimi",
+    "workEmailLabel": "Töö e-post",
+    "phoneNumberLabel": "Telefoninumber",
+    "subjectLabel": "Teema",
+    "sendMessageBtn": "Saada sõnum",
+    "reachUsTitle": "Jõua meieni",
+    "reachUsDirectlyWord": "otse",
+    "callUs": "Helistage meile",
+    "emailUs": "Saatke meile e-kiri",
+    "ourOffices": "Meie kontorid",
+    "quickResponse": "Kiire vastus",
+    "replyPromptly": "Vastame kiiresti",
+    "businessSupport": "Ettevõtluse tugi",
+    "inquiryToDelivery": "Päringust kuni kohaletoimetamiseni",
+    "consultOurExperts": "Konsulteerige meie ekspertidega",
+    "getRightSolution": "Hankige õige lahendus",
+    "subjects": {
+      "generalInquiry": "Üldine päring",
+      "customDev": "Kohandatud tarkvaraarendus",
+      "cloudDevOps": "Pilv ja DevOps",
+      "aiMl": "AI ja masinõpe",
+      "mobileDev": "Mobiilirakenduste arendus",
+      "uiUx": "UI/UX disain",
+      "consulting": "Konsulteerimine / Partnerlus",
+      "other": "muud"
     }
   },
   "services": {
@@ -1180,7 +1219,7 @@
     "credoPeople": "INIMEST",
     "credoBrighterTomorrow": "HELEDAM HOMME",
     "hyderabadLocation": "Hyderabad, India",
-    "vijayawadaLocation": "Vijayawada, Andhra Pradesh",
+    "vijayawadaLocation": "Vijayawada, India",
     "southAfricaLocation": "Lõuna-Aafrika Vabariik – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Kasutustingimused",
     "accessibility": "Juurdepääsetavus",
@@ -1189,7 +1228,8 @@
     "vijayawadaOffice": "Vijayawada kontor",
     "allRightsReserved": "Kõik õigused kaitstud.",
     "hyderabadPin": "Hyderabad, India",
-    "southAfricaPin": "Lõuna-Aafrika"
+    "southAfricaPin": "Lõuna-Aafrika",
+    "dubaiLocation": "Lähis-Ida keskus · Araabia Ühendemiraadid"
   },
   "common": {
     "loading": "Laadimine...",

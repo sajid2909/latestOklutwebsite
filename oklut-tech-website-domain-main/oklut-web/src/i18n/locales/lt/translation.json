@@ -130,7 +130,7 @@
     "emailLabel": "El. paštas *",
     "company": "Įmonė",
     "subject": "Tema",
-    "messageLabel": "Žinutė *",
+    "messageLabel": "Pranešimas",
     "sending": "Siunčiamas…",
     "sendBtn": "Siųsti žinutę",
     "successMsg": "Žinutė išsiųsta! Kopija jums išsiųsta el. paštu.",
@@ -144,13 +144,52 @@
       "email": "you@company.com",
       "company": "Jūsų įmonė ar organizacija",
       "subject": "Kaip galime padėti?",
-      "message": "Papasakokite apie savo projektą, laiko juostą ir tikslus..."
+      "message": "Papasakokite apie savo projektą, laiko juostą ir tikslus...",
+      "firstName": "Įveskite savo vardą",
+      "lastName": "Įveskite savo pavardę",
+      "workEmail": "Įveskite savo el. pašto adresą",
+      "phoneNumber": "Įveskite savo telefono numerį",
+      "selectSubject": "Pasirinkite temą",
+      "messageNew": "Įveskite savo žinutę čia..."
     },
     "validation": {
       "fullNameRequired": "Įveskite savo vardą ir pavardę.",
-      "emailRequired": "Įveskite savo el. pašto adresą.",
+      "emailRequired": "Būtinas el.",
       "emailInvalid": "Įveskite galiojantį el. pašto adresą.",
-      "messageRequired": "Įveskite žinutę."
+      "messageRequired": "Reikalingas pranešimas.",
+      "firstNameRequired": "Vardas būtinas.",
+      "lastNameRequired": "Būtina nurodyti pavardę.",
+      "subjectRequired": "Pasirinkite temą."
+    },
+    "eyebrowDash": "SUSISIEKITE MUMS",
+    "sendUsAMessage": "Atsiųskite mums žinutę",
+    "subMessage": "Turite klausimą, planuojate projektą ar norite ištirti partnerystę? Užpildykite formą ir mūsų komanda netrukus su jumis susisieks.",
+    "firstNameLabel": "Vardas",
+    "lastNameLabel": "Pavardė",
+    "workEmailLabel": "Darbo paštas",
+    "phoneNumberLabel": "Telefono numeris",
+    "subjectLabel": "Tema",
+    "sendMessageBtn": "Siųsti žinutę",
+    "reachUsTitle": "Pasiekite mus",
+    "reachUsDirectlyWord": "tiesiogiai",
+    "callUs": "Paskambinkite mums",
+    "emailUs": "El. paštu",
+    "ourOffices": "Mūsų biurai",
+    "quickResponse": "Greitas atsakymas",
+    "replyPromptly": "Atsakome operatyviai",
+    "businessSupport": "Verslo palaikymas",
+    "inquiryToDelivery": "Nuo užklausos iki pristatymo",
+    "consultOurExperts": "Pasikonsultuokite su mūsų ekspertais",
+    "getRightSolution": "Gaukite tinkamą sprendimą",
+    "subjects": {
+      "generalInquiry": "Bendra apklausa",
+      "customDev": "Individualios programinės įrangos kūrimas",
+      "cloudDevOps": "Debesis ir „DevOps“.",
+      "aiMl": "AI ir mašininis mokymasis",
+      "mobileDev": "Programėlių mobiliesiems kūrimas",
+      "uiUx": "UI/UX dizainas",
+      "consulting": "Konsultacijos / Partnerystė",
+      "other": "Kita"
     }
   },
   "services": {
@@ -1180,7 +1219,7 @@
     "credoPeople": "ŽMONĖS",
     "credoBrighterTomorrow": "ŠVIEŠESNIS RYTOJAS",
     "hyderabadLocation": "Haidarabadas, Indija",
-    "vijayawadaLocation": "Vijayawada, Andra Pradešas",
+    "vijayawadaLocation": "Vijayawada, Indija",
     "southAfricaLocation": "Pietų Afrika – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Naudojimo sąlygos",
     "accessibility": "Prieinamumas",
@@ -1189,7 +1228,8 @@
     "vijayawadaOffice": "Vijayawada biuras",
     "allRightsReserved": "Visos teisės saugomos.",
     "hyderabadPin": "Haidarabadas, Indija",
-    "southAfricaPin": "Pietų Afrika"
+    "southAfricaPin": "Pietų Afrika",
+    "dubaiLocation": "Artimųjų Rytų centras · Jungtiniai Arabų Emyratai"
   },
   "common": {
     "loading": "Įkeliama...",

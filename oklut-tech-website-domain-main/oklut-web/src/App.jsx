@@ -58,8 +58,7 @@ const PilotPrototypingPage = lazy(() => import('./pages/services/PilotPrototypin
 const ManagedServicesPage = lazy(() => import('./pages/services/ManagedServicesPage.jsx'))
 const ProductsPage = lazy(() => import('./pages/ProductsPage.jsx'))
 
-const GMAIL_COMPOSE_URL =
-  'https://mail.google.com/mail/u/0/?pli=1#inbox?compose=DmwnWrRvwttmtqXdlSPmhJcnwgNknRpNQrlZKjhdBnMLfqKHsMdvkLDjxhLPHVPjvZwdpnvFWzZg'
+const GMAIL_COMPOSE_URL = 'https://mail.google.com/mail/?view=cm&fs=1&to=info@oklut.com'
 
 const CONTACT = {
   phone: '18004103299',
@@ -80,6 +79,10 @@ const CONTACT = {
   southAfricaAddress: 'Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa',
   southAfricaMapsHref:
     'https://www.google.com/maps/search/Unit+11+Sunset+View+10+Hazy+Street+Newcastle+Kwa-Zulu+Natal+2930+South+Africa',
+  dubaiCompany: 'Middle East hub · United Arab Emirates',
+  dubaiAddress: 'Building 11, Office 111, Dubai Internet City, Dubai, UAE',
+  dubaiMapsHref:
+    'https://www.google.com/maps/search/Building+11+Office+111+Dubai+Internet+City+Dubai+UAE',
 }
 
 const NAV_ITEMS = [
@@ -222,7 +225,9 @@ function scrollToSection(id) {
     window.scrollTo({ top: 0, behavior })
     return
   }
-  const el = document.getElementById(id) || (id === 'our-services' ? document.getElementById('services') : null) || (id === 'technologies' ? document.getElementById('gallery') : null) || (id === 'gallery' ? document.getElementById('technologies') : null)
+  const normalizedId = id === 'our-services' ? 'services' : (id === 'gallery' ? 'technologies' : id)
+
+  const el = document.getElementById(normalizedId) || document.getElementById(id)
   if (el) {
     const y = el.getBoundingClientRect().top + window.scrollY - (NAV_OFFSET - 8)
     window.scrollTo({ top: y, behavior })
@@ -292,7 +297,17 @@ function Navbar({ onSignIn, onSignUp }) {
     location.pathname === '/technologies'
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(() => {
+          ticking = false
+          const isScrolled = window.scrollY > 12
+          setScrolled((prev) => (prev !== isScrolled ? isScrolled : prev))
+        })
+      }
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -361,16 +376,17 @@ function Navbar({ onSignIn, onSignUp }) {
     }
     let ticking = false
     let cancelled = false
+    let replaceStateTimer = null
     const update = () => {
       ticking = false
       const atBottom =
         window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60
       if (atBottom) {
-        if (!cancelled) setActiveSection('contact')
+        if (!cancelled) setActiveSection((prev) => (prev !== 'contact' ? 'contact' : prev))
         return
       }
       if (window.scrollY < 100) {
-        if (!cancelled) setActiveSection('top')
+        if (!cancelled) setActiveSection((prev) => (prev !== 'top' ? 'top' : prev))
         return
       }
 
@@ -399,7 +415,7 @@ function Navbar({ onSignIn, onSignUp }) {
 
       if (!cancelled && current) {
         const activeName = current === 'gallery' ? 'technologies' : current
-        setActiveSection(activeName)
+        setActiveSection((prev) => (prev !== activeName ? activeName : prev))
         if (isHomeRoute && typeof window !== 'undefined') {
           if (window.location.pathname === '/technologies' && (activeName === 'top' || !activeName)) {
             return
@@ -415,7 +431,12 @@ function Navbar({ onSignIn, onSignUp }) {
                     ? '/contact'
                     : '/'
           if (window.location.pathname !== targetPath) {
-            window.history.replaceState(null, '', targetPath)
+            clearTimeout(replaceStateTimer)
+            replaceStateTimer = setTimeout(() => {
+              if (!cancelled && window.location.pathname !== targetPath) {
+                window.history.replaceState(null, '', targetPath)
+              }
+            }, 150)
           }
         }
       }
@@ -431,6 +452,7 @@ function Navbar({ onSignIn, onSignUp }) {
     window.addEventListener('resize', onScroll)
     return () => {
       cancelled = true
+      clearTimeout(replaceStateTimer)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
@@ -882,10 +904,10 @@ function SectionHead({ index, eyebrow, title, sub, center = false }) {
 function About() {
   const { t } = useTranslation()
   const features = [
-    { icon: 'award', title: t('about.awardWinning'), text: t('about.awardText'), color: '#2dd4bf' },
-    { icon: 'users', title: t('about.professionalStaff'), text: t('about.staffText'), color: '#38bdf8' },
-    { icon: 'clock', title: t('about.support247'), text: t('about.supportText'), color: '#34d399' },
-    { icon: 'star', title: t('about.fairPrices'), text: t('about.pricesText'), color: '#818cf8' },
+    { id: 'award', icon: 'award', title: t('about.awardWinning'), text: t('about.awardText'), color: '#2dd4bf' },
+    { id: 'users', icon: 'users', title: t('about.professionalStaff'), text: t('about.staffText'), color: '#38bdf8' },
+    { id: 'clock', icon: 'clock', title: t('about.support247'), text: t('about.supportText'), color: '#34d399' },
+    { id: 'star', icon: 'star', title: t('about.fairPrices'), text: t('about.pricesText'), color: '#818cf8' },
   ]
   return (
     <section id="about" className="section about-section">
@@ -901,7 +923,7 @@ function About() {
           <p className="about-lede" dangerouslySetInnerHTML={{ __html: t('about.description') }} />
           <div className="about-features-grid">
             {features.map((f) => (
-              <div key={f.title} className="about-feature-card glass-card reveal">
+              <div key={f.id} className="about-feature-card glass-card reveal">
                 <div className="about-feature-card-icon" style={{ '--card-accent': f.color }}>
                   <Icon name={f.icon} />
                 </div>
@@ -974,15 +996,15 @@ function CountUp({ end, suffix = '', duration = 1600 }) {
 function Stats() {
   const { t } = useTranslation()
   const stats = [
-    { value: 1056, suffix: '+', label: t('stats.happyClients'), icon: 'users', color: '#2dd4bf' },
-    { value: 328, suffix: '+', label: t('stats.projectsDone'), icon: 'package', color: '#38bdf8' },
-    { value: 23, suffix: '+', label: t('stats.winAwards'), icon: 'award', color: '#f59e0b' },
+    { id: 'clients', value: 1056, suffix: '+', label: t('stats.happyClients'), icon: 'users', color: '#2dd4bf' },
+    { id: 'projects', value: 328, suffix: '+', label: t('stats.projectsDone'), icon: 'package', color: '#38bdf8' },
+    { id: 'awards', value: 23, suffix: '+', label: t('stats.winAwards'), icon: 'award', color: '#f59e0b' },
   ]
   return (
     <section className="statsband" aria-label="Company statistics">
       <div className="container statsband-grid">
         {stats.map((s, i) => (
-          <div className="stat-card glass-card reveal" key={s.label} style={{ transitionDelay: `${i * 80}ms` }}>
+          <div className="stat-card glass-card reveal" key={s.id} style={{ transitionDelay: `${i * 80}ms` }}>
             <div className="stat-icon" style={{ color: s.color, backgroundColor: `${s.color}18` }}>
               <Icon name={s.icon} />
             </div>
@@ -1288,27 +1310,43 @@ function Technologies() {
 
 function ContactForm() {
   const { t } = useTranslation()
-  const [form, setForm] = useState({ name: '', email: '', company: '', subject: '', message: '' })
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
   const [toast, setToast] = useState(null)
 
   useEffect(() => {
     if (!toast) return
-    const t = setTimeout(() => setToast(null), 5000)
-    return () => clearTimeout(t)
+    const tTimer = setTimeout(() => setToast(null), 5000)
+    return () => clearTimeout(tTimer)
   }, [toast])
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
+    if (errors[name]) {
+      setErrors((errs) => {
+        const next = { ...errs }
+        delete next[name]
+        return next
+      })
+    }
   }
 
   const validate = () => {
     const next = {}
-    if (!form.name.trim()) next.name = t('contact.validation.fullNameRequired', { defaultValue: t('contact.validation.nameRequired', { defaultValue: 'Name is required.' }) })
+    if (!form.firstName.trim()) next.firstName = t('contact.validation.firstNameRequired', { defaultValue: 'First name is required.' })
+    if (!form.lastName.trim()) next.lastName = t('contact.validation.lastNameRequired', { defaultValue: 'Last name is required.' })
     if (!form.email.trim()) next.email = t('contact.validation.emailRequired', { defaultValue: 'Email is required.' })
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = t('contact.validation.emailInvalid', { defaultValue: 'Enter a valid email.' })
+    if (!form.subject.trim()) next.subject = t('contact.validation.subjectRequired', { defaultValue: 'Please select a subject.' })
     if (!form.message.trim()) next.message = t('contact.validation.messageRequired', { defaultValue: 'Message is required.' })
     return next
   }
@@ -1320,23 +1358,36 @@ function ContactForm() {
     if (Object.keys(nextErrors).length > 0) return
 
     setStatus('submitting')
-    const { error } = await supabase.from('contact_messages').insert([{ ...form }])
+    const fullName = `${form.firstName} ${form.lastName}`.trim()
+    const subjectValue = form.subject.trim() || 'General Inquiry'
+    const phoneInfo = form.phone.trim() ? `Phone: ${form.phone.trim()}` : ''
+
+    const { error } = await supabase.from('contact_messages').insert([
+      {
+        name: fullName,
+        email: form.email.trim(),
+        company: phoneInfo || null,
+        subject: subjectValue,
+        message: form.message.trim(),
+      },
+    ])
 
     if (error) {
       setStatus('idle')
-      setToast({ type: 'error', text: t('contact.errorMsg') })
+      setToast({ type: 'error', text: t('contact.errorMsg', { defaultValue: 'Failed to send message. Please try again.' }) })
     } else {
       setStatus('success')
-      setForm({ name: '', email: '', company: '', subject: '', message: '' })
-      setToast({ type: 'success', text: t('contact.successMsg') })
+      setForm({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '' })
+      setToast({ type: 'success', text: t('contact.successMsg', { defaultValue: 'Your message has been sent successfully!' }) })
       try {
         const { error: emailError } = await supabase.functions.invoke('send-contact-message', {
           body: {
             to: form.email.trim(),
-            name: form.name.trim(),
+            name: fullName,
             email: form.email.trim(),
-            company: form.company.trim(),
-            subject: form.subject.trim(),
+            phone: form.phone.trim(),
+            company: '',
+            subject: subjectValue,
             message: form.message.trim(),
           },
         })
@@ -1350,180 +1401,278 @@ function ContactForm() {
   return (
     <section id="contact" className="section contact-section">
       <div className="container">
-        <SectionHead
-          eyebrow={t('contact.eyebrow')}
-          title={t('contact.title')}
-          sub={t('contact.sub')}
-        />
-        <div className="contact-layout">
-          <div className="contact-info reveal">
-            <div className="contact-panel">
-              <span className="eyebrow">
-                <span className="eyebrow-bar" aria-hidden="true" />
-                {t('contact.reachUs')}
-              </span>
-              <h3 className="contact-panel-title">
-                {t('contact.preferConversation')}
-              </h3>
-              <p className="contact-lede">
-                {t('contact.contactLede')}
-              </p>
-              <ul className="contact-list">
-                <li>
-                  <span className="contact-icon">
-                    <a href={CONTACT.phoneHref} aria-label={`Call ${CONTACT.phone}`}>
-                      <Icon name="phone" />
-                    </a>
+        <div className="contact-modern-grid">
+          {/* Left Column: Contact Form Card */}
+          <div className="contact-form-card reveal">
+            <span className="contact-card-eyebrow">
+              {t('contact.eyebrowDash', { defaultValue: 'CONTACT US' })} <span className="contact-eyebrow-dash">—</span>
+            </span>
+            <h2 className="contact-card-title">
+              {t('contact.sendUsAMessage', { defaultValue: 'Send us a message' })}
+            </h2>
+            <p className="contact-card-sub">
+              {t('contact.subMessage', { defaultValue: 'Have a question, a project in mind, or want to explore a partnership? Fill out the form and our team will get back to you shortly.' })}
+            </p>
+
+            <form onSubmit={handleSubmit} noValidate className="contact-modern-form">
+              <div className="contact-form-row-2">
+                <div className="contact-input-field">
+                  <label htmlFor="firstName">
+                    {t('contact.firstNameLabel', { defaultValue: 'First Name' }).replace(/\s*\*+$/, '')} *
+                  </label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    placeholder={t('contact.placeholders.firstName', { defaultValue: 'Enter your first name' })}
+                    autoComplete="given-name"
+                    aria-invalid={errors.firstName ? 'true' : undefined}
+                    className={errors.firstName ? 'input-error' : ''}
+                  />
+                  {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+                </div>
+                <div className="contact-input-field">
+                  <label htmlFor="lastName">
+                    {t('contact.lastNameLabel', { defaultValue: 'Last Name' }).replace(/\s*\*+$/, '')} *
+                  </label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    placeholder={t('contact.placeholders.lastName', { defaultValue: 'Enter your last name' })}
+                    autoComplete="family-name"
+                    aria-invalid={errors.lastName ? 'true' : undefined}
+                    className={errors.lastName ? 'input-error' : ''}
+                  />
+                  {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+                </div>
+              </div>
+
+              <div className="contact-input-field">
+                <label htmlFor="email">
+                  {t('contact.workEmailLabel', { defaultValue: 'Work Email' }).replace(/\s*\*+$/, '')} *
+                </label>
+                <div className="contact-input-icon-wrap">
+                  <span className="contact-field-icon" aria-hidden="true">
+                    <Icon name="mail" />
                   </span>
-                  <span className="contact-channel">
-                    <small>{t('contact.phone')}</small>
-                    <a href={CONTACT.phoneHref}>{CONTACT.phone}</a>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder={t('contact.placeholders.workEmail', { defaultValue: 'Enter your email address' })}
+                    autoComplete="email"
+                    aria-invalid={errors.email ? 'true' : undefined}
+                    className={errors.email ? 'input-error' : ''}
+                  />
+                </div>
+                {errors.email && <span className="error-message">{errors.email}</span>}
+              </div>
+
+              <div className="contact-input-field">
+                <label htmlFor="phone">
+                  {t('contact.phoneNumberLabel', { defaultValue: 'Phone Number' })}
+                </label>
+                <div className="contact-input-icon-wrap">
+                  <span className="contact-field-icon" aria-hidden="true">
+                    <Icon name="phone" />
                   </span>
-                </li>
-                <li>
-                  <span className="contact-icon">
-                    <a
-                      href={GMAIL_COMPOSE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Email ${CONTACT.email}`}
-                    >
-                      <Icon name="mail" />
-                    </a>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder={t('contact.placeholders.phoneNumber', { defaultValue: 'Enter your phone number' })}
+                    autoComplete="tel"
+                  />
+                </div>
+              </div>
+
+              <div className="contact-input-field">
+                <label htmlFor="subject">
+                  {t('contact.subjectLabel', { defaultValue: 'Subject' }).replace(/\s*\*+$/, '')} *
+                </label>
+                <div className="contact-select-wrap">
+                  <select
+                    id="subject"
+                    name="subject"
+                    value={form.subject}
+                    onChange={handleChange}
+                    aria-invalid={errors.subject ? 'true' : undefined}
+                    className={errors.subject ? 'input-error' : ''}
+                  >
+                    <option value="">{t('contact.placeholders.selectSubject', { defaultValue: 'Select a subject' })}</option>
+                    <option value="General Inquiry">{t('contact.subjects.generalInquiry', { defaultValue: 'General Inquiry' })}</option>
+                    <option value="Custom Software Development">{t('contact.subjects.customDev', { defaultValue: 'Custom Software Development' })}</option>
+                    <option value="Cloud & DevOps">{t('contact.subjects.cloudDevOps', { defaultValue: 'Cloud & DevOps' })}</option>
+                    <option value="AI & Machine Learning">{t('contact.subjects.aiMl', { defaultValue: 'AI & Machine Learning' })}</option>
+                    <option value="Mobile App Development">{t('contact.subjects.mobileDev', { defaultValue: 'Mobile App Development' })}</option>
+                    <option value="UI/UX Design">{t('contact.subjects.uiUx', { defaultValue: 'UI/UX Design' })}</option>
+                    <option value="Consulting / Partnership">{t('contact.subjects.consulting', { defaultValue: 'Consulting / Partnership' })}</option>
+                    <option value="Other">{t('contact.subjects.other', { defaultValue: 'Other' })}</option>
+                  </select>
+                  <span className="contact-select-chevron" aria-hidden="true">
+                    <Icon name="chevronDown" />
                   </span>
-                  <span className="contact-channel">
-                    <small>{t('contact.email')}</small>
-                    <a
-                      href={GMAIL_COMPOSE_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {CONTACT.email}
-                    </a>
-                  </span>
-                </li>
-                <li>
-                  <span className="contact-icon">
-                    <a href={CONTACT.mapsHref} target="_blank" rel="noopener noreferrer" aria-label="Open office location on Google Maps">
-                      <Icon name="pin" />
-                    </a>
-                  </span>
-                  <span className="contact-channel">
-                    <small>{t('contact.office')}</small>
-                    <a href={CONTACT.mapsHref} target="_blank" rel="noopener noreferrer">
-                      {CONTACT.address}
-                    </a>
-                  </span>
-                </li>
-                <li>
-                  <span className="contact-icon">
-                    <a href={CONTACT.vijayawadaMapsHref} target="_blank" rel="noopener noreferrer" aria-label="Open Vijayawada office location on Google Maps">
-                      <Icon name="pin" />
-                    </a>
-                  </span>
-                  <span className="contact-channel">
-                    <small>{t('contact.offices.vijayawada', { defaultValue: 'Vijayawada Office' })}</small>
-                    <a href={CONTACT.vijayawadaMapsHref} target="_blank" rel="noopener noreferrer">
-                      {CONTACT.vijayawadaAddress}
-                    </a>
-                  </span>
-                </li>
-                <li>
-                  <span className="contact-icon">
-                    <a href={CONTACT.southAfricaMapsHref} target="_blank" rel="noopener noreferrer" aria-label="Open South Africa office location on Google Maps">
-                      <Icon name="pin" />
-                    </a>
-                  </span>
-                  <span className="contact-channel">
-                    <small>{t('contact.offices.southAfrica', { defaultValue: 'South Africa Office' })}</small>
-                    <a href={CONTACT.southAfricaMapsHref} target="_blank" rel="noopener noreferrer">
-                      <strong>{CONTACT.southAfricaCompany}</strong><br />
-                      Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa
-                    </a>
-                  </span>
-                </li>
-                <li>
-                  <span className="contact-icon"><Icon name="clock" /></span>
-                  <span className="contact-channel">
-                    <small>{t('contact.hours')}</small>
-                    <strong>{t('contact.hoursValue')}</strong>
-                  </span>
-                </li>
-              </ul>
-              <Link to="/book-consultation" className="btn btn-primary">
-                {t('contact.bookSlot')}
-                <Icon name="arrow" />
-              </Link>
-            </div>
+                </div>
+                {errors.subject && <span className="error-message">{errors.subject}</span>}
+              </div>
+
+              <div className="contact-input-field">
+                <label htmlFor="message">
+                  {t('contact.messageLabel', { defaultValue: 'Message' }).replace(/\s*\*+$/, '')} *
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="4"
+                  value={form.message}
+                  onChange={handleChange}
+                  placeholder={t('contact.placeholders.messageNew', { defaultValue: 'Type your message here...' })}
+                  aria-invalid={errors.message ? 'true' : undefined}
+                  className={errors.message ? 'input-error' : ''}
+                />
+                {errors.message && <span className="error-message">{errors.message}</span>}
+              </div>
+
+              <button
+                type="submit"
+                className="contact-submit-btn"
+                disabled={status === 'submitting'}
+              >
+                <Icon name="send" />
+                <span>{status === 'submitting' ? t('contact.sending', { defaultValue: 'Sending...' }) : t('contact.sendMessageBtn', { defaultValue: 'Send Message' })}</span>
+              </button>
+            </form>
           </div>
 
-          <form className="card contact-form reveal" onSubmit={handleSubmit} noValidate>
-            <div className="contact-form-head">
-              <h3>{t('contact.sendMessage')}</h3>
-              <p>{t('contact.fieldsRequired')}</p>
+          {/* Right Column: Reach Us Directly */}
+          <div className="contact-info-column reveal">
+            <div className="contact-info-header">
+              <h2 className="contact-info-title">
+                {t('contact.reachUsTitle', { defaultValue: 'Reach us' })} <span className="text-cyan">{t('contact.reachUsDirectlyWord', { defaultValue: 'directly' })}</span>
+              </h2>
+              <h3 className="contact-info-tagline">
+                {t('contact.preferConversation', { defaultValue: 'Prefer a conversation? We are one call away.' })}
+              </h3>
+              <p className="contact-info-desc">
+                {t('contact.contactLede', { defaultValue: 'The fastest way to move forward is a short conversation. Reach us on any channel below, or book a slot and we will come to you prepared.' })}
+              </p>
             </div>
-            <div className="grid grid-2">
-              <div className="input-group">
-                <label htmlFor="name">{t('contact.fullName')}</label>
-                <input
-                  id="name"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder={t('contact.placeholders.fullName', { defaultValue: t('contact.placeholders.name', { defaultValue: 'Jane Doe' }) })}
-                  autoComplete="name"
-                  aria-invalid={errors.name ? 'true' : undefined}
-                  aria-describedby={errors.name ? 'name-error' : undefined}
-                  className={errors.name ? 'input-error' : ''}
-                />
-                {errors.name && <span className="error-message" id="name-error">{errors.name}</span>}
-              </div>
-              <div className="input-group">
-                <label htmlFor="email">{t('contact.emailLabel')}</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder={t('contact.placeholders.email', { defaultValue: 'you@company.com' })}
-                  autoComplete="email"
-                  aria-invalid={errors.email ? 'true' : undefined}
-                  aria-describedby={errors.email ? 'email-error' : undefined}
-                  className={errors.email ? 'input-error' : ''}
-                />
-                {errors.email && <span className="error-message" id="email-error">{errors.email}</span>}
+
+            {/* Quick Action Cards */}
+            <div className="contact-quick-cards-grid">
+              <a href={CONTACT.phoneHref} className="contact-quick-card" aria-label={`Call ${CONTACT.phone}`}>
+                <div className="contact-quick-icon-box" aria-hidden="true">
+                  <Icon name="phone" />
+                </div>
+                <div className="contact-quick-details">
+                  <span className="contact-quick-label">{t('contact.callUs', { defaultValue: 'Call Us' })}</span>
+                  <span className="contact-quick-value">{CONTACT.phone}</span>
+                </div>
+              </a>
+
+              <a
+                href={GMAIL_COMPOSE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="contact-quick-card"
+                aria-label={`Email ${CONTACT.email}`}
+              >
+                <div className="contact-quick-icon-box" aria-hidden="true">
+                  <Icon name="mail" />
+                </div>
+                <div className="contact-quick-details">
+                  <span className="contact-quick-label">{t('contact.emailUs', { defaultValue: 'Email Us' })}</span>
+                  <span className="contact-quick-value">{CONTACT.email}</span>
+                </div>
+              </a>
+            </div>
+
+            {/* Middle Section: Our Offices List + World Map */}
+            <div className="contact-middle-section">
+              <div className="contact-offices-col">
+                <div className="contact-offices-heading">
+                  <span>{t('contact.ourOffices', { defaultValue: 'Our Offices' })}</span> <span className="contact-offices-dash">—</span>
+                </div>
+                <div className="contact-offices-list">
+                  <a
+                    href={CONTACT.southAfricaMapsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-office-item"
+                  >
+                    <Icon name="pin" className="contact-pin-icon" />
+                    <span>{t('footer.southAfricaLocation', { defaultValue: 'South Africa – OKLUT TECHNOLOGIES PVT LTD' })}</span>
+                  </a>
+
+                  <a
+                    href={CONTACT.mapsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-office-item"
+                  >
+                    <Icon name="pin" className="contact-pin-icon" />
+                    <span>{t('footer.hyderabadLocation', { defaultValue: 'Hyderabad, India' })}</span>
+                  </a>
+
+                  <a
+                    href={CONTACT.vijayawadaMapsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-office-item"
+                  >
+                    <Icon name="pin" className="contact-pin-icon" />
+                    <span>{t('footer.vijayawadaLocation', { defaultValue: 'Vijayawada, India' })}</span>
+                  </a>
+
+                  <a
+                    href={CONTACT.dubaiMapsHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-office-item"
+                  >
+                    <Icon name="pin" className="contact-pin-icon" />
+                    <span>{t('footer.dubaiLocation', { defaultValue: 'Middle East hub · United Arab Emirates' })}</span>
+                  </a>
+                </div>
               </div>
             </div>
-            <div className="grid grid-2">
-              <div className="input-group">
-                <label htmlFor="company">{t('contact.company')}</label>
-                <input id="company" name="company" value={form.company} onChange={handleChange} placeholder={t('contact.placeholders.company', { defaultValue: 'Company Inc.' })} autoComplete="organization" />
+
+            {/* Bottom Trust Badges Strip */}
+            <div className="contact-trust-strip">
+              <div className="contact-trust-item">
+                <Icon name="messageSquare" className="contact-trust-icon" />
+                <div className="contact-trust-text">
+                  <strong>{t('contact.quickResponse', { defaultValue: 'Quick Response' })}</strong>
+                  <small>{t('contact.replyPromptly', { defaultValue: 'We reply promptly' })}</small>
+                </div>
               </div>
-              <div className="input-group">
-                <label htmlFor="subject">{t('contact.subject')}</label>
-                <input id="subject" name="subject" value={form.subject} onChange={handleChange} placeholder={t('contact.placeholders.subject', { defaultValue: 'How can we help?' })} />
+              <div className="contact-trust-divider" aria-hidden="true" />
+              <div className="contact-trust-item">
+                <Icon name="handshake" className="contact-trust-icon" />
+                <div className="contact-trust-text">
+                  <strong>{t('contact.businessSupport', { defaultValue: 'Business Support' })}</strong>
+                  <small>{t('contact.inquiryToDelivery', { defaultValue: 'From inquiry to delivery' })}</small>
+                </div>
+              </div>
+              <div className="contact-trust-divider" aria-hidden="true" />
+              <div className="contact-trust-item">
+                <Icon name="headphones" className="contact-trust-icon" />
+                <div className="contact-trust-text">
+                  <strong>{t('contact.consultOurExperts', { defaultValue: 'Consult Our Experts' })}</strong>
+                  <small>{t('contact.getRightSolution', { defaultValue: 'Get the right solution' })}</small>
+                </div>
               </div>
             </div>
-            <div className="input-group">
-              <label htmlFor="message">{t('contact.messageLabel')}</label>
-              <textarea
-                id="message"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                placeholder={t('contact.placeholders.message', { defaultValue: 'Tell us about your project, timeline, and goals...' })}
-                aria-invalid={errors.message ? 'true' : undefined}
-                aria-describedby={errors.message ? 'message-error' : undefined}
-                className={errors.message ? 'input-error' : ''}
-              />
-              {errors.message && <span className="error-message" id="message-error">{errors.message}</span>}
-            </div>
-            <button type="submit" className="btn btn-primary btn-lg" disabled={status === 'submitting'}>
-              {status === 'submitting' ? t('contact.sending') : t('contact.sendBtn')}
-              {status !== 'submitting' && <Icon name="arrow" />}
-            </button>
-          </form>
+          </div>
         </div>
       </div>
       {toast && (
@@ -1540,13 +1689,20 @@ function ScrollProgress() {
   const ref = useRef(null)
 
   useEffect(() => {
+    let ticking = false
     const onScroll = () => {
-      const el = ref.current
-      if (!el) return
-      const doc = document.documentElement
-      const max = doc.scrollHeight - window.innerHeight
-      const p = max > 0 ? window.scrollY / max : 0
-      el.style.width = `${(p * 100).toFixed(2)}%`
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(() => {
+          ticking = false
+          const el = ref.current
+          if (!el) return
+          const doc = document.documentElement
+          const max = doc.scrollHeight - window.innerHeight
+          const p = max > 0 ? window.scrollY / max : 0
+          el.style.width = `${(p * 100).toFixed(2)}%`
+        })
+      }
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -1564,9 +1720,17 @@ function BackToTop() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    let ticking = false
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const onScroll = () => {
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      setVisible(!reduced && window.scrollY > 480)
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(() => {
+          ticking = false
+          const shouldBeVisible = !reduced && window.scrollY > 480
+          setVisible((prev) => (prev !== shouldBeVisible ? shouldBeVisible : prev))
+        })
+      }
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -1686,6 +1850,22 @@ function FooterWorldMap() {
         <circle cx="163" cy="85" r="4.5" fill="#2998ff" opacity="0.35" />
         <circle cx="163" cy="85" r="2.5" fill="#38bdf8" />
         <title>{t('footer.southAfricaPin', { defaultValue: 'South Africa' })}</title>
+      </g>
+
+      {/* Office Marker 3: Middle East (Dubai, UAE) */}
+      <g className="footer-map-pin-group">
+        <circle
+          cx="182"
+          cy="44"
+          r="8"
+          className="footer-map-pulse-ring"
+          fill="none"
+          stroke="#2998ff"
+          strokeWidth="1.2"
+        />
+        <circle cx="182" cy="44" r="4.5" fill="#2998ff" opacity="0.35" />
+        <circle cx="182" cy="44" r="2.5" fill="#38bdf8" />
+        <title>{t('footer.dubaiPin', { defaultValue: 'Middle East (Dubai, UAE)' })}</title>
       </g>
     </svg>
   )
@@ -1910,63 +2090,82 @@ function Footer() {
 
         {/* Contact Information & Office Locations Row */}
         <div className="footer-contact-row">
-          {/* Offices — three aligned address blocks in one row */}
+          {/* Offices — four aligned address blocks in sequence: South Africa, Hyderabad, Vijayawada, Dubai */}
           <div className="footer-offices-row">
-          <div className="footer-office-block">
-            <Icon name="pin" className="footer-contact-icon" />
-            <a
-              href={CONTACT.mapsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-office-link"
-              aria-label="Open India office location on Google Maps"
-            >
-              <strong>{t('footer.hyderabadLocation', { defaultValue: 'Hyderabad, India' })}</strong>
-              <span>
-                SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081
-              </span>
-            </a>
+            {/* 1st: South Africa Office */}
+            <div className="footer-office-block">
+              <Icon name="pin" className="footer-contact-icon" />
+              <a
+                href={CONTACT.southAfricaMapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-office-link"
+                aria-label="Open South Africa office location on Google Maps"
+              >
+                <strong>{t('footer.southAfricaLocation', { defaultValue: 'South Africa – OKLUT TECHNOLOGIES PVT LTD' })}</strong>
+                <span>
+                  {CONTACT.southAfricaAddress}
+                </span>
+              </a>
+            </div>
+
+            <div className="footer-contact-divider" aria-hidden="true" />
+
+            {/* 2nd: Hyderabad Office */}
+            <div className="footer-office-block">
+              <Icon name="pin" className="footer-contact-icon" />
+              <a
+                href={CONTACT.mapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-office-link"
+                aria-label="Open India office location on Google Maps"
+              >
+                <strong>{t('footer.hyderabadLocation', { defaultValue: 'Hyderabad, India' })}</strong>
+                <span>
+                  {CONTACT.address}
+                </span>
+              </a>
+            </div>
+
+            <div className="footer-contact-divider" aria-hidden="true" />
+
+            {/* 3rd: Vijayawada Office */}
+            <div className="footer-office-block">
+              <Icon name="pin" className="footer-contact-icon" />
+              <a
+                href={CONTACT.vijayawadaMapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-office-link"
+                aria-label="Open Vijayawada office location on Google Maps"
+              >
+                <strong>{t('footer.vijayawadaLocation', { defaultValue: 'Vijayawada, India' })}</strong>
+                <span>
+                  {CONTACT.vijayawadaAddress}
+                </span>
+              </a>
+            </div>
+
+            <div className="footer-contact-divider" aria-hidden="true" />
+
+            {/* 4th: Middle East / Dubai Office */}
+            <div className="footer-office-block">
+              <Icon name="pin" className="footer-contact-icon" />
+              <a
+                href={CONTACT.dubaiMapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-office-link"
+                aria-label="Open Middle East office location on Google Maps"
+              >
+                <strong>{t('footer.dubaiLocation', { defaultValue: 'Middle East hub · United Arab Emirates' })}</strong>
+                <span>
+                  {CONTACT.dubaiAddress}
+                </span>
+              </a>
+            </div>
           </div>
-
-          <div className="footer-contact-divider" aria-hidden="true" />
-
-          {/* Vijayawada Office */}
-          <div className="footer-office-block">
-            <Icon name="pin" className="footer-contact-icon" />
-            <a
-              href={CONTACT.vijayawadaMapsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-office-link"
-              aria-label="Open Vijayawada office location on Google Maps"
-            >
-              <strong>{t('footer.vijayawadaLocation', { defaultValue: 'Vijayawada, Andhra Pradesh' })}</strong>
-              <span>
-                D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003
-              </span>
-            </a>
-          </div>
-
-          <div className="footer-contact-divider" aria-hidden="true" />
-
-          {/* South Africa Office */}
-          <div className="footer-office-block">
-            <Icon name="pin" className="footer-contact-icon" />
-            <a
-              href={CONTACT.southAfricaMapsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-office-link"
-              aria-label="Open South Africa office location on Google Maps"
-            >
-              <strong>{t('footer.southAfricaLocation', { defaultValue: 'South Africa – OKLUT TECHNOLOGIES PVT LTD' })}</strong>
-              <span>
-                Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa
-              </span>
-            </a>
-          </div>
-          </div>
-
         </div>
 
         {/* Bottom Legal / Copyright Row */}
@@ -2130,6 +2329,7 @@ function OurServices() {
 }
 
 function HomePage() {
+  const { lang } = useTranslation()
   const location = useLocation()
   const pendingScroll = useRef(location.state?.scrollTo || null)
 
@@ -2144,58 +2344,28 @@ function HomePage() {
   }, [])
 
   useEffect(() => {
-    const reveals = () => Array.from(document.querySelectorAll('.reveal'))
-    const revealEl = (el) => el.classList.add('revealed')
-    const isInView = (el) => {
-      const r = el.getBoundingClientRect()
-      const vh = window.innerHeight || document.documentElement.clientHeight
-      return r.top < vh && r.bottom > 0
-    }
-    const revealInView = () => {
-      reveals().forEach((el) => {
-        if (!el.classList.contains('revealed') && isInView(el)) revealEl(el)
-      })
-    }
+    const reveals = document.querySelectorAll('.reveal:not(.revealed)')
+    if (!reveals.length) return
 
     if (!('IntersectionObserver' in window)) {
-      reveals().forEach(revealEl)
+      reveals.forEach((el) => el.classList.add('revealed'))
       return
     }
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            revealEl(entry.target)
+            entry.target.classList.add('revealed')
             io.unobserve(entry.target)
           }
         })
       },
-      { threshold: 0.12 },
+      { threshold: 0.1, rootMargin: '0px 0px 60px 0px' },
     )
-    reveals().forEach((el) => io.observe(el))
+    reveals.forEach((el) => io.observe(el))
 
-    // Fallback: Chrome can skip observer callbacks for elements next to a
-    // position:sticky item in a grid (e.g. the services cards), leaving them
-    // stuck at opacity 0. Also reveal anything entering the viewport manually.
-    let raf = 0
-    const onScroll = () => {
-      if (raf) return
-      raf = requestAnimationFrame(() => {
-        raf = 0
-        revealInView()
-      })
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    revealInView()
-
-    return () => {
-      io.disconnect()
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-      if (raf) cancelAnimationFrame(raf)
-    }
-  }, [])
+    return () => io.disconnect()
+  }, [lang])
 
   return (
     <>
@@ -2233,6 +2403,12 @@ function App() {
   const { t } = useTranslation()
   const { isRecovery } = useAuth()
   const location = useLocation()
+  const isHomeRoute =
+    location.pathname === '/' ||
+    location.pathname === '/about' ||
+    location.pathname === '/services' ||
+    location.pathname === '/contact' ||
+    location.pathname === '/technologies'
   // Returning from an email-confirmation link (?confirmed=1): open the existing
   // Sign In view immediately with a success notice. No credentials are carried
   // over — the form always initialises empty.

@@ -130,7 +130,7 @@
     "emailLabel": "E-mail *",
     "company": "Bedrijf",
     "subject": "Onderwerp",
-    "messageLabel": "Bericht *",
+    "messageLabel": "Bericht",
     "sending": "Verzenden...",
     "sendBtn": "Bericht verzenden",
     "successMsg": "Bericht verzonden! Er is een kopie naar u gemaild.",
@@ -144,13 +144,52 @@
       "email": "jij@bedrijf.com",
       "company": "Uw bedrijf of organisatie",
       "subject": "Hoe kunnen wij helpen?",
-      "message": "Vertel ons over uw project, tijdlijn en doelen..."
+      "message": "Vertel ons over uw project, tijdlijn en doelen...",
+      "firstName": "Voer uw voornaam in",
+      "lastName": "Voer uw achternaam in",
+      "workEmail": "Voer uw e-mailadres in",
+      "phoneNumber": "Voer uw telefoonnummer in",
+      "selectSubject": "Selecteer een onderwerp",
+      "messageNew": "Typ hier uw bericht..."
     },
     "validation": {
       "fullNameRequired": "Voer uw volledige naam in.",
-      "emailRequired": "Voer uw e-mailadres in.",
+      "emailRequired": "E-mail is vereist.",
       "emailInvalid": "Voer een geldig e-mailadres in.",
-      "messageRequired": "Voer een bericht in."
+      "messageRequired": "Bericht is vereist.",
+      "firstNameRequired": "Voornaam is vereist.",
+      "lastNameRequired": "Achternaam is vereist.",
+      "subjectRequired": "Selecteer een onderwerp."
+    },
+    "eyebrowDash": "NEEM CONTACT MET ONS OP",
+    "sendUsAMessage": "Stuur ons een bericht",
+    "subMessage": "Heeft u een vraag, een project in gedachten of wilt u een samenwerking verkennen? Vul het formulier in en ons team neemt zo snel mogelijk contact met u op.",
+    "firstNameLabel": "Voornaam",
+    "lastNameLabel": "Achternaam",
+    "workEmailLabel": "Werk e-mail",
+    "phoneNumberLabel": "Telefoonnummer",
+    "subjectLabel": "Onderwerp",
+    "sendMessageBtn": "Bericht verzenden",
+    "reachUsTitle": "Bereik ons",
+    "reachUsDirectlyWord": "direct",
+    "callUs": "Bel ons",
+    "emailUs": "E-mail ons",
+    "ourOffices": "Onze kantoren",
+    "quickResponse": "Snelle reactie",
+    "replyPromptly": "Wij antwoorden snel",
+    "businessSupport": "Zakelijke ondersteuning",
+    "inquiryToDelivery": "Van aanvraag tot levering",
+    "consultOurExperts": "Raadpleeg onze experts",
+    "getRightSolution": "Zorg voor de juiste oplossing",
+    "subjects": {
+      "generalInquiry": "Algemeen onderzoek",
+      "customDev": "Maatwerk softwareontwikkeling",
+      "cloudDevOps": "Cloud en DevOps",
+      "aiMl": "AI en machinaal leren",
+      "mobileDev": "Ontwikkeling van mobiele apps",
+      "uiUx": "UI/UX-ontwerp",
+      "consulting": "Advies / Partnerschap",
+      "other": "Anders"
     }
   },
   "services": {
@@ -1180,7 +1219,7 @@
     "credoPeople": "MENSEN",
     "credoBrighterTomorrow": "EEN HELDERE MORGEN",
     "hyderabadLocation": "Hyderabad, India",
-    "vijayawadaLocation": "Vijayawada, Andhra Pradesh",
+    "vijayawadaLocation": "Vijayawada, India",
     "southAfricaLocation": "Zuid-Afrika – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Gebruiksvoorwaarden",
     "accessibility": "Toegankelijkheid",
@@ -1189,7 +1228,8 @@
     "vijayawadaOffice": "Vijayawada-kantoor",
     "allRightsReserved": "Alle rechten voorbehouden.",
     "hyderabadPin": "Hyderabad, India",
-    "southAfricaPin": "Zuid-Afrika"
+    "southAfricaPin": "Zuid-Afrika",
+    "dubaiLocation": "Midden-Oosten hub · Verenigde Arabische Emiraten"
   },
   "common": {
     "loading": "Bezig met laden...",

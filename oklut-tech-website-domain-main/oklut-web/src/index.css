@@ -104,13 +104,13 @@
 }
 
 html {
-  scroll-behavior: smooth;
   scroll-padding-top: 6rem;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  -webkit-overflow-scrolling: touch;
 }
 
 img {
@@ -1380,15 +1380,27 @@ pre {
   top: 1rem;
 }
 
-/* ----- Reveal on scroll ----- */
+/* ----- Reveal on scroll & Compositor optimization ----- */
 .reveal {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+  will-change: opacity, transform;
 }
 .reveal.revealed {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
+}
+
+.navbar {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.hero-video,
+.glass-card {
+  transform: translateZ(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1399,6 +1411,12 @@ pre {
     opacity: 1;
     transform: none;
     transition: none;
+    will-change: auto;
+  }
+  .navbar,
+  .hero-video,
+  .glass-card {
+    will-change: auto;
   }
   .toast {
     animation: none;

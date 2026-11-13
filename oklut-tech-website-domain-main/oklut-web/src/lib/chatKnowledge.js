@@ -15,6 +15,7 @@ const CONTACT = {
     'D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003',
   southAfricaCompany: 'OKLUT TECHNOLOGIES PVT LTD',
   southAfricaAddress: 'Unit 11, Sunset View, 10 Hazy Street, Newcastle, Kwa-Zulu Natal, 2930, South Africa',
+  dubaiAddress: 'Building 11, Office 111, Dubai Internet City, Dubai, UAE',
   hours: 'Monday – Saturday, 9:30 – 18:30 IST',
 }
 
@@ -513,9 +514,10 @@ You can explore these under the Technologies section on our website.`,
 
 📞 Phone (toll-free): ${CONTACT.phone}
 ✉️ Email: ${CONTACT.email}
+📍 South Africa Office: ${CONTACT.southAfricaCompany}, ${CONTACT.southAfricaAddress}
 📍 Hyderabad, India (Headquarters): ${CONTACT.address}
 📍 Vijayawada, India: ${CONTACT.vijayawadaAddress}
-📍 South Africa Office: ${CONTACT.southAfricaCompany}, ${CONTACT.southAfricaAddress}
+📍 Middle East hub (UAE): ${CONTACT.dubaiAddress}
 
 You can also use the "Send us a message" form on our homepage, or book a free consultation.`,
   },

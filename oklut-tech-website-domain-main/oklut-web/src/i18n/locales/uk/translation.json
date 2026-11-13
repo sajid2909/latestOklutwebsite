@@ -130,7 +130,7 @@
     "emailLabel": "Електронна пошта *",
     "company": "Компанія",
     "subject": "Тема",
-    "messageLabel": "повідомлення *",
+    "messageLabel": "повідомлення",
     "sending": "Надсилання…",
     "sendBtn": "Надіслати повідомлення",
     "successMsg": "Повідомлення надіслано! Копію надіслано вам електронною поштою.",
@@ -144,13 +144,52 @@
       "email": "you@company.com",
       "company": "Ваша компанія чи організація",
       "subject": "Як ми можемо допомогти?",
-      "message": "Розкажіть нам про свій проект, графік і цілі..."
+      "message": "Розкажіть нам про свій проект, графік і цілі...",
+      "firstName": "Введіть своє ім'я",
+      "lastName": "Введіть своє прізвище",
+      "workEmail": "Введіть адресу електронної пошти",
+      "phoneNumber": "Введіть свій номер телефону",
+      "selectSubject": "Виберіть тему",
+      "messageNew": "Введіть своє повідомлення тут..."
     },
     "validation": {
       "fullNameRequired": "Введіть своє повне ім'я.",
-      "emailRequired": "Будь ласка, введіть адресу електронної пошти.",
+      "emailRequired": "Необхідно вказати адресу електронної пошти.",
       "emailInvalid": "Введіть дійсну електронну адресу.",
-      "messageRequired": "Будь ласка, введіть повідомлення."
+      "messageRequired": "Необхідне повідомлення.",
+      "firstNameRequired": "Ім'я обов'язкове.",
+      "lastNameRequired": "Прізвище обов’язкове.",
+      "subjectRequired": "Виберіть тему."
+    },
+    "eyebrowDash": "ЗВ'ЯЖІТЬСЯ З НАМИ",
+    "sendUsAMessage": "Надішліть нам повідомлення",
+    "subMessage": "Маєте запитання, плануєте проект або бажаєте вивчити партнерство? Заповніть форму, і наша команда незабаром зв’яжеться з вами.",
+    "firstNameLabel": "Ім'я",
+    "lastNameLabel": "Прізвище",
+    "workEmailLabel": "Робоча електронна пошта",
+    "phoneNumberLabel": "Номер телефону",
+    "subjectLabel": "Тема",
+    "sendMessageBtn": "Надіслати повідомлення",
+    "reachUsTitle": "Зв'яжіться з нами",
+    "reachUsDirectlyWord": "безпосередньо",
+    "callUs": "Телефонуйте нам",
+    "emailUs": "Напишіть нам",
+    "ourOffices": "Наші офіси",
+    "quickResponse": "Швидке реагування",
+    "replyPromptly": "Ми відповідаємо швидко",
+    "businessSupport": "Підтримка бізнесу",
+    "inquiryToDelivery": "Від запиту до доставки",
+    "consultOurExperts": "Зверніться до наших експертів",
+    "getRightSolution": "Отримайте правильне рішення",
+    "subjects": {
+      "generalInquiry": "Загальне розслідування",
+      "customDev": "Розробка програмного забезпечення на замовлення",
+      "cloudDevOps": "Хмара та DevOps",
+      "aiMl": "ШІ та машинне навчання",
+      "mobileDev": "Розробка мобільних додатків",
+      "uiUx": "UI/UX дизайн",
+      "consulting": "Консалтинг / Партнерство",
+      "other": "інше"
     }
   },
   "services": {
@@ -1180,7 +1219,7 @@
     "credoPeople": "ЛЮДИ",
     "credoBrighterTomorrow": "ЯСКРАВЕ ЗАВТРА",
     "hyderabadLocation": "Гайдарабад, Індія",
-    "vijayawadaLocation": "Віджаявада, Андхра-Прадеш",
+    "vijayawadaLocation": "Віджаявада, Індія",
     "southAfricaLocation": "Південна Африка – OKLUT TECHNOLOGIES PVT LTD",
     "termsOfUse": "Умови використання",
     "accessibility": "Доступність",
@@ -1189,7 +1228,8 @@
     "vijayawadaOffice": "Віджаявада офіс",
     "allRightsReserved": "Всі права захищені.",
     "hyderabadPin": "Хайдарабад, Індія",
-    "southAfricaPin": "Південна Африка"
+    "southAfricaPin": "Південна Африка",
+    "dubaiLocation": "Близькосхідний центр · Об’єднані Арабські Емірати"
   },
   "common": {
     "loading": "Завантаження...",
