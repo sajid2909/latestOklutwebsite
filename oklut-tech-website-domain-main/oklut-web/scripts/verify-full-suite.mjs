@@ -356,7 +356,7 @@ try {
   // 14. Contact and location info
   list = await sendText('Where are you located?')
   check('Location question returns Hyderabad office address', last(list), (r) =>
-    /Madhapur|Hyderabad|SBR Towers/i.test(r)
+    /Madhapur|Hyderabad|Samridhi Vasyam|SBR Towers/i.test(r)
   )
 
   list = await sendText('Give me your phone number and email')

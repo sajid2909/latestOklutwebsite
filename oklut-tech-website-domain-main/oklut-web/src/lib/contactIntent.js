@@ -33,7 +33,7 @@ export const CONTACT = {
   phoneDisplay: '1800 410 3299',
   email: 'info@oklut.com',
   address:
-    'SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081',
+    'Second Floor, Samridhi Vasyam, D No 1/98/9/3/23, Capital Pk Rd, Above Axis bank Image gardens branch, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081',
   vijayawadaAddress:
     'D.No. 24-29-210A, Durgapuram, Gulabithota Road, Vijayawada, NTR District, Andhra Pradesh – 520003',
   southAfricaCompany: 'OKLUT TECHNOLOGIES PVT LTD',
