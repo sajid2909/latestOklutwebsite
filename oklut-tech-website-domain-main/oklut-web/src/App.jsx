@@ -66,9 +66,9 @@ const CONTACT = {
   phoneDisplay: '1800 410 3299',
   email: 'info@oklut.com',
   emailHref: 'mailto:info@oklut.com',
-  addressLine: 'SBR Towers, Axis bank building, Madhapur, Hyderabad',
+  addressLine: 'Second Floor, Samridhi Vasyam, Capital Pk Rd, Madhapur, Hyderabad',
   address:
-    'SBR Towers, Axis bank building, Second Floor, D No 1/98/93/23, HUDA Tecno Encalve Cyber Hills Colony, VIP Hills, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081',
+    'Second Floor, Samridhi Vasyam, D No 1/98/9/3/23, Capital Pk Rd, Above Axis bank Image gardens branch, Jaihind Enclave, Madhapur, Hyderabad, Telangana 500081',
   mapsHref:
     'https://www.google.com/maps/dir/?api=1&destination=Second+Floor,+Samridhi+Vasyam,+D+No+1%2F98%2F9%2F3%2F23,+Capital+Pk+Rd,+beside+Narayana+High+School,+Cyber+Hills+Colony,+VIP+Hills,+Jaihind+Enclave,+Madhapur,+Hyderabad,+Telangana+500081',
   vijayawadaAddress:
